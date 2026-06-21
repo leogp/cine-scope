@@ -1,0 +1,232 @@
+volumes:
+  postgres_data:
+  redis_data:
+  rabbitmq_data:
+
+networks:
+  cinescope-net:
+    driver: bridge
+
+services:
+  # ─── Infrastructure ────────────────────────────────────────────────────────
+
+  postgres:
+    image: postgres:16
+    container_name: postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-cinescope}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-cinescope_secret}
+      POSTGRES_DB: ${POSTGRES_DB:-cinescope}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - cinescope-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-cinescope} -d ${POSTGRES_DB:-cinescope}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  redis:
+    image: redis:alpine
+    container_name: redis
+    volumes:
+      - redis_data:/data
+    networks:
+      - cinescope-net
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+
+  rabbitmq:
+    image: rabbitmq:management-alpine
+    container_name: rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-cinescope}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-cinescope_secret}
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    ports:
+      - "15672:15672"
+    networks:
+      - cinescope-net
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  # ─── Application Services ──────────────────────────────────────────────────
+
+  auth-service:
+    build:
+      context: ./auth-service
+      dockerfile: Dockerfile.dev
+    container_name: auth-service
+    command: npm run dev
+    ports:
+      - "4001:4001"
+    environment:
+      NODE_ENV: development
+      PORT: 4001
+      DATABASE_URL: postgresql://${POSTGRES_USER:-cinescope}:${POSTGRES_PASSWORD:-cinescope_secret}@postgres:5432/${POSTGRES_DB:-cinescope}
+      REDIS_URL: redis://redis:6379
+      RABBITMQ_URL: amqp://${RABBITMQ_USER:-cinescope}:${RABBITMQ_PASSWORD:-cinescope_secret}@rabbitmq:5672
+    volumes:
+      - ./auth-service:/app
+      - /app/node_modules
+    networks:
+      - cinescope-net
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  catalog-service:
+    build:
+      context: ./catalog-service
+      dockerfile: Dockerfile.dev
+    container_name: catalog-service
+    command: npm run dev
+    ports:
+      - "4002:4002"
+    environment:
+      NODE_ENV: development
+      PORT: 4002
+      DATABASE_URL: postgresql://${POSTGRES_USER:-cinescope}:${POSTGRES_PASSWORD:-cinescope_secret}@postgres:5432/${POSTGRES_DB:-cinescope}
+      REDIS_URL: redis://redis:6379
+      RABBITMQ_URL: amqp://${RABBITMQ_USER:-cinescope}:${RABBITMQ_PASSWORD:-cinescope_secret}@rabbitmq:5672
+    volumes:
+      - ./catalog-service:/app
+      - /app/node_modules
+    networks:
+      - cinescope-net
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  recomendation-service:
+    build:
+      context: ./recomendation-service
+      dockerfile: Dockerfile.dev
+    container_name: recomendation-service
+    command: npm run dev
+    ports:
+      - "4003:4003"
+    environment:
+      NODE_ENV: development
+      PORT: 4003
+      DATABASE_URL: postgresql://${POSTGRES_USER:-cinescope}:${POSTGRES_PASSWORD:-cinescope_secret}@postgres:5432/${POSTGRES_DB:-cinescope}
+      REDIS_URL: redis://redis:6379
+      RABBITMQ_URL: amqp://${RABBITMQ_USER:-cinescope}:${RABBITMQ_PASSWORD:-cinescope_secret}@rabbitmq:5672
+    volumes:
+      - ./recomendation-service:/app
+      - /app/node_modules
+    networks:
+      - cinescope-net
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  review-service:
+    build:
+      context: ./review-service
+      dockerfile: Dockerfile.dev
+    container_name: review-service
+    command: npm run dev
+    ports:
+      - "4004:4004"
+    environment:
+      NODE_ENV: development
+      PORT: 4004
+      DATABASE_URL: postgresql://${POSTGRES_USER:-cinescope}:${POSTGRES_PASSWORD:-cinescope_secret}@postgres:5432/${POSTGRES_DB:-cinescope}
+      REDIS_URL: redis://redis:6379
+      RABBITMQ_URL: amqp://${RABBITMQ_USER:-cinescope}:${RABBITMQ_PASSWORD:-cinescope_secret}@rabbitmq:5672
+    volumes:
+      - ./review-service:/app
+      - /app/node_modules
+    networks:
+      - cinescope-net
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  watchlist-service:
+    build:
+      context: ./watchlist-service
+      dockerfile: Dockerfile.dev
+    container_name: watchlist-service
+    command: npm run dev
+    ports:
+      - "4005:4005"
+    environment:
+      NODE_ENV: development
+      PORT: 4005
+      DATABASE_URL: postgresql://${POSTGRES_USER:-cinescope}:${POSTGRES_PASSWORD:-cinescope_secret}@postgres:5432/${POSTGRES_DB:-cinescope}
+      REDIS_URL: redis://redis:6379
+      RABBITMQ_URL: amqp://${RABBITMQ_USER:-cinescope}:${RABBITMQ_PASSWORD:-cinescope_secret}@rabbitmq:5672
+    volumes:
+      - ./watchlist-service:/app
+      - /app/node_modules
+    networks:
+      - cinescope-net
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  gateway-service:
+    build:
+      context: ./gateway-service
+      dockerfile: Dockerfile.dev
+    container_name: gateway-service
+    command: npm run dev
+    ports:
+      - "4000:4000"
+    environment:
+      NODE_ENV: development
+      PORT: 4000
+      AUTH_SERVICE_URL: http://auth-service:4001
+      CATALOG_SERVICE_URL: http://catalog-service:4002
+      RECOMENDATION_SERVICE_URL: http://recomendation-service:4003
+      REVIEW_SERVICE_URL: http://review-service:4004
+      WATCHLIST_SERVICE_URL: http://watchlist-service:4005
+    volumes:
+      - ./gateway-service:/app
+      - /app/node_modules
+    networks:
+      - cinescope-net
+    depends_on:
+      auth-service:
+        condition: service_started
+      catalog-service:
+        condition: service_started
+      recomendation-service:
+        condition: service_started
+      review-service:
+        condition: service_started
+      watchlist-service:
+        condition: service_started
