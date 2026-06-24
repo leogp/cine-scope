@@ -18,6 +18,7 @@ build/
 logs/
 *.log
 npm-debug.log*
+TODO.txt
 
 # Prisma
 prisma/migrations/dev/
