@@ -1,6 +1,7 @@
 # Dependencies
 node_modules/
 .npm
+node-compile-cache/
 
 # Build output
 dist/
