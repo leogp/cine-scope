@@ -6,11 +6,15 @@ import { SignUpRequest } from './signUpRequest'
 import { SignUpResponse } from './signUpResponse'
 import { EmailAlreadyExistsError } from '../../../domain/errors/emailAlreadyExistsError'
 import { UsernameAlreadyExistsError } from '../../../domain/errors/usernameAlreadyExistsError'
+import { RoleRepository } from '../../../domain/repositories/roleRepository'
+import { RoleNotFoundError } from '../../../domain/errors/roleNotFoundError'
+import { UserStatus } from '../../../domain/enums/userStatus'
 
 export class SignUpUseCase {
   constructor(
     private readonly userRepository: UserRepository,
-    private readonly passwordHasher: PasswordHasher
+    private readonly passwordHasher: PasswordHasher,
+    private readonly roleRepository: RoleRepository
   ) {}
 
   async execute(request: SignUpRequest): Promise<SignUpResponse> {
@@ -28,15 +32,23 @@ export class SignUpUseCase {
 
     const hashedPassword = await this.passwordHasher.hash(request.password)
 
-    const user: User = {
-      id: randomUUID(),
-      username: request.username,
-      email: request.email,
-      password: hashedPassword,
-      name: request.name,
-      status: 'active',
+    const user = new User(
+      randomUUID(),
+      request.username,
+      request.email,
+      hashedPassword,
+      request.name,
+      UserStatus.ACTIVE
+    )
+
+    // find and assign default role to user
+    const defaultRole = await this.roleRepository.getDefaultRole()
+
+    if (!defaultRole) {
+      throw new RoleNotFoundError()
     }
 
+    user.assignRole(defaultRole)
     await this.userRepository.save(user)
 
     return {
