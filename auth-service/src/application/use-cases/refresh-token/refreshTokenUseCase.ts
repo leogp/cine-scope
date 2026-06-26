@@ -4,7 +4,7 @@ import { RefreshTokenRepository } from '../../../domain/repositories/refreshToke
 import { UserRepository } from '../../../domain/repositories/userRepository'
 import { TokenGenerator } from '../../../domain/services/tokenGenerator'
 import { RefreshTokenRequest } from './refreshTokenRequest'
-import { RefreshTokenResponse } from './RefreshTokenResponse'
+import { RefreshTokenResponse } from './refreshTokenResponse'
 
 export class RefreshTokenUseCase {
   constructor(

@@ -2,11 +2,13 @@ import { User } from '../../../domain/entities/user'
 import { UserRepository } from '../../../domain/repositories/userRepository'
 import { PasswordHasher } from '../../../domain/services/passwordHasher'
 import { TokenGenerator } from '../../../domain/services/tokenGenerator'
+import { LoginResponse } from './loginResponse'
 
 export class LoginUseCase {
   private readonly userRepository: UserRepository
   private readonly passwordHasher: PasswordHasher
   private readonly tokenGenerator: TokenGenerator
+  private readonly refreshTokenRepository: any
 
   constructor(
     userRepository: UserRepository,
@@ -18,7 +20,7 @@ export class LoginUseCase {
     this.tokenGenerator = tokenGenerator
   }
 
-  async execute(body: User): Promise<string> {
+  async execute(body: User): Promise<LoginResponse> {
     const user = await this.userRepository.findByEmail(body.email)
 
     if (!user) {
@@ -31,6 +33,14 @@ export class LoginUseCase {
     }
 
     const accessToken = await this.tokenGenerator.generateAccessToken(user)
-    return accessToken
+
+    const refreshToken = await this.tokenGenerator.generateRefreshToken(user)
+
+    await this.refreshTokenRepository.save(refreshToken)
+
+    return {
+      accessToken,
+      refreshToken: refreshToken.token,
+    }
   }
 }

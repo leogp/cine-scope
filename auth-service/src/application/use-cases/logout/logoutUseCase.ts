@@ -1,22 +1,32 @@
-import { User } from '../../domain/entities/user'
-import { UserRepository } from '../../domain/repositories/userRepository'
-import { TokenGenerator } from '../../domain/services/tokenGenerator'
+import { RefreshTokenRepository } from '../../../domain/repositories/refreshTokenRepository'
+import { UserRepository } from '../../../domain/repositories/userRepository'
+import { TokenGenerator } from '../../../domain/services/tokenGenerator'
+import { LogoutRequest } from './logoutRequest'
 
 export class LogoutUseCase {
-  private readonly _userRepository: UserRepository
-  private readonly _tokenGenerator: TokenGenerator
+  private readonly userRepository: UserRepository
+  private readonly tokenGenerator: TokenGenerator
+  private readonly refreshTokenRepository: RefreshTokenRepository
 
-  constructor(userRepository: UserRepository, tokenGenerator: TokenGenerator) {
-    this._userRepository = userRepository
-    this._tokenGenerator = tokenGenerator
+  constructor(
+    userRepository: UserRepository,
+    tokenGenerator: TokenGenerator,
+    refreshTokenRepository: RefreshTokenRepository
+  ) {
+    this.userRepository = userRepository
+    this.tokenGenerator = tokenGenerator
+    this.refreshTokenRepository = refreshTokenRepository
   }
 
-  async execute(body: User): Promise<void> {
-    const user = await this._userRepository.findById(body.id)
-    if (!user) {
-      throw new Error('User not found')
-    }
+  async execute(body: LogoutRequest): Promise<void> {
+    const refreshToken = await this.refreshTokenRepository.findByToken(body.refreshToken)
 
-    await this._tokenGenerator.invalidateToken(body.id)
+    if (!refreshToken) {
+      return
+    }
+    // No se revoca el access token porque expira automáticamente después de un tiempo determinado
+    refreshToken.revoke()
+
+    await this.refreshTokenRepository.update(refreshToken)
   }
 }
