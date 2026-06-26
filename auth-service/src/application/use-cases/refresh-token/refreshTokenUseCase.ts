@@ -1,5 +1,6 @@
-// application/use-cases/refresh-token/RefreshTokenUseCase.ts
-
+import { InvalidRefreshTokenError } from '../../../domain/errors/invalidRefreshTokenError'
+import { RefreshTokenExpiredError } from '../../../domain/errors/refreshTokenExpiredError'
+import { RefreshTokenRevokedError } from '../../../domain/errors/refreshTokenRevokeError'
 import { RefreshTokenRepository } from '../../../domain/repositories/refreshTokenRepository'
 import { UserRepository } from '../../../domain/repositories/userRepository'
 import { TokenGenerator } from '../../../domain/services/tokenGenerator'
@@ -17,21 +18,21 @@ export class RefreshTokenUseCase {
     const currentRefreshToken = await this.refreshTokenRepository.findByToken(request.refreshToken)
 
     if (!currentRefreshToken) {
-      throw new Error('Invalid refresh token')
+      throw new InvalidRefreshTokenError()
     }
 
     if (currentRefreshToken.isExpired()) {
-      throw new Error('Refresh token expired')
+      throw new RefreshTokenExpiredError()
     }
 
     if (currentRefreshToken.isRevoked()) {
-      throw new Error('Refresh token revoked')
+      throw new RefreshTokenRevokedError()
     }
 
     const user = await this.userRepository.findById(currentRefreshToken.userId)
 
     if (!user) {
-      throw new Error('Invalid refresh token')
+      throw new InvalidRefreshTokenError()
     }
 
     const accessToken = await this.tokenGenerator.generateAccessToken(user)

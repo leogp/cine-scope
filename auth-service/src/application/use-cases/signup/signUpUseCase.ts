@@ -4,6 +4,8 @@ import { UserRepository } from '../../../domain/repositories/userRepository'
 import { PasswordHasher } from '../../../domain/services/passwordHasher'
 import { SignUpRequest } from './signUpRequest'
 import { SignUpResponse } from './signUpResponse'
+import { EmailAlreadyExistsError } from '../../../domain/errors/emailAlreadyExistsError'
+import { UsernameAlreadyExistsError } from '../../../domain/errors/usernameAlreadyExistsError'
 
 export class SignUpUseCase {
   constructor(
@@ -15,13 +17,13 @@ export class SignUpUseCase {
     const existingEmail = await this.userRepository.findByEmail(request.email)
 
     if (existingEmail) {
-      throw new Error('Email already exists')
+      throw new EmailAlreadyExistsError(request.email)
     }
 
     const existingUsername = await this.userRepository.findByUsername(request.username)
 
     if (existingUsername) {
-      throw new Error('Username already exists')
+      throw new UsernameAlreadyExistsError(request.username)
     }
 
     const hashedPassword = await this.passwordHasher.hash(request.password)
