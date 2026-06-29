@@ -9,6 +9,9 @@ import { UsernameAlreadyExistsError } from '../../../domain/errors/usernameAlrea
 import { RoleRepository } from '../../../domain/repositories/roleRepository'
 import { RoleNotFoundError } from '../../../domain/errors/roleNotFoundError'
 import { UserStatus } from '../../../domain/enums/userStatus'
+import { Password } from '../../../domain/value-objects/password'
+import { Email } from '../../../domain/value-objects/email'
+import { Username } from '../../../domain/value-objects/username'
 
 export class SignUpUseCase {
   constructor(
@@ -18,28 +21,31 @@ export class SignUpUseCase {
   ) {}
 
   async execute(request: SignUpRequest): Promise<SignUpResponse> {
-    const existingEmail = await this.userRepository.findByEmail(request.email)
+    const email = new Email(request.email)
+    const existingEmail = await this.userRepository.findByEmail(email)
 
     if (existingEmail) {
       throw new EmailAlreadyExistsError(request.email)
     }
 
-    const existingUsername = await this.userRepository.findByUsername(request.username)
+    const username = new Username(request.username)
+    const existingUsername = await this.userRepository.findByUsername(username)
 
     if (existingUsername) {
       throw new UsernameAlreadyExistsError(request.username)
     }
 
-    const hashedPassword = await this.passwordHasher.hash(request.password)
+    const password = new Password(request.password)
+    const hashedPassword = await this.passwordHasher.hash(password.toString())
 
-    const user = new User(
-      randomUUID(),
-      request.username,
-      request.email,
-      hashedPassword,
-      request.name,
-      UserStatus.ACTIVE
-    )
+    const user = User.create({
+      id: randomUUID(),
+      username,
+      email,
+      passwordHash: hashedPassword,
+      name: request.name,
+      status: UserStatus.ACTIVE,
+    })
 
     // find and assign default role to user
     const defaultRole = await this.roleRepository.getDefaultRole()

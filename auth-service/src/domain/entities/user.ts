@@ -3,45 +3,53 @@ import { Email } from '../value-objects/email'
 import { Username } from '../value-objects/username'
 import { Role } from './role'
 
+export interface CreateUserProps {
+  id: string
+  username: Username
+  email: Email
+  passwordHash: string
+  name: string
+  status: UserStatus
+  roles?: Role[]
+}
+
 export class User {
-  private readonly _id: string
-  private readonly _username: Username
-  private readonly _email: Email
-  private readonly _name: string
-  private _password: string
-  private _status: UserStatus
-  private readonly roles: Role[]
+  private constructor(
+    private readonly _id: string,
+    private readonly _username: Username,
+    private readonly _email: Email,
+    private _passwordHash: string,
+    private readonly _name: string,
+    private _status: UserStatus,
+    private readonly _roles: Role[]
+  ) {}
 
-  constructor(
-    id: string,
-    username: string,
-    email: string,
-    password: string,
-    name: string,
-    status: UserStatus,
-    roles: Role[] = []
-  ) {
-    this._id = id
-    this._username = new Username(username)
-    this._email = new Email(email)
-    this._password = password
-    this._name = name
-    this._status = status
-    this.roles = roles
+  /**
+   * Creates a new User.
+   */
+  static create(props: CreateUserProps): User {
+    return new User(
+      props.id,
+      props.username,
+      props.email,
+      props.passwordHash,
+      props.name,
+      props.status ?? UserStatus.ACTIVE,
+      props.roles ?? []
+    )
   }
-
   assignRole(role: Role): void {
-    const alreadyAssigned = this.roles.some((r) => r.id === role.id)
+    const alreadyAssigned = this._roles.some((r) => r.id === role.id)
 
     if (alreadyAssigned) {
       return
     }
 
-    this.roles.push(role)
+    this._roles.push(role)
   }
 
   changePassword(hashedPassword: string) {
-    this._password = hashedPassword
+    this._passwordHash = hashedPassword
   }
 
   activate() {
@@ -69,8 +77,8 @@ export class User {
     return this._name
   }
 
-  get password(): string {
-    return this._password
+  get passwordHash(): string {
+    return this._passwordHash
   }
 
   get status(): UserStatus {
@@ -78,6 +86,6 @@ export class User {
   }
 
   getRoles(): Role[] {
-    return this.roles
+    return this._roles
   }
 }

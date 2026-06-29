@@ -1,5 +1,5 @@
 import { User } from '../../../domain/entities/user'
-import { InvalidCredentialsError } from '../../../domain/errors/invalidCredentialsError'
+import { InvalidCredentialsError } from '../../errors/invalidCredentialsError'
 import { UserNotFoundError } from '../../../domain/errors/userNotFoundError'
 import { RefreshTokenRepository } from '../../../domain/repositories/refreshTokenRepository'
 import { UserRepository } from '../../../domain/repositories/userRepository'
@@ -32,13 +32,13 @@ export class LoginUseCase {
       throw new UserNotFoundError()
     }
 
-    const isPasswordValid = await this.passwordHasher.compare(body.password, user.password)
+    const isPasswordValid = await this.passwordHasher.compare(body.passwordHash, user.passwordHash)
     if (!isPasswordValid) {
       throw new InvalidCredentialsError()
     }
 
+    // generate access token and refresh token
     const accessToken = await this.tokenGenerator.generateAccessToken(user)
-
     const refreshToken = await this.tokenGenerator.generateRefreshToken(user)
 
     await this.refreshTokenRepository.save(refreshToken)
