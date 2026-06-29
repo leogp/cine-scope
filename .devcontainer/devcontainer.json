@@ -1,0 +1,23 @@
+{
+  "name": "CineScope Workspace",
+  "image": "node:24-alpine",
+  "workspaceFolder": "/workspace",
+  "mounts": [
+    "source=cinescope_ide_auth_nm,target=/workspace/auth-service/node_modules,type=volume",
+    "source=cinescope_ide_catalog_nm,target=/workspace/catalog-service/node_modules,type=volume",
+    "source=cinescope_ide_recomendation_nm,target=/workspace/recomendation-service/node_modules,type=volume",
+    "source=cinescope_ide_review_nm,target=/workspace/review-service/node_modules,type=volume",
+    "source=cinescope_ide_watchlist_nm,target=/workspace/watchlist-service/node_modules,type=volume",
+    "source=cinescope_ide_gateway_nm,target=/workspace/gateway-service/node_modules,type=volume"
+  ],
+  "postCreateCommand": "for dir in auth-service catalog-service review-service watchlist-service recomendation-service gateway-service; do echo \"Installing $dir...\" && cd /workspace/$dir && npm ci && cd /workspace; done",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "ms-vscode.vscode-typescript-next"
+      ]
+    }
+  }
+}
