@@ -1,10 +1,12 @@
 import { UserStatus } from '../enums/userStatus'
+import { Email } from '../value-objects/email'
+import { Username } from '../value-objects/username'
 import { Role } from './role'
 
 export class User {
   private readonly _id: string
-  private readonly _username: string
-  private readonly _email: string
+  private readonly _username: Username
+  private readonly _email: Email
   private readonly _name: string
   private _password: string
   private _status: UserStatus
@@ -20,8 +22,8 @@ export class User {
     roles: Role[] = []
   ) {
     this._id = id
-    this._username = username
-    this._email = email
+    this._username = new Username(username)
+    this._email = new Email(email)
     this._password = password
     this._name = name
     this._status = status
@@ -55,11 +57,11 @@ export class User {
     return this._id
   }
 
-  get username(): string {
+  get username(): Username {
     return this._username
   }
 
-  get email(): string {
+  get email(): Email {
     return this._email
   }
 
