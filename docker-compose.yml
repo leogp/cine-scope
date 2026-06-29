@@ -2,6 +2,12 @@ volumes:
   postgres_data:
   redis_data:
   rabbitmq_data:
+  auth_node_modules:
+  catalog_node_modules:
+  recomendation_node_modules:
+  review_node_modules:
+  watchlist_node_modules:
+  gateway_node_modules:
 
 networks:
   cinescope-net:
@@ -79,7 +85,8 @@ services:
       RABBITMQ_URL: amqp://${RABBITMQ_USER:-cinescope}:${RABBITMQ_PASSWORD:-cinescope_secret}@rabbitmq:5672
     volumes:
       - ./auth-service:/app
-      - /app/node_modules
+      - auth_node_modules:/app/node_modules
+      - ./tsconfig.base.json:/tsconfig.base.json
     networks:
       - cinescope-net
     depends_on:
@@ -106,7 +113,8 @@ services:
       RABBITMQ_URL: amqp://${RABBITMQ_USER:-cinescope}:${RABBITMQ_PASSWORD:-cinescope_secret}@rabbitmq:5672
     volumes:
       - ./catalog-service:/app
-      - /app/node_modules
+      - catalog_node_modules:/app/node_modules
+      - ./tsconfig.base.json:/tsconfig.base.json
     networks:
       - cinescope-net
     depends_on:
@@ -133,7 +141,8 @@ services:
       RABBITMQ_URL: amqp://${RABBITMQ_USER:-cinescope}:${RABBITMQ_PASSWORD:-cinescope_secret}@rabbitmq:5672
     volumes:
       - ./recomendation-service:/app
-      - /app/node_modules
+      - recomendation_node_modules:/app/node_modules
+      - ./tsconfig.base.json:/tsconfig.base.json
     networks:
       - cinescope-net
     depends_on:
@@ -160,7 +169,8 @@ services:
       RABBITMQ_URL: amqp://${RABBITMQ_USER:-cinescope}:${RABBITMQ_PASSWORD:-cinescope_secret}@rabbitmq:5672
     volumes:
       - ./review-service:/app
-      - /app/node_modules
+      - review_node_modules:/app/node_modules
+      - ./tsconfig.base.json:/tsconfig.base.json
     networks:
       - cinescope-net
     depends_on:
@@ -187,7 +197,8 @@ services:
       RABBITMQ_URL: amqp://${RABBITMQ_USER:-cinescope}:${RABBITMQ_PASSWORD:-cinescope_secret}@rabbitmq:5672
     volumes:
       - ./watchlist-service:/app
-      - /app/node_modules
+      - watchlist_node_modules:/app/node_modules
+      - ./tsconfig.base.json:/tsconfig.base.json
     networks:
       - cinescope-net
     depends_on:
@@ -216,7 +227,8 @@ services:
       WATCHLIST_SERVICE_URL: http://watchlist-service:4005
     volumes:
       - ./gateway-service:/app
-      - /app/node_modules
+      - gateway_node_modules:/app/node_modules
+      - ./tsconfig.base.json:/tsconfig.base.json
     networks:
       - cinescope-net
     depends_on:

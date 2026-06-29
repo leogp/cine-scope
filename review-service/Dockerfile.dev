@@ -4,9 +4,10 @@ LABEL service="review-service"
 
 WORKDIR /app
 
-COPY package*.json ./
-RUN npm ci
+COPY entrypoint.sh ./
+RUN chmod +x entrypoint.sh
 
 EXPOSE 4004
 
+ENTRYPOINT ["sh", "entrypoint.sh"]
 CMD ["npm", "run", "dev"]
