@@ -1,0 +1,13 @@
+# Shared development image for all CineScope services.
+#
+# Used by docker-compose for the `deps` installer and every service container.
+# It only provides the Node runtime plus the native build toolchain (needed to
+# compile modules such as bcrypt). Dependencies are NOT baked in: they are
+# installed at runtime by the `deps` service into the bind-mounted workspace,
+# so the host sees a single hoisted node_modules and never needs Node locally.
+FROM node:24-alpine
+
+# Toolchain required to build native addons (e.g. bcrypt) on Alpine/musl.
+RUN apk add --no-cache python3 make g++
+
+WORKDIR /workspace

@@ -1,16 +1,49 @@
-# catalog-service — multistage Dockerfile
-# Stage 1: builder — installs all deps (including devDeps) and compiles TypeScript
+# catalog-service — production image (npm workspaces monorepo)
+#
+# NOTE: build from the repository ROOT so the workspace lockfile is in context:
+#   docker build -f catalog-service/Dockerfile -t catalog-service .
+
+# ─── Stage 1: builder — install full workspace and compile this service ──────
 FROM node:24-alpine AS builder
 
-WORKDIR /app
+# Toolchain for native addons (e.g. bcrypt).
+RUN apk add --no-cache python3 make g++
 
-COPY package*.json ./
+WORKDIR /workspace
+
+# Copy root manifests + every workspace manifest first so `npm ci` resolves the
+# whole graph deterministically from the single root lockfile (better caching).
+COPY package.json package-lock.json ./
+COPY auth-service/package.json ./auth-service/
+COPY catalog-service/package.json ./catalog-service/
+COPY recomendation-service/package.json ./recomendation-service/
+COPY review-service/package.json ./review-service/
+COPY watchlist-service/package.json ./watchlist-service/
+COPY gateway-service/package.json ./gateway-service/
 RUN npm ci
 
-COPY . .
-RUN npm run build
+# Compile just this service.
+COPY tsconfig.base.json ./
+COPY catalog-service ./catalog-service
+RUN npm run build -w catalog-service
 
-# Stage 2: production — lean image with only compiled output and prod deps
+# ─── Stage 2: prod-deps — production-only dependencies ───────────────────────
+FROM node:24-alpine AS prod-deps
+
+RUN apk add --no-cache python3 make g++
+
+WORKDIR /workspace
+
+COPY package.json package-lock.json ./
+COPY auth-service/package.json ./auth-service/
+COPY catalog-service/package.json ./catalog-service/
+COPY recomendation-service/package.json ./recomendation-service/
+COPY review-service/package.json ./review-service/
+COPY watchlist-service/package.json ./watchlist-service/
+COPY gateway-service/package.json ./gateway-service/
+RUN npm ci --omit=dev
+
+# ─── Stage 3: production — lean runtime image ────────────────────────────────
 FROM node:24-alpine AS production
 
 LABEL service="catalog-service"
@@ -20,10 +53,9 @@ RUN addgroup -g 1001 -S appgroup && \
 
 WORKDIR /app
 
-COPY package*.json ./
-RUN npm ci --omit=dev && npm cache clean --force
-
-COPY --from=builder --chown=appuser:appgroup /app/dist ./dist
+COPY --from=prod-deps --chown=appuser:appgroup /workspace/node_modules ./node_modules
+COPY --from=builder --chown=appuser:appgroup /workspace/catalog-service/dist ./dist
+COPY --chown=appuser:appgroup catalog-service/package.json ./package.json
 
 USER appuser
 

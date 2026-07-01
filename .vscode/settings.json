@@ -1,0 +1,15 @@
+{
+  // Use the workspace's hoisted TypeScript (installed by the container into the
+  // bind-mounted root node_modules) instead of VS Code's bundled version.
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "typescript.enablePromptUseWorkspaceTsdk": true,
+
+  // Let the ESLint extension resolve each service's tsconfig automatically.
+  "eslint.workingDirectories": [{ "mode": "auto" }],
+
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  }
+}
