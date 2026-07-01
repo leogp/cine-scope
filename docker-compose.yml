@@ -2,18 +2,38 @@ volumes:
   postgres_data:
   redis_data:
   rabbitmq_data:
-  auth_node_modules:
-  catalog_node_modules:
-  recomendation_node_modules:
-  review_node_modules:
-  watchlist_node_modules:
-  gateway_node_modules:
 
 networks:
   cinescope-net:
     driver: bridge
 
+# ─── Shared dev service definition ───────────────────────────────────────────
+# Every application container is built from the same lightweight dev image and
+# bind-mounts the whole repository at /workspace. Node resolves dependencies
+# from the single hoisted node_modules created by the `deps` service, which
+# lives on the host (bind mount) so VS Code can see every installed package
+# without anything being installed on the host machine.
+x-node-dev: &node-dev
+  build:
+    context: .
+    dockerfile: Dockerfile.dev
+  image: cinescope-dev:latest
+  volumes:
+    - .:/workspace
+  networks:
+    - cinescope-net
+
 services:
+  # ─── Dependencies installer ────────────────────────────────────────────────
+  # Runs `npm install` once for the whole workspace before the services start.
+  # Because the repo is bind-mounted, the resulting node_modules appears on the
+  # host and is shared by all services (and read by the VS Code TS server).
+  deps:
+    <<: *node-dev
+    container_name: cinescope-deps
+    command: npm install
+    restart: "no"
+
   # ─── Infrastructure ────────────────────────────────────────────────────────
 
   postgres:
@@ -70,10 +90,9 @@ services:
   # ─── Application Services ──────────────────────────────────────────────────
 
   auth-service:
-    build:
-      context: ./auth-service
-      dockerfile: Dockerfile.dev
+    <<: *node-dev
     container_name: auth-service
+    working_dir: /workspace/auth-service
     command: npm run dev
     ports:
       - "4001:4001"
@@ -83,13 +102,9 @@ services:
       DATABASE_URL: postgresql://${POSTGRES_USER:-cinescope}:${POSTGRES_PASSWORD:-cinescope_secret}@postgres:5432/${POSTGRES_DB:-cinescope}
       REDIS_URL: redis://redis:6379
       RABBITMQ_URL: amqp://${RABBITMQ_USER:-cinescope}:${RABBITMQ_PASSWORD:-cinescope_secret}@rabbitmq:5672
-    volumes:
-      - ./auth-service:/app
-      - auth_node_modules:/app/node_modules
-      - ./tsconfig.base.json:/tsconfig.base.json
-    networks:
-      - cinescope-net
     depends_on:
+      deps:
+        condition: service_completed_successfully
       postgres:
         condition: service_healthy
       redis:
@@ -98,10 +113,9 @@ services:
         condition: service_healthy
 
   catalog-service:
-    build:
-      context: ./catalog-service
-      dockerfile: Dockerfile.dev
+    <<: *node-dev
     container_name: catalog-service
+    working_dir: /workspace/catalog-service
     command: npm run dev
     ports:
       - "4002:4002"
@@ -111,13 +125,9 @@ services:
       DATABASE_URL: postgresql://${POSTGRES_USER:-cinescope}:${POSTGRES_PASSWORD:-cinescope_secret}@postgres:5432/${POSTGRES_DB:-cinescope}
       REDIS_URL: redis://redis:6379
       RABBITMQ_URL: amqp://${RABBITMQ_USER:-cinescope}:${RABBITMQ_PASSWORD:-cinescope_secret}@rabbitmq:5672
-    volumes:
-      - ./catalog-service:/app
-      - catalog_node_modules:/app/node_modules
-      - ./tsconfig.base.json:/tsconfig.base.json
-    networks:
-      - cinescope-net
     depends_on:
+      deps:
+        condition: service_completed_successfully
       postgres:
         condition: service_healthy
       redis:
@@ -126,10 +136,9 @@ services:
         condition: service_healthy
 
   recomendation-service:
-    build:
-      context: ./recomendation-service
-      dockerfile: Dockerfile.dev
+    <<: *node-dev
     container_name: recomendation-service
+    working_dir: /workspace/recomendation-service
     command: npm run dev
     ports:
       - "4003:4003"
@@ -139,13 +148,9 @@ services:
       DATABASE_URL: postgresql://${POSTGRES_USER:-cinescope}:${POSTGRES_PASSWORD:-cinescope_secret}@postgres:5432/${POSTGRES_DB:-cinescope}
       REDIS_URL: redis://redis:6379
       RABBITMQ_URL: amqp://${RABBITMQ_USER:-cinescope}:${RABBITMQ_PASSWORD:-cinescope_secret}@rabbitmq:5672
-    volumes:
-      - ./recomendation-service:/app
-      - recomendation_node_modules:/app/node_modules
-      - ./tsconfig.base.json:/tsconfig.base.json
-    networks:
-      - cinescope-net
     depends_on:
+      deps:
+        condition: service_completed_successfully
       postgres:
         condition: service_healthy
       redis:
@@ -154,10 +159,9 @@ services:
         condition: service_healthy
 
   review-service:
-    build:
-      context: ./review-service
-      dockerfile: Dockerfile.dev
+    <<: *node-dev
     container_name: review-service
+    working_dir: /workspace/review-service
     command: npm run dev
     ports:
       - "4004:4004"
@@ -167,13 +171,9 @@ services:
       DATABASE_URL: postgresql://${POSTGRES_USER:-cinescope}:${POSTGRES_PASSWORD:-cinescope_secret}@postgres:5432/${POSTGRES_DB:-cinescope}
       REDIS_URL: redis://redis:6379
       RABBITMQ_URL: amqp://${RABBITMQ_USER:-cinescope}:${RABBITMQ_PASSWORD:-cinescope_secret}@rabbitmq:5672
-    volumes:
-      - ./review-service:/app
-      - review_node_modules:/app/node_modules
-      - ./tsconfig.base.json:/tsconfig.base.json
-    networks:
-      - cinescope-net
     depends_on:
+      deps:
+        condition: service_completed_successfully
       postgres:
         condition: service_healthy
       redis:
@@ -182,10 +182,9 @@ services:
         condition: service_healthy
 
   watchlist-service:
-    build:
-      context: ./watchlist-service
-      dockerfile: Dockerfile.dev
+    <<: *node-dev
     container_name: watchlist-service
+    working_dir: /workspace/watchlist-service
     command: npm run dev
     ports:
       - "4005:4005"
@@ -195,13 +194,9 @@ services:
       DATABASE_URL: postgresql://${POSTGRES_USER:-cinescope}:${POSTGRES_PASSWORD:-cinescope_secret}@postgres:5432/${POSTGRES_DB:-cinescope}
       REDIS_URL: redis://redis:6379
       RABBITMQ_URL: amqp://${RABBITMQ_USER:-cinescope}:${RABBITMQ_PASSWORD:-cinescope_secret}@rabbitmq:5672
-    volumes:
-      - ./watchlist-service:/app
-      - watchlist_node_modules:/app/node_modules
-      - ./tsconfig.base.json:/tsconfig.base.json
-    networks:
-      - cinescope-net
     depends_on:
+      deps:
+        condition: service_completed_successfully
       postgres:
         condition: service_healthy
       redis:
@@ -210,10 +205,9 @@ services:
         condition: service_healthy
 
   gateway-service:
-    build:
-      context: ./gateway-service
-      dockerfile: Dockerfile.dev
+    <<: *node-dev
     container_name: gateway-service
+    working_dir: /workspace/gateway-service
     command: npm run dev
     ports:
       - "4000:4000"
@@ -225,13 +219,9 @@ services:
       RECOMENDATION_SERVICE_URL: http://recomendation-service:4003
       REVIEW_SERVICE_URL: http://review-service:4004
       WATCHLIST_SERVICE_URL: http://watchlist-service:4005
-    volumes:
-      - ./gateway-service:/app
-      - gateway_node_modules:/app/node_modules
-      - ./tsconfig.base.json:/tsconfig.base.json
-    networks:
-      - cinescope-net
     depends_on:
+      deps:
+        condition: service_completed_successfully
       auth-service:
         condition: service_started
       catalog-service:

@@ -1,0 +1,33 @@
+# Build context is the repository root (npm workspaces).
+# Keep it lean and never ship installed deps or build output into an image.
+node_modules
+**/node_modules
+dist
+**/dist
+*.tsbuildinfo
+
+.git
+.gitignore
+.dockerignore
+
+# Env & secrets
+.env
+.env.*
+!.env.example
+
+# Logs & coverage
+*.log
+npm-debug.log*
+logs
+coverage
+**/coverage
+.nyc_output
+
+# Editor / tooling
+.vscode
+.idea
+*.swp
+*.swo
+
+# Docs
+README.md

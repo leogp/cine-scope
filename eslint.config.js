@@ -11,6 +11,19 @@ module.exports = tseslint.config(
   // ─── Base: TypeScript recommended rules ───────────────────────────────────
   ...tseslint.configs.recommended,
 
+  // ─── Type-aware linting ───────────────────────────────────────────────────
+  // Enables rules that need type information (e.g. no-floating-promises).
+  // `projectService` auto-discovers each microservice's tsconfig.json.
+  {
+    files: ['**/*.ts'],
+    languageOptions: {
+      parserOptions: {
+        projectService: true,
+        tsconfigRootDir: __dirname,
+      },
+    },
+  },
+
   // ─── Prettier: disables formatting rules that conflict with Prettier ───────
   eslintConfigPrettier,
 
