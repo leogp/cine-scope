@@ -3,7 +3,9 @@ import { RefreshTokenExpiredError } from '../../errors/refreshTokenExpiredError'
 import { RefreshTokenRevokedError } from '../../errors/refreshTokenRevokeError'
 import { RefreshTokenRepository } from '../../../domain/repositories/refreshTokenRepository'
 import { UserRepository } from '../../../domain/repositories/userRepository'
-import { TokenGenerator } from '../../../domain/services/tokenGenerator'
+import { AccessTokenGenerator } from '../../ports/accessTokenGenerator'
+import { RefreshTokenGenerator } from '../../ports/refreshTokenGenerator'
+import { RefreshToken } from '../../../domain/entities/refreshToken'
 import { RefreshTokenRequest } from './refreshTokenRequest'
 import { RefreshTokenResponse } from './refreshTokenResponse'
 
@@ -11,7 +13,8 @@ export class RefreshTokenUseCase {
   constructor(
     private readonly userRepository: UserRepository,
     private readonly refreshTokenRepository: RefreshTokenRepository,
-    private readonly tokenGenerator: TokenGenerator
+    private readonly accessTokenGenerator: AccessTokenGenerator,
+    private readonly refreshTokenGenerator: RefreshTokenGenerator
   ) {}
 
   async execute(request: RefreshTokenRequest): Promise<RefreshTokenResponse> {
@@ -35,13 +38,26 @@ export class RefreshTokenUseCase {
       throw new InvalidRefreshTokenError()
     }
 
-    const accessToken = await this.tokenGenerator.generateAccessToken(user)
+    const accessToken = await this.accessTokenGenerator.generate({
+      subject: user.id,
+      username: user.username.toString(),
+      email: user.email.toString(),
+      roles: user.roles.map((role) => role.name),
+    })
 
     currentRefreshToken.revoke()
 
     await this.refreshTokenRepository.update(currentRefreshToken)
 
-    const newRefreshToken = await this.tokenGenerator.generateRefreshToken(user)
+    const generated = await this.refreshTokenGenerator.generate(user.id)
+
+    const newRefreshToken = RefreshToken.create({
+      id: crypto.randomUUID(),
+      token: generated.token,
+      userId: user.id,
+      expiresAt: generated.expiresAt,
+      revoked: false,
+    })
 
     await this.refreshTokenRepository.save(newRefreshToken)
 

@@ -1,8 +1,17 @@
-import { RefreshToken } from '../entities/refreshToken'
-import { User } from '../entities/user'
+export interface AccessTokenPayload {
+  subject: string
+  username: string
+  email: string
+  roles: string[]
+}
+
+export interface GeneratedRefreshToken {
+  token: string
+  expiresAt: Date
+}
 
 export interface TokenGenerator {
-  generateAccessToken(user: User): Promise<string>
+  generateAccessToken(payload: AccessTokenPayload): Promise<string>
 
-  generateRefreshToken(user: User): Promise<RefreshToken>
+  generateRefreshToken(subject: string): Promise<GeneratedRefreshToken>
 }

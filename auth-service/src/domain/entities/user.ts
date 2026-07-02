@@ -38,6 +38,7 @@ export class User {
       props.roles ?? []
     )
   }
+
   assignRole(role: Role): void {
     const alreadyAssigned = this._roles.some((r) => r.id === role.id)
 
@@ -48,15 +49,15 @@ export class User {
     this._roles.push(role)
   }
 
-  changePassword(hashedPassword: string) {
+  changePassword(hashedPassword: string): void {
     this._passwordHash = hashedPassword
   }
 
-  activate() {
+  activate(): void {
     this._status = UserStatus.ACTIVE
   }
 
-  deactivate() {
+  deactivate(): void {
     this._status = UserStatus.INACTIVE
   }
 
@@ -85,7 +86,7 @@ export class User {
     return this._status
   }
 
-  getRoles(): Role[] {
+  get roles(): Role[] {
     return this._roles
   }
 }
