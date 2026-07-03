@@ -42,13 +42,21 @@ services:
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-cinescope}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-cinescope_secret}
-      POSTGRES_DB: ${POSTGRES_DB:-cinescope}
+      # Maintenance DB only — service databases are created below. Without this
+      # the image would create a database named after POSTGRES_USER.
+      POSTGRES_DB: postgres
+      # Comma-separated list of extra databases created on first init
+      # (one database per microservice; see infra/postgres/init-databases.sh)
+      POSTGRES_MULTIPLE_DATABASES: auth_db
+    ports:
+      - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./infra/postgres/init-databases.sh:/docker-entrypoint-initdb.d/init-databases.sh:ro
     networks:
       - cinescope-net
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-cinescope} -d ${POSTGRES_DB:-cinescope}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-cinescope} -d postgres"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -99,7 +107,7 @@ services:
     environment:
       NODE_ENV: development
       PORT: 4001
-      DATABASE_URL: postgresql://${POSTGRES_USER:-cinescope}:${POSTGRES_PASSWORD:-cinescope_secret}@postgres:5432/${POSTGRES_DB:-cinescope}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-cinescope}:${POSTGRES_PASSWORD:-cinescope_secret}@postgres:5432/auth_db
       REDIS_URL: redis://redis:6379
       RABBITMQ_URL: amqp://${RABBITMQ_USER:-cinescope}:${RABBITMQ_PASSWORD:-cinescope_secret}@rabbitmq:5672
     depends_on:
