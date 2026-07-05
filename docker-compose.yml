@@ -38,7 +38,7 @@ services:
       # prisma.config.ts resolves env('DATABASE_URL') at config-load time even
       # for `generate`, which never connects — only the value must exist.
       DATABASE_URL: postgresql://${POSTGRES_USER:-cinescope}:${POSTGRES_PASSWORD:-cinescope_secret}@postgres:5432/auth_db
-    restart: "no"
+    restart: 'no'
 
   # ─── Infrastructure ────────────────────────────────────────────────────────
 
@@ -55,14 +55,14 @@ services:
       # (one database per microservice; see infra/postgres/init-databases.sh)
       POSTGRES_MULTIPLE_DATABASES: auth_db
     ports:
-      - "5432:5432"
+      - '5432:5432'
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./infra/postgres/init-databases.sh:/docker-entrypoint-initdb.d/init-databases.sh:ro
     networks:
       - cinescope-net
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-cinescope} -d postgres"]
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-cinescope} -d postgres']
       interval: 10s
       timeout: 5s
       retries: 5
@@ -76,7 +76,7 @@ services:
     networks:
       - cinescope-net
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ['CMD', 'redis-cli', 'ping']
       interval: 10s
       timeout: 5s
       retries: 5
@@ -91,11 +91,11 @@ services:
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
     ports:
-      - "15672:15672"
+      - '15672:15672'
     networks:
       - cinescope-net
     healthcheck:
-      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      test: ['CMD', 'rabbitmq-diagnostics', 'ping']
       interval: 15s
       timeout: 10s
       retries: 5
@@ -109,7 +109,7 @@ services:
     working_dir: /workspace/auth-service
     command: npm run dev
     ports:
-      - "4001:4001"
+      - '4001:4001'
     environment:
       NODE_ENV: development
       PORT: 4001
@@ -132,7 +132,7 @@ services:
     working_dir: /workspace/catalog-service
     command: npm run dev
     ports:
-      - "4002:4002"
+      - '4002:4002'
     environment:
       NODE_ENV: development
       PORT: 4002
@@ -155,7 +155,7 @@ services:
     working_dir: /workspace/recomendation-service
     command: npm run dev
     ports:
-      - "4003:4003"
+      - '4003:4003'
     environment:
       NODE_ENV: development
       PORT: 4003
@@ -178,7 +178,7 @@ services:
     working_dir: /workspace/review-service
     command: npm run dev
     ports:
-      - "4004:4004"
+      - '4004:4004'
     environment:
       NODE_ENV: development
       PORT: 4004
@@ -201,7 +201,7 @@ services:
     working_dir: /workspace/watchlist-service
     command: npm run dev
     ports:
-      - "4005:4005"
+      - '4005:4005'
     environment:
       NODE_ENV: development
       PORT: 4005
@@ -224,7 +224,7 @@ services:
     working_dir: /workspace/gateway-service
     command: npm run dev
     ports:
-      - "4000:4000"
+      - '4000:4000'
     environment:
       NODE_ENV: development
       PORT: 4000
