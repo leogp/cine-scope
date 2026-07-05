@@ -31,7 +31,13 @@ services:
   deps:
     <<: *node-dev
     container_name: cinescope-deps
-    command: npm install
+    # Install the workspace, then generate Prisma clients (Prisma 7 does not
+    # generate on install; the allow-scripts policy also blocks postinstall).
+    command: sh -c "npm install && npm run generate -w auth-service"
+    environment:
+      # prisma.config.ts resolves env('DATABASE_URL') at config-load time even
+      # for `generate`, which never connects — only the value must exist.
+      DATABASE_URL: postgresql://${POSTGRES_USER:-cinescope}:${POSTGRES_PASSWORD:-cinescope_secret}@postgres:5432/auth_db
     restart: "no"
 
   # ─── Infrastructure ────────────────────────────────────────────────────────
