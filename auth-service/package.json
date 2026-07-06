@@ -6,6 +6,8 @@
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "generate": "prisma generate",
+    "migrate:deploy": "prisma migrate deploy",
+    "seed": "prisma db seed",
     "build": "tsc",
     "start": "node dist/index.js",
     "test": "jest",

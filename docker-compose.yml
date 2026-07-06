@@ -31,13 +31,16 @@ services:
   deps:
     <<: *node-dev
     container_name: cinescope-deps
-    # Install the workspace, then generate Prisma clients (Prisma 7 does not
-    # generate on install; the allow-scripts policy also blocks postinstall).
-    command: sh -c "npm install && npm run generate -w auth-service"
+    # Install the workspace, generate Prisma clients (Prisma 7 does not
+    # generate on install; the allow-scripts policy also blocks postinstall),
+    # then apply migrations and seed so a fresh volume comes up ready.
+    command: sh -c "npm install && npm run generate -w auth-service && npm run migrate:deploy -w auth-service && npm run seed -w auth-service"
     environment:
-      # prisma.config.ts resolves env('DATABASE_URL') at config-load time even
-      # for `generate`, which never connects — only the value must exist.
       DATABASE_URL: postgresql://${POSTGRES_USER:-cinescope}:${POSTGRES_PASSWORD:-cinescope_secret}@postgres:5432/auth_db
+    depends_on:
+      # migrate deploy and db seed connect to the database
+      postgres:
+        condition: service_healthy
     restart: 'no'
 
   # ─── Infrastructure ────────────────────────────────────────────────────────
