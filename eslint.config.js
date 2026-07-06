@@ -5,7 +5,7 @@ const eslintConfigPrettier = require('eslint-config-prettier')
 module.exports = tseslint.config(
   // ─── Ignored paths ────────────────────────────────────────────────────────
   {
-    ignores: ['**/dist/**', '**/node_modules/**', '**/*.js'],
+    ignores: ['**/dist/**', '**/node_modules/**', '**/*.js', '**/prisma/generated/**'],
   },
 
   // ─── Base: TypeScript recommended rules ───────────────────────────────────
@@ -18,7 +18,11 @@ module.exports = tseslint.config(
     files: ['**/*.ts'],
     languageOptions: {
       parserOptions: {
-        projectService: true,
+        // Config files (prisma.config.ts) live outside each service's tsconfig
+        // (rootDir is ./src), so they get the default project instead.
+        projectService: {
+          allowDefaultProject: ['*/prisma.config.ts'],
+        },
         tsconfigRootDir: __dirname,
       },
     },

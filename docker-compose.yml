@@ -31,8 +31,17 @@ services:
   deps:
     <<: *node-dev
     container_name: cinescope-deps
-    command: npm install
-    restart: "no"
+    # Install the workspace, generate Prisma clients (Prisma 7 does not
+    # generate on install; the allow-scripts policy also blocks postinstall),
+    # then apply migrations and seed so a fresh volume comes up ready.
+    command: sh -c "npm install && npm run generate -w auth-service && npm run migrate:deploy -w auth-service && npm run seed -w auth-service"
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-cinescope}:${POSTGRES_PASSWORD:-cinescope_secret}@postgres:5432/auth_db
+    depends_on:
+      # migrate deploy and db seed connect to the database
+      postgres:
+        condition: service_healthy
+    restart: 'no'
 
   # ─── Infrastructure ────────────────────────────────────────────────────────
 
@@ -42,13 +51,21 @@ services:
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-cinescope}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-cinescope_secret}
-      POSTGRES_DB: ${POSTGRES_DB:-cinescope}
+      # Maintenance DB only — service databases are created below. Without this
+      # the image would create a database named after POSTGRES_USER.
+      POSTGRES_DB: postgres
+      # Comma-separated list of extra databases created on first init
+      # (one database per microservice; see infra/postgres/init-databases.sh)
+      POSTGRES_MULTIPLE_DATABASES: auth_db
+    ports:
+      - '5432:5432'
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./infra/postgres/init-databases.sh:/docker-entrypoint-initdb.d/init-databases.sh:ro
     networks:
       - cinescope-net
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-cinescope} -d ${POSTGRES_DB:-cinescope}"]
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-cinescope} -d postgres']
       interval: 10s
       timeout: 5s
       retries: 5
@@ -62,7 +79,7 @@ services:
     networks:
       - cinescope-net
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ['CMD', 'redis-cli', 'ping']
       interval: 10s
       timeout: 5s
       retries: 5
@@ -77,11 +94,11 @@ services:
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
     ports:
-      - "15672:15672"
+      - '15672:15672'
     networks:
       - cinescope-net
     healthcheck:
-      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      test: ['CMD', 'rabbitmq-diagnostics', 'ping']
       interval: 15s
       timeout: 10s
       retries: 5
@@ -95,11 +112,11 @@ services:
     working_dir: /workspace/auth-service
     command: npm run dev
     ports:
-      - "4001:4001"
+      - '4001:4001'
     environment:
       NODE_ENV: development
       PORT: 4001
-      DATABASE_URL: postgresql://${POSTGRES_USER:-cinescope}:${POSTGRES_PASSWORD:-cinescope_secret}@postgres:5432/${POSTGRES_DB:-cinescope}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-cinescope}:${POSTGRES_PASSWORD:-cinescope_secret}@postgres:5432/auth_db
       REDIS_URL: redis://redis:6379
       RABBITMQ_URL: amqp://${RABBITMQ_USER:-cinescope}:${RABBITMQ_PASSWORD:-cinescope_secret}@rabbitmq:5672
     depends_on:
@@ -118,7 +135,7 @@ services:
     working_dir: /workspace/catalog-service
     command: npm run dev
     ports:
-      - "4002:4002"
+      - '4002:4002'
     environment:
       NODE_ENV: development
       PORT: 4002
@@ -141,7 +158,7 @@ services:
     working_dir: /workspace/recomendation-service
     command: npm run dev
     ports:
-      - "4003:4003"
+      - '4003:4003'
     environment:
       NODE_ENV: development
       PORT: 4003
@@ -164,7 +181,7 @@ services:
     working_dir: /workspace/review-service
     command: npm run dev
     ports:
-      - "4004:4004"
+      - '4004:4004'
     environment:
       NODE_ENV: development
       PORT: 4004
@@ -187,7 +204,7 @@ services:
     working_dir: /workspace/watchlist-service
     command: npm run dev
     ports:
-      - "4005:4005"
+      - '4005:4005'
     environment:
       NODE_ENV: development
       PORT: 4005
@@ -210,7 +227,7 @@ services:
     working_dir: /workspace/gateway-service
     command: npm run dev
     ports:
-      - "4000:4000"
+      - '4000:4000'
     environment:
       NODE_ENV: development
       PORT: 4000

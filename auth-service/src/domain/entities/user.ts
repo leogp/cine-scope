@@ -87,6 +87,6 @@ export class User {
   }
 
   get roles(): Role[] {
-    return this._roles
+    return [...this._roles]
   }
 }
