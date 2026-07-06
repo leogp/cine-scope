@@ -1,19 +1,18 @@
-import { User } from '../../../../domain/entities/user'
-import { Role } from '../../../../domain/entities/role'
-import { UserStatus } from '../../../../domain/enums/userStatus'
-import { Email } from '../../../../domain/value-objects/email'
-import { Username } from '../../../../domain/value-objects/username'
+import { User } from '../../../domain/entities/user'
+import { UserStatus } from '../../../domain/enums/userStatus'
+import { Email } from '../../../domain/value-objects/email'
+import { Username } from '../../../domain/value-objects/username'
 import { UserStatus as PrismaUserStatus } from '../generated/enums'
-import { UserGetPayload } from '../generated/models'
+import { UserModel } from '../generated/models'
+import { PrismaRoleMapper, RoleRow } from '../role/prismaRoleMapper'
 
 /**
- * Include needed to rehydrate a domain User: join rows plus their Role.
+ * Row shape the mapper accepts: user scalars plus, when the repository chose
+ * to load them, the user_roles join rows with their Role.
  */
-export const userWithRolesInclude = {
-  roles: { include: { role: true } },
-} as const
-
-export type UserWithRoles = UserGetPayload<{ include: typeof userWithRolesInclude }>
+export type UserRow = UserModel & {
+  roles?: { role: RoleRow }[]
+}
 
 export interface UserPersistence {
   id: string
@@ -35,7 +34,7 @@ const statusToPersistence: Record<UserStatus, PrismaUserStatus> = {
 }
 
 export class PrismaUserMapper {
-  static toDomain(row: UserWithRoles): User {
+  static toDomain(row: UserRow): User {
     return User.create({
       id: row.id,
       username: new Username(row.username),
@@ -43,15 +42,13 @@ export class PrismaUserMapper {
       passwordHash: row.passwordHash,
       name: row.name,
       status: statusToDomain[row.status],
-      roles: row.roles.map((userRole) => {
-        return new Role(userRole.role.id, userRole.role.name, userRole.role.description)
-      }),
+      roles: row.roles?.map((userRole) => PrismaRoleMapper.toDomain(userRole.role)),
     })
   }
 
   /**
    * Scalar columns only — role assignments are written by the repository
-   * through nested writes on the user_roles relation.
+   * through specific operations or nested writes on the user_roles relation.
    */
   static toPersistence(user: User): UserPersistence {
     return {

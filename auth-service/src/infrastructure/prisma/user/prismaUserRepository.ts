@@ -1,9 +1,18 @@
-import { User } from '../../../../domain/entities/user'
-import { UserRepository } from '../../../../domain/repositories/userRepository'
-import { Email } from '../../../../domain/value-objects/email'
-import { Username } from '../../../../domain/value-objects/username'
+import { User } from '../../../domain/entities/user'
+import { UserRepository } from '../../../domain/repositories/userRepository'
+import { Email } from '../../../domain/value-objects/email'
+import { Username } from '../../../domain/value-objects/username'
 import { PrismaClient } from '../generated/client'
-import { PrismaUserMapper, userWithRolesInclude } from './prismaUserMapper'
+import { PrismaUserMapper } from './prismaUserMapper'
+
+/**
+ * Rehydrating a User loads its user_roles join rows plus their Role.
+ * Role permissions are not loaded here — fetch them through RoleRepository
+ * when needed.
+ */
+const userWithRolesInclude = {
+  roles: { include: { role: true } },
+} as const
 
 export class PrismaUserRepository implements UserRepository {
   constructor(private readonly prisma: PrismaClient) {}
