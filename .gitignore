@@ -46,5 +46,6 @@ CLAUDE.md
 claude.json
 *.claude
 .agents/
+plan.md
 # Prisma generated client
 **/prisma/generated/
