@@ -1,15 +1,14 @@
-import 'dotenv/config';
-import express, { Request, Response } from 'express';
+import 'dotenv/config'
+import express from 'express'
 
-const app = express();
-const PORT = process.env.PORT ?? 4001;
+import { buildHealthRoutes } from './infrastructure/http/routes/healthRoutes'
 
-app.use(express.json());
+const app = express()
+const PORT = process.env.PORT ?? 4001
 
-app.get('/health', (_req: Request, res: Response) => {
-  res.json({ status: 'ok', service: 'auth-service' });
-});
+app.use(express.json())
+app.use(buildHealthRoutes())
 
 app.listen(PORT, () => {
-  console.log(`auth-service running on port ${PORT}`);
-});
+  console.log(`auth-service running on port ${PORT}`)
+})
