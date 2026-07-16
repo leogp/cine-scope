@@ -1,20 +1,10 @@
 import { RefreshTokenRepository } from '../../../domain/repositories/refreshTokenRepository'
-import { UserRepository } from '../../../domain/repositories/userRepository'
-import { TokenGenerator } from '../../../domain/services/tokenGenerator'
 import { LogoutRequest } from './logoutRequest'
 
 export class LogoutUseCase {
-  private readonly userRepository: UserRepository
-  private readonly tokenGenerator: TokenGenerator
   private readonly refreshTokenRepository: RefreshTokenRepository
 
-  constructor(
-    userRepository: UserRepository,
-    tokenGenerator: TokenGenerator,
-    refreshTokenRepository: RefreshTokenRepository
-  ) {
-    this.userRepository = userRepository
-    this.tokenGenerator = tokenGenerator
+  constructor(refreshTokenRepository: RefreshTokenRepository) {
     this.refreshTokenRepository = refreshTokenRepository
   }
 
