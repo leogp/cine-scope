@@ -8,12 +8,12 @@ The platform is designed around Domain-Driven Design (DDD), Clean Architecture a
 
 CineScope is composed of multiple backend services:
 
-* **Auth Service**
-* **Catalog Service**
-* **Review Service**
-* **Watchlist Service**
-* **Recommendation Service**
-* **API Gateway**
+- **Auth Service**
+- **Catalog Service**
+- **Review Service**
+- **Watchlist Service**
+- **Recommendation Service**
+- **API Gateway**
 
 Services communicate synchronously through REST APIs and asynchronously through events.
 
@@ -21,25 +21,25 @@ Services communicate synchronously through REST APIs and asynchronously through 
 
 ### Backend
 
-* Node.js
-* TypeScript
-* Express
+- Node.js
+- TypeScript
+- Express
 
 ### Data
 
-* PostgreSQL
-* Redis
+- PostgreSQL
+- Redis
 
 ### Messaging
 
-* RabbitMQ
+- RabbitMQ
 
 ### Infrastructure
 
-* Docker
-* Docker Compose
-* Kubernetes
-* Minikube
+- Docker
+- Docker Compose
+- Kubernetes
+- Minikube
 
 ## Security
 
@@ -52,18 +52,18 @@ Services communicate synchronously through REST APIs and asynchronously through 
 
 ## Testing
 
-* Jest
-* Supertest
+- Jest
+- Supertest
 
 ## Architectural Principles
 
-* Microservices-first approach
-* Domain-Driven Design (DDD)
-* Clean Architecture
-* Hexagonal Architecture
-* Event-Driven Architecture
-* Database per Service
-* Eventual Consistency
+- Microservices-first approach
+- Domain-Driven Design (DDD)
+- Clean Architecture
+- Hexagonal Architecture
+- Event-Driven Architecture
+- Database per Service
+- Eventual Consistency
 
 ## Development
 
@@ -74,11 +74,11 @@ dependencies. There is a **single hoisted `node_modules` at the repo root**.
 
 You do **not** need Node.js installed on your host. Everything runs inside
 Docker, and the workspace's `node_modules` is bind-mounted back to the host so
-your editor (VS Code) resolves every package with no red squiggles.
+your editor resolves every package with no red squiggles.
 
 ### Requirements
 
-* Docker + Docker Compose
+- Docker + Docker Compose
 
 ### Start the stack
 
@@ -123,9 +123,9 @@ docker compose run --rm deps npm run build        # compile every service
 Like everything else, tests run **inside containers** — no Node.js needed on
 the host. There are two kinds of suites:
 
-* **Unit / HTTP tests** (`*.test.ts`) — pure Jest + Supertest over in-memory
+- **Unit / HTTP tests** (`*.test.ts`) — pure Jest + Supertest over in-memory
   fakes, no infrastructure required.
-* **Integration tests** (`*.int.test.ts`) — Prisma repositories exercised
+- **Integration tests** (`*.int.test.ts`) — Prisma repositories exercised
   against a real Postgres database (`auth_test_db`, created automatically the
   first time the `postgres` volume is initialised).
 
@@ -176,26 +176,26 @@ docker build -f auth-service/Dockerfile -t cinescope/auth-service .
 
 The repository currently contains the foundational infrastructure required to support the platform:
 
-* Docker environment
-* Container orchestration configuration
-* Messaging infrastructure
-* Database services
-* Cache services
+- Docker environment
+- Container orchestration configuration
+- Messaging infrastructure
+- Database services
+- Cache services
 
 Additional business services will be introduced incrementally.
 
 ## Planned Features
 
-* Authentication and authorization
-* Movie and TV catalog
-* Ratings and reviews
-* Favorites and watchlists
-* Recommendations
-* API Gateway
-* Event-driven communication
-* Outbox Pattern
-* Saga Pattern
-* Kubernetes deployment
+- Authentication and authorization
+- Movie and TV catalog
+- Ratings and reviews
+- Favorites and watchlists
+- Recommendations
+- API Gateway
+- Event-driven communication
+- Outbox Pattern
+- Saga Pattern
+- Kubernetes deployment
 
 ## License
 
