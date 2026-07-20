@@ -44,6 +44,13 @@ describe('Entity', () => {
     expect(entity.id).toBe('entity-1')
   })
 
+  it('exposes a readonly snapshot of its props via data', () => {
+    const entity = new StubEntity(buildProps())
+
+    expect(entity.data.id).toBe('entity-1')
+    expect(entity.data.name).toBe('original')
+  })
+
   it('equals another entity of the same type with the same id', () => {
     const a = new StubEntity(buildProps())
     const b = new StubEntity(buildProps({ name: 'different state' }))

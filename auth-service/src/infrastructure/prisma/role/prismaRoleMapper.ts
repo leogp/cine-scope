@@ -35,8 +35,8 @@ export class PrismaRoleMapper {
   static toPersistence(role: Role): RolePersistence {
     return {
       id: role.id,
-      name: role.name,
-      description: role.description,
+      name: role.data.name,
+      description: role.data.description,
     }
   }
 }

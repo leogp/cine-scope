@@ -1,14 +1,15 @@
+import { ValueObject } from '@cinescope/shared/domain'
 import { InvalidPasswordError } from '../errors/invalidPasswordError'
 
-export class Password {
-  private readonly value: string
-
+export class Password extends ValueObject<string> {
   constructor(value: string) {
-    this.validate(value)
-    this.value = value
+    // Static so validation can run before super() without touching `this`.
+    Password.validate(value)
+
+    super(value)
   }
 
-  private validate(value: string): void {
+  private static validate(value: string): void {
     if (value.length < 8) {
       throw new InvalidPasswordError('Password must contain at least 8 characters.')
     }
@@ -28,9 +29,5 @@ export class Password {
     if (!/[!@#$%^&*(),.?":{}|<>_\-+=\\[\]/]/.test(value)) {
       throw new InvalidPasswordError('Password must contain at least one special character.')
     }
-  }
-
-  toString(): string {
-    return this.value
   }
 }

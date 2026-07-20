@@ -1,7 +1,8 @@
+import { UseCase } from '@cinescope/shared/application'
 import { RefreshTokenRepository } from '../../../domain/repositories/refreshTokenRepository'
 import { LogoutRequest } from './logoutRequest'
 
-export class LogoutUseCase {
+export class LogoutUseCase implements UseCase<LogoutRequest, void> {
   private readonly refreshTokenRepository: RefreshTokenRepository
 
   constructor(refreshTokenRepository: RefreshTokenRepository) {

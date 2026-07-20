@@ -1,7 +1,19 @@
+import { AggregateRoot, EntityProps } from '@cinescope/shared/domain'
 import { UserStatus } from '../enums/userStatus'
 import { Email } from '../value-objects/email'
 import { Username } from '../value-objects/username'
 import { Role } from './role'
+
+export interface UserProps extends EntityProps {
+  username: Username
+  email: Email
+  passwordHash: string
+  name: string
+  status: UserStatus
+  // readonly at the type level: external readers (via `data`) cannot mutate
+  // the collection; assignRole reassigns it instead of pushing.
+  roles: readonly Role[]
+}
 
 export interface CreateUserProps {
   id: string
@@ -13,80 +25,45 @@ export interface CreateUserProps {
   roles?: Role[]
 }
 
-export class User {
-  private constructor(
-    private readonly _id: string,
-    private readonly _username: Username,
-    private readonly _email: Email,
-    private _passwordHash: string,
-    private readonly _name: string,
-    private _status: UserStatus,
-    private readonly _roles: Role[]
-  ) {}
+export class User extends AggregateRoot<UserProps> {
+  private constructor(props: UserProps) {
+    super(props)
+  }
 
   /**
    * Creates a new User.
    */
   static create(props: CreateUserProps): User {
-    return new User(
-      props.id,
-      props.username,
-      props.email,
-      props.passwordHash,
-      props.name,
-      props.status ?? UserStatus.ACTIVE,
-      props.roles ?? []
-    )
+    return new User({
+      id: props.id,
+      username: props.username,
+      email: props.email,
+      passwordHash: props.passwordHash,
+      name: props.name,
+      status: props.status ?? UserStatus.ACTIVE,
+      roles: props.roles ?? [],
+    })
   }
 
   assignRole(role: Role): void {
-    const alreadyAssigned = this._roles.some((r) => r.id === role.id)
+    const alreadyAssigned = this.props.roles.some((r) => r.id === role.id)
 
     if (alreadyAssigned) {
       return
     }
 
-    this._roles.push(role)
+    this.props.roles = [...this.props.roles, role]
   }
 
   changePassword(hashedPassword: string): void {
-    this._passwordHash = hashedPassword
+    this.props.passwordHash = hashedPassword
   }
 
   activate(): void {
-    this._status = UserStatus.ACTIVE
+    this.props.status = UserStatus.ACTIVE
   }
 
   deactivate(): void {
-    this._status = UserStatus.INACTIVE
-  }
-
-  // Getters
-  get id(): string {
-    return this._id
-  }
-
-  get username(): Username {
-    return this._username
-  }
-
-  get email(): Email {
-    return this._email
-  }
-
-  get name(): string {
-    return this._name
-  }
-
-  get passwordHash(): string {
-    return this._passwordHash
-  }
-
-  get status(): UserStatus {
-    return this._status
-  }
-
-  get roles(): Role[] {
-    return [...this._roles]
+    this.props.status = UserStatus.INACTIVE
   }
 }

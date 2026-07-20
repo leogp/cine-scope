@@ -53,11 +53,11 @@ export class PrismaUserMapper {
   static toPersistence(user: User): UserPersistence {
     return {
       id: user.id,
-      username: user.username.toString(),
-      email: user.email.toString(),
-      passwordHash: user.passwordHash,
-      name: user.name,
-      status: statusToPersistence[user.status],
+      username: user.data.username.toString(),
+      email: user.data.email.toString(),
+      passwordHash: user.data.passwordHash,
+      name: user.data.name,
+      status: statusToPersistence[user.data.status],
     }
   }
 }

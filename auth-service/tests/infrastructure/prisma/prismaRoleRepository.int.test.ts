@@ -21,8 +21,8 @@ describe('PrismaRoleRepository', () => {
 
     expect(found).not.toBeNull()
     expect(found!.id).toBe('role-1')
-    expect(found!.description).toBe('Default role')
-    expect(found!.permissions).toEqual([])
+    expect(found!.data.description).toBe('Default role')
+    expect(found!.data.permissions).toEqual([])
   })
 
   it('returns the role named after DEFAULT_ROLE_NAME as the default role', async () => {
@@ -31,7 +31,7 @@ describe('PrismaRoleRepository', () => {
 
     const defaultRole = await roleRepository.getDefaultRole()
 
-    expect(defaultRole!.name).toBe(DEFAULT_ROLE_NAME)
+    expect(defaultRole!.data.name).toBe(DEFAULT_ROLE_NAME)
     expect(defaultRole!.id).toBe('role-1')
   })
 

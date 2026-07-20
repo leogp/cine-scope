@@ -16,7 +16,7 @@ export class InMemoryUserRepository implements UserRepository {
 
   async findByUsername(username: Username): Promise<User | null> {
     const match = [...this.users.values()].find(
-      (user) => user.username.toString() === username.toString()
+      (user) => user.data.username.toString() === username.toString()
     )
 
     return match ?? null
@@ -24,7 +24,7 @@ export class InMemoryUserRepository implements UserRepository {
 
   async findByEmail(email: Email): Promise<User | null> {
     const match = [...this.users.values()].find(
-      (user) => user.email.toString() === email.toString()
+      (user) => user.data.email.toString() === email.toString()
     )
 
     return match ?? null

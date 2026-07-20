@@ -50,7 +50,7 @@ describe('RefreshTokenUseCase', () => {
 
     const newToken = await refreshTokenRepository.findByToken(response.refreshToken)
     expect(newToken).not.toBeNull()
-    expect(newToken!.userId).toBe(user.id)
+    expect(newToken!.data.userId).toBe(user.id)
     expect(newToken!.isRevoked()).toBe(false)
   })
 

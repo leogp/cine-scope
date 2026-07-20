@@ -9,7 +9,9 @@ export class InMemoryRefreshTokenRepository implements RefreshTokenRepository {
   }
 
   async findByToken(token: string): Promise<RefreshToken | null> {
-    const match = [...this.tokens.values()].find((refreshToken) => refreshToken.token === token)
+    const match = [...this.tokens.values()].find(
+      (refreshToken) => refreshToken.data.token === token
+    )
 
     return match ?? null
   }

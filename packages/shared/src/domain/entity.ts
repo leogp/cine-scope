@@ -15,6 +15,16 @@ export abstract class Entity<Props extends EntityProps> {
   }
 
   /**
+   * Readonly snapshot of the entity's props. Concrete entities expose their
+   * state through this instead of a getter per field; because state-changing
+   * methods reassign props (rather than mutating in place), a previously read
+   * snapshot is stable and callers cannot mutate the entity through it.
+   */
+  get data(): Readonly<Props> {
+    return this.props
+  }
+
+  /**
    * Identity-based equality: two entities are the same if they are the same
    * concrete type and share the same id.
    */

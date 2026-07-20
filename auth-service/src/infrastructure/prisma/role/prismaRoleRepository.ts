@@ -44,7 +44,7 @@ export class PrismaRoleRepository implements RoleRepository {
       data: {
         ...PrismaRoleMapper.toPersistence(role),
         permissions: {
-          create: role.permissions.map((permission) => ({ permissionId: permission.id })),
+          create: role.data.permissions.map((permission) => ({ permissionId: permission.id })),
         },
       },
     })
@@ -60,7 +60,7 @@ export class PrismaRoleRepository implements RoleRepository {
         // Replace permission assignments with the entity's current set
         permissions: {
           deleteMany: {},
-          create: role.permissions.map((permission) => ({ permissionId: permission.id })),
+          create: role.data.permissions.map((permission) => ({ permissionId: permission.id })),
         },
       },
     })

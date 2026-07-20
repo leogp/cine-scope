@@ -1,4 +1,5 @@
 import { randomUUID } from 'crypto'
+import { UseCase } from '@cinescope/shared/application'
 import { User } from '../../../domain/entities/user'
 import { UserRepository } from '../../../domain/repositories/userRepository'
 import { PasswordHasher } from '../../../domain/services/passwordHasher'
@@ -13,7 +14,7 @@ import { Password } from '../../../domain/value-objects/password'
 import { Email } from '../../../domain/value-objects/email'
 import { Username } from '../../../domain/value-objects/username'
 
-export class SignUpUseCase {
+export class SignUpUseCase implements UseCase<SignUpRequest, SignUpResponse> {
   constructor(
     private readonly userRepository: UserRepository,
     private readonly passwordHasher: PasswordHasher,

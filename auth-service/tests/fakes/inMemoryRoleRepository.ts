@@ -15,7 +15,7 @@ export class InMemoryRoleRepository implements RoleRepository {
   }
 
   async findByName(name: string): Promise<Role | null> {
-    const match = [...this.roles.values()].find((role) => role.name === name)
+    const match = [...this.roles.values()].find((role) => role.data.name === name)
 
     return match ?? null
   }

@@ -36,8 +36,8 @@ describe('SignUpUseCase', () => {
     const saved = await userRepository.findByEmail(new Email(validRequest.email))
     expect(saved).not.toBeNull()
     expect(saved!.id).toBe(response.id)
-    expect(saved!.passwordHash).toBe('hashed:Str0ng!Pass')
-    expect(saved!.roles.map((role) => role.name)).toEqual(['user'])
+    expect(saved!.data.passwordHash).toBe('hashed:Str0ng!Pass')
+    expect(saved!.data.roles.map((role) => role.data.name)).toEqual(['user'])
   })
 
   it('rejects a duplicate email', async () => {

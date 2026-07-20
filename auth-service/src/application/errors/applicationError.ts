@@ -1,7 +1,3 @@
-export abstract class ApplicationError extends Error {
-  constructor(message: string) {
-    super(message)
-
-    this.name = this.constructor.name
-  }
-}
+// The base now lives in the shared kernel so every service maps errors the
+// same way. Re-exported here to keep the application's error import paths stable.
+export { ApplicationError } from '@cinescope/shared/application'
