@@ -1,33 +1,30 @@
-export interface RefreshTokenProps {
-  id: string
+import { Entity, EntityProps } from '@cinescope/shared/domain'
+
+export interface RefreshTokenProps extends EntityProps {
   token: string
   userId: string
   expiresAt: Date
   revoked: boolean
 }
 
-export class RefreshToken {
-  constructor(
-    public readonly id: string,
-    public readonly userId: string,
-    public readonly token: string,
-    public readonly expiresAt: Date,
-    public revoked: boolean
-  ) {}
+export class RefreshToken extends Entity<RefreshTokenProps> {
+  private constructor(props: RefreshTokenProps) {
+    super(props)
+  }
 
   static create(props: RefreshTokenProps): RefreshToken {
-    return new RefreshToken(props.id, props.userId, props.token, props.expiresAt, props.revoked)
+    return new RefreshToken(props)
   }
 
   isExpired(): boolean {
-    return this.expiresAt.getTime() < Date.now()
+    return this.props.expiresAt.getTime() < Date.now()
   }
 
   isRevoked(): boolean {
-    return !!this.revoked
+    return this.props.revoked
   }
 
   revoke(): void {
-    this.revoked = true
+    this.props.revoked = true
   }
 }

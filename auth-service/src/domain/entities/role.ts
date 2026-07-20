@@ -1,4 +1,12 @@
+import { Entity, EntityProps } from '@cinescope/shared/domain'
 import { Permission } from './permission'
+
+export interface RoleProps extends EntityProps {
+  name: string
+  description: string
+  // readonly at the type level, like User.roles — assignPermission reassigns.
+  permissions: readonly Permission[]
+}
 
 export interface createRoleProps {
   id: string
@@ -7,42 +15,27 @@ export interface createRoleProps {
   permissions?: Permission[]
 }
 
-export class Role {
-  private constructor(
-    private readonly _id: string,
-    private readonly _name: string,
-    private readonly _description: string,
-    private readonly _permissions: Permission[]
-  ) {}
+export class Role extends Entity<RoleProps> {
+  private constructor(props: RoleProps) {
+    super(props)
+  }
 
   static create(props: createRoleProps): Role {
-    return new Role(props.id, props.name, props.description, props.permissions ?? [])
+    return new Role({
+      id: props.id,
+      name: props.name,
+      description: props.description,
+      permissions: props.permissions ?? [],
+    })
   }
 
   assignPermission(permission: Permission): void {
-    const alreadyAssigned = this._permissions.some((p) => p.id === permission.id)
+    const alreadyAssigned = this.props.permissions.some((p) => p.id === permission.id)
 
     if (alreadyAssigned) {
       return
     }
 
-    this._permissions.push(permission)
-  }
-
-  // Getters
-  get id(): string {
-    return this._id
-  }
-
-  get name(): string {
-    return this._name
-  }
-
-  get description(): string {
-    return this._description
-  }
-
-  get permissions(): Permission[] {
-    return [...this._permissions]
+    this.props.permissions = [...this.props.permissions, permission]
   }
 }

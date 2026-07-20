@@ -47,7 +47,7 @@ describe('LoginUseCase', () => {
 
     const persisted = await refreshTokenRepository.findByToken(response.refreshToken)
     expect(persisted).not.toBeNull()
-    expect(persisted!.userId).toBe(user.id)
+    expect(persisted!.data.userId).toBe(user.id)
     expect(persisted!.isRevoked()).toBe(false)
   })
 

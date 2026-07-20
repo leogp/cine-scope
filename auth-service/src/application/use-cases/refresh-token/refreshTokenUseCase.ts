@@ -1,3 +1,4 @@
+import { UseCase } from '@cinescope/shared/application'
 import { InvalidRefreshTokenError } from '../../errors/invalidRefreshTokenError'
 import { RefreshTokenExpiredError } from '../../errors/refreshTokenExpiredError'
 import { RefreshTokenRevokedError } from '../../errors/refreshTokenRevokeError'
@@ -9,7 +10,9 @@ import { RefreshToken } from '../../../domain/entities/refreshToken'
 import { RefreshTokenRequest } from './refreshTokenRequest'
 import { RefreshTokenResponse } from './refreshTokenResponse'
 
-export class RefreshTokenUseCase {
+export class RefreshTokenUseCase
+  implements UseCase<RefreshTokenRequest, RefreshTokenResponse>
+{
   constructor(
     private readonly userRepository: UserRepository,
     private readonly refreshTokenRepository: RefreshTokenRepository,
@@ -32,7 +35,7 @@ export class RefreshTokenUseCase {
       throw new RefreshTokenRevokedError()
     }
 
-    const user = await this.userRepository.findById(currentRefreshToken.userId)
+    const user = await this.userRepository.findById(currentRefreshToken.data.userId)
 
     if (!user) {
       throw new InvalidRefreshTokenError()
@@ -40,9 +43,9 @@ export class RefreshTokenUseCase {
 
     const accessToken = await this.accessTokenGenerator.generate({
       subject: user.id,
-      username: user.username.toString(),
-      email: user.email.toString(),
-      roles: user.roles.map((role) => role.name),
+      username: user.data.username.toString(),
+      email: user.data.email.toString(),
+      roles: user.data.roles.map((role) => role.data.name),
     })
 
     currentRefreshToken.revoke()
@@ -63,7 +66,7 @@ export class RefreshTokenUseCase {
 
     return {
       accessToken,
-      refreshToken: newRefreshToken.token,
+      refreshToken: newRefreshToken.data.token,
     }
   }
 }

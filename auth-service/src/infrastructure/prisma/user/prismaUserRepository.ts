@@ -49,7 +49,7 @@ export class PrismaUserRepository implements UserRepository {
       data: {
         ...PrismaUserMapper.toPersistence(user),
         roles: {
-          create: user.roles.map((role) => ({ roleId: role.id })),
+          create: user.data.roles.map((role) => ({ roleId: role.id })),
         },
       },
     })
@@ -65,7 +65,7 @@ export class PrismaUserRepository implements UserRepository {
         // Replace role assignments with the entity's current set
         roles: {
           deleteMany: {},
-          create: user.roles.map((role) => ({ roleId: role.id })),
+          create: user.data.roles.map((role) => ({ roleId: role.id })),
         },
       },
     })

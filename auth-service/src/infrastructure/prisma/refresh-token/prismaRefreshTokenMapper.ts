@@ -23,10 +23,10 @@ export class PrismaRefreshTokenMapper {
   static toPersistence(refreshToken: RefreshToken): RefreshTokenPersistence {
     return {
       id: refreshToken.id,
-      token: refreshToken.token,
-      userId: refreshToken.userId,
-      expiresAt: refreshToken.expiresAt,
-      revoked: refreshToken.revoked,
+      token: refreshToken.data.token,
+      userId: refreshToken.data.userId,
+      expiresAt: refreshToken.data.expiresAt,
+      revoked: refreshToken.data.revoked,
     }
   }
 }

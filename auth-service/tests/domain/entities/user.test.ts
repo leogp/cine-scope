@@ -21,12 +21,12 @@ describe('User', () => {
     const user = buildUser()
 
     expect(user.id).toBe('user-1')
-    expect(user.username.toString()).toBe('leo_dev')
-    expect(user.email.toString()).toBe('leo@example.com')
-    expect(user.passwordHash).toBe('hashed-password')
-    expect(user.name).toBe('Leo')
-    expect(user.status).toBe(UserStatus.ACTIVE)
-    expect(user.roles).toEqual([])
+    expect(user.data.username.toString()).toBe('leo_dev')
+    expect(user.data.email.toString()).toBe('leo@example.com')
+    expect(user.data.passwordHash).toBe('hashed-password')
+    expect(user.data.name).toBe('Leo')
+    expect(user.data.status).toBe(UserStatus.ACTIVE)
+    expect(user.data.roles).toEqual([])
   })
 
   it('assigns a role', () => {
@@ -35,8 +35,8 @@ describe('User', () => {
 
     user.assignRole(role)
 
-    expect(user.roles).toHaveLength(1)
-    expect(user.roles[0].id).toBe('role-1')
+    expect(user.data.roles).toHaveLength(1)
+    expect(user.data.roles[0].id).toBe('role-1')
   })
 
   it('does not assign the same role twice', () => {
@@ -45,16 +45,22 @@ describe('User', () => {
     user.assignRole(buildRole())
     user.assignRole(buildRole())
 
-    expect(user.roles).toHaveLength(1)
+    expect(user.data.roles).toHaveLength(1)
   })
 
-  it('returns a copy of the roles so the internal list cannot be mutated', () => {
+  it('exposes roles as a stable snapshot: assignRole reassigns instead of mutating', () => {
     const user = buildUser()
+    const before = user.data.roles
+
     user.assignRole(buildRole())
+    const after = user.data.roles
 
-    user.roles.pop()
-
-    expect(user.roles).toHaveLength(1)
+    // The snapshot read before the change is untouched, and the collection was
+    // replaced (not mutated in place), so the entity cannot be mutated through
+    // a previously read reference.
+    expect(before).toHaveLength(0)
+    expect(after).toHaveLength(1)
+    expect(before).not.toBe(after)
   })
 
   it('changes the password hash', () => {
@@ -62,16 +68,16 @@ describe('User', () => {
 
     user.changePassword('new-hash')
 
-    expect(user.passwordHash).toBe('new-hash')
+    expect(user.data.passwordHash).toBe('new-hash')
   })
 
   it('activates and deactivates the user', () => {
     const user = buildUser()
 
     user.deactivate()
-    expect(user.status).toBe(UserStatus.INACTIVE)
+    expect(user.data.status).toBe(UserStatus.INACTIVE)
 
     user.activate()
-    expect(user.status).toBe(UserStatus.ACTIVE)
+    expect(user.data.status).toBe(UserStatus.ACTIVE)
   })
 })

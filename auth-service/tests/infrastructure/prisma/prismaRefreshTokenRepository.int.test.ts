@@ -41,8 +41,8 @@ describe('PrismaRefreshTokenRepository', () => {
 
     expect(found).not.toBeNull()
     expect(found!.id).toBe('token-1')
-    expect(found!.userId).toBe(token.userId)
-    expect(found!.expiresAt.getTime()).toBe(token.expiresAt.getTime())
+    expect(found!.data.userId).toBe(token.data.userId)
+    expect(found!.data.expiresAt.getTime()).toBe(token.data.expiresAt.getTime())
     expect(found!.isRevoked()).toBe(false)
   })
 

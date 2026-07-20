@@ -1,3 +1,4 @@
+import { UseCase } from '@cinescope/shared/application'
 // Repositories
 import { RefreshTokenRepository } from '../../../domain/repositories/refreshTokenRepository'
 import { UserRepository } from '../../../domain/repositories/userRepository'
@@ -13,7 +14,7 @@ import { LoginRequest } from './loginRequest'
 import { InvalidCredentialsError } from '../../errors/invalidCredentialsError'
 import { UserNotFoundError } from '../../../domain/errors/userNotFoundError'
 
-export class LoginUseCase {
+export class LoginUseCase implements UseCase<LoginRequest, LoginResponse> {
   private readonly userRepository: UserRepository
   private readonly passwordHasher: PasswordHasher
   private readonly accessTokenGenerator: AccessTokenGenerator
@@ -41,7 +42,10 @@ export class LoginUseCase {
       throw new UserNotFoundError()
     }
 
-    const isPasswordValid = await this.passwordHasher.compare(request.password, user.passwordHash)
+    const isPasswordValid = await this.passwordHasher.compare(
+      request.password,
+      user.data.passwordHash
+    )
     if (!isPasswordValid) {
       throw new InvalidCredentialsError()
     }
@@ -50,9 +54,9 @@ export class LoginUseCase {
 
     const accessToken = await this.accessTokenGenerator.generate({
       subject: user.id,
-      username: user.username.toString(),
-      email: user.email.toString(),
-      roles: user.roles.map((role) => role.name),
+      username: user.data.username.toString(),
+      email: user.data.email.toString(),
+      roles: user.data.roles.map((role) => role.data.name),
     })
 
     const generatedRefreshToken = await this.refreshTokenGenerator.generate(user.id)
@@ -69,7 +73,7 @@ export class LoginUseCase {
 
     return {
       accessToken,
-      refreshToken: refreshToken.token,
+      refreshToken: refreshToken.data.token,
     }
   }
 }

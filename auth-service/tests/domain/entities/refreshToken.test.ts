@@ -16,10 +16,10 @@ describe('RefreshToken', () => {
     const token = buildToken({ expiresAt })
 
     expect(token.id).toBe('token-1')
-    expect(token.token).toBe('refresh-token-value')
-    expect(token.userId).toBe('user-1')
-    expect(token.expiresAt).toBe(expiresAt)
-    expect(token.revoked).toBe(false)
+    expect(token.data.token).toBe('refresh-token-value')
+    expect(token.data.userId).toBe('user-1')
+    expect(token.data.expiresAt).toBe(expiresAt)
+    expect(token.data.revoked).toBe(false)
   })
 
   it('is not expired before expiresAt', () => {

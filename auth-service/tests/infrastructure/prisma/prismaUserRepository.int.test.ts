@@ -31,11 +31,11 @@ describe('PrismaUserRepository', () => {
 
     expect(found).not.toBeNull()
     expect(found!.id).toBe(user.id)
-    expect(found!.username.toString()).toBe('leo_dev')
-    expect(found!.email.toString()).toBe('leo@example.com')
-    expect(found!.passwordHash).toBe(user.passwordHash)
-    expect(found!.status).toBe(UserStatus.ACTIVE)
-    expect(found!.roles.map((r) => r.name)).toEqual(['user'])
+    expect(found!.data.username.toString()).toBe('leo_dev')
+    expect(found!.data.email.toString()).toBe('leo@example.com')
+    expect(found!.data.passwordHash).toBe(user.data.passwordHash)
+    expect(found!.data.status).toBe(UserStatus.ACTIVE)
+    expect(found!.data.roles.map((r) => r.data.name)).toEqual(['user'])
   })
 
   it('finds a user by username and by id', async () => {
@@ -46,7 +46,7 @@ describe('PrismaUserRepository', () => {
     const byId = await userRepository.findById(user.id)
 
     expect(byUsername!.id).toBe(user.id)
-    expect(byId!.email.toString()).toBe('leo@example.com')
+    expect(byId!.data.email.toString()).toBe('leo@example.com')
   })
 
   it('returns null when no user matches', async () => {
@@ -63,6 +63,6 @@ describe('PrismaUserRepository', () => {
     await userRepository.update(user)
 
     const found = await userRepository.findById(user.id)
-    expect(found!.passwordHash).toBe('hashed:N3w!Password')
+    expect(found!.data.passwordHash).toBe('hashed:N3w!Password')
   })
 })

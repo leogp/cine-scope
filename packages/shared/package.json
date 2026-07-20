@@ -1,0 +1,24 @@
+{
+  "name": "@cinescope/shared",
+  "version": "1.0.0",
+  "description": "Shared domain and application building blocks for cine-scope microservices",
+  "private": true,
+  "exports": {
+    "./domain": {
+      "types": "./dist/domain/index.d.ts",
+      "default": "./dist/domain/index.js"
+    },
+    "./application": {
+      "types": "./dist/application/index.d.ts",
+      "default": "./dist/application/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch --preserveWatchOutput",
+    "test": "jest",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "format": "prettier --write ."
+  }
+}

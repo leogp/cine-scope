@@ -31,10 +31,12 @@ services:
   deps:
     <<: *node-dev
     container_name: cinescope-deps
-    # Install the workspace, generate Prisma clients (Prisma 7 does not
-    # generate on install; the allow-scripts policy also blocks postinstall),
-    # then apply migrations and seed so a fresh volume comes up ready.
-    command: sh -c "npm install && npm run generate -w auth-service && npm run migrate:deploy -w auth-service && npm run seed -w auth-service"
+    # Install the workspace, build the @cinescope/shared package (its package
+    # exports point at ./dist, which every service and the seed import at
+    # runtime), generate Prisma clients (Prisma 7 does not generate on install;
+    # the allow-scripts policy also blocks postinstall), then apply migrations
+    # and seed so a fresh volume comes up ready.
+    command: sh -c "npm install && npm run build -w @cinescope/shared && npm run generate -w auth-service && npm run migrate:deploy -w auth-service && npm run seed -w auth-service"
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER:-cinescope}:${POSTGRES_PASSWORD:-cinescope_secret}@postgres:5432/auth_db
     depends_on:
