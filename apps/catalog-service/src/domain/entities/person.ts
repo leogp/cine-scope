@@ -1,5 +1,4 @@
-import { AggregateRoot } from '../../../../packages/shared/dist/domain/aggregateRoot'
-import { EntityProps } from '../../../../packages/shared/dist/domain/entity'
+import { AggregateRoot, EntityProps } from '@cinescope/shared/domain'
 import { PersonName } from '../value-objects/personName'
 import { ExternalReference } from './externalReference'
 

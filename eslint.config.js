@@ -21,7 +21,7 @@ module.exports = tseslint.config(
         // Config files (prisma.config.ts) live outside each service's tsconfig
         // (rootDir is ./src), so they get the default project instead.
         projectService: {
-          allowDefaultProject: ['*/prisma.config.ts'],
+          allowDefaultProject: ['apps/*/prisma.config.ts'],
         },
         tsconfigRootDir: __dirname,
       },
@@ -47,5 +47,5 @@ module.exports = tseslint.config(
       // Disallow floating promises (common async bug in Express handlers)
       '@typescript-eslint/no-floating-promises': 'error',
     },
-  },
+  }
 )

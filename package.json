@@ -3,13 +3,8 @@
   "version": "1.0.0",
   "private": true,
   "workspaces": [
-    "packages/shared",
-    "auth-service",
-    "catalog-service",
-    "recomendation-service",
-    "review-service",
-    "watchlist-service",
-    "gateway-service"
+    "apps/*",
+    "packages/shared"
   ],
   "scripts": {
     "lint": "eslint .",

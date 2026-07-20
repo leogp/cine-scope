@@ -111,7 +111,7 @@ services:
   auth-service:
     <<: *node-dev
     container_name: auth-service
-    working_dir: /workspace/auth-service
+    working_dir: /workspace/apps/auth-service
     command: npm run dev
     ports:
       - '4001:4001'
@@ -134,7 +134,7 @@ services:
   catalog-service:
     <<: *node-dev
     container_name: catalog-service
-    working_dir: /workspace/catalog-service
+    working_dir: /workspace/apps/catalog-service
     command: npm run dev
     ports:
       - '4002:4002'
@@ -157,7 +157,7 @@ services:
   recomendation-service:
     <<: *node-dev
     container_name: recomendation-service
-    working_dir: /workspace/recomendation-service
+    working_dir: /workspace/apps/recomendation-service
     command: npm run dev
     ports:
       - '4003:4003'
@@ -180,7 +180,7 @@ services:
   review-service:
     <<: *node-dev
     container_name: review-service
-    working_dir: /workspace/review-service
+    working_dir: /workspace/apps/review-service
     command: npm run dev
     ports:
       - '4004:4004'
@@ -203,7 +203,7 @@ services:
   watchlist-service:
     <<: *node-dev
     container_name: watchlist-service
-    working_dir: /workspace/watchlist-service
+    working_dir: /workspace/apps/watchlist-service
     command: npm run dev
     ports:
       - '4005:4005'
@@ -226,7 +226,7 @@ services:
   gateway-service:
     <<: *node-dev
     container_name: gateway-service
-    working_dir: /workspace/gateway-service
+    working_dir: /workspace/apps/gateway-service
     command: npm run dev
     ports:
       - '4000:4000'

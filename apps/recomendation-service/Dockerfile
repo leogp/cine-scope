@@ -1,7 +1,7 @@
 # recomendation-service — production image (npm workspaces monorepo)
 #
 # NOTE: build from the repository ROOT so the workspace lockfile is in context:
-#   docker build -f recomendation-service/Dockerfile -t recomendation-service .
+#   docker build -f apps/recomendation-service/Dockerfile -t recomendation-service .
 
 # ─── Stage 1: builder — install full workspace and compile this service ──────
 FROM node:24-alpine AS builder
@@ -14,17 +14,17 @@ WORKDIR /workspace
 # Copy root manifests + every workspace manifest first so `npm ci` resolves the
 # whole graph deterministically from the single root lockfile (better caching).
 COPY package.json package-lock.json ./
-COPY auth-service/package.json ./auth-service/
-COPY catalog-service/package.json ./catalog-service/
-COPY recomendation-service/package.json ./recomendation-service/
-COPY review-service/package.json ./review-service/
-COPY watchlist-service/package.json ./watchlist-service/
-COPY gateway-service/package.json ./gateway-service/
+COPY apps/auth-service/package.json ./apps/auth-service/
+COPY apps/catalog-service/package.json ./apps/catalog-service/
+COPY apps/recomendation-service/package.json ./apps/recomendation-service/
+COPY apps/review-service/package.json ./apps/review-service/
+COPY apps/watchlist-service/package.json ./apps/watchlist-service/
+COPY apps/gateway-service/package.json ./apps/gateway-service/
 RUN npm ci
 
 # Compile just this service.
 COPY tsconfig.base.json ./
-COPY recomendation-service ./recomendation-service
+COPY apps/recomendation-service ./apps/recomendation-service
 RUN npm run build -w recomendation-service
 
 # ─── Stage 2: prod-deps — production-only dependencies ───────────────────────
@@ -35,12 +35,12 @@ RUN apk add --no-cache python3 make g++
 WORKDIR /workspace
 
 COPY package.json package-lock.json ./
-COPY auth-service/package.json ./auth-service/
-COPY catalog-service/package.json ./catalog-service/
-COPY recomendation-service/package.json ./recomendation-service/
-COPY review-service/package.json ./review-service/
-COPY watchlist-service/package.json ./watchlist-service/
-COPY gateway-service/package.json ./gateway-service/
+COPY apps/auth-service/package.json ./apps/auth-service/
+COPY apps/catalog-service/package.json ./apps/catalog-service/
+COPY apps/recomendation-service/package.json ./apps/recomendation-service/
+COPY apps/review-service/package.json ./apps/review-service/
+COPY apps/watchlist-service/package.json ./apps/watchlist-service/
+COPY apps/gateway-service/package.json ./apps/gateway-service/
 RUN npm ci --omit=dev
 
 # ─── Stage 3: production — lean runtime image ────────────────────────────────
@@ -54,8 +54,8 @@ RUN addgroup -g 1001 -S appgroup && \
 WORKDIR /app
 
 COPY --from=prod-deps --chown=appuser:appgroup /workspace/node_modules ./node_modules
-COPY --from=builder --chown=appuser:appgroup /workspace/recomendation-service/dist ./dist
-COPY --chown=appuser:appgroup recomendation-service/package.json ./package.json
+COPY --from=builder --chown=appuser:appgroup /workspace/apps/recomendation-service/dist ./dist
+COPY --chown=appuser:appgroup apps/recomendation-service/package.json ./package.json
 
 USER appuser
 
