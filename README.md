@@ -166,7 +166,7 @@ Each service ships a multi-stage `Dockerfile`. Because of the single workspace
 lockfile, build them from the repository **root**:
 
 ```bash
-docker build -f auth-service/Dockerfile -t cinescope/auth-service .
+docker build -f apps/auth-service/Dockerfile -t cinescope/auth-service .
 ```
 
 > Note: when Prisma schemas are added, give each service its own generated
