@@ -1,4 +1,12 @@
-export interface SeriesProps {
+import { AggregateRoot, EntityProps } from '@cinescope/shared/domain'
+import { LanguageCode } from '../value-objects/languageCode'
+import { MovieTitle } from '../value-objects/movieTitle'
+import { Company } from './company'
+import { ExternalReference } from './externalReference'
+import { Genre } from './genre'
+import { Person } from './person'
+
+export interface SeriesProps extends EntityProps {
   id: string
   title: MovieTitle
   overview: string | null
@@ -18,8 +26,10 @@ export interface SeriesProps {
 
 export type CreateSeriesProps = Omit<SeriesProps, 'id' | 'createdAt' | 'updatedAt'>
 
-export class Series {
-  private constructor(private readonly props: SeriesProps) {}
+export class Series extends AggregateRoot<SeriesProps> {
+  private constructor(props: SeriesProps) {
+    super(props)
+  }
 
   static create(props: CreateSeriesProps): Series {
     return new Series({
@@ -34,16 +44,8 @@ export class Series {
     return new Series(props)
   }
 
-  get data(): Readonly<SeriesProps> {
-    return this.props
-  }
-
   changeTitle(title: MovieTitle): void {
     this.props.title = title
     this.touch()
-  }
-
-  private touch(): void {
-    this.props.updatedAt = new Date()
   }
 }

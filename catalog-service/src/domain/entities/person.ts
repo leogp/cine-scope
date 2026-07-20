@@ -1,4 +1,9 @@
-export interface PersonProps {
+import { AggregateRoot } from '../../../../packages/shared/dist/domain/aggregateRoot'
+import { EntityProps } from '../../../../packages/shared/dist/domain/entity'
+import { PersonName } from '../value-objects/personName'
+import { ExternalReference } from './externalReference'
+
+export interface PersonProps extends EntityProps {
   id: string
   name: PersonName
   biography: string | null
@@ -12,8 +17,10 @@ export interface PersonProps {
 export type CreatePersonProps = Omit<PersonProps, 'id' | 'createdAt' | 'updatedAt'>
 
 // It can be a director, actor, producer, etc.
-export class Person {
-  private constructor(private readonly props: PersonProps) {}
+export class Person extends AggregateRoot<PersonProps> {
+  private constructor(props: PersonProps) {
+    super(props)
+  }
 
   static create(props: CreatePersonProps): Person {
     return new Person({
@@ -26,10 +33,6 @@ export class Person {
 
   static restore(props: PersonProps): Person {
     return new Person(props)
-  }
-
-  get data(): Readonly<PersonProps> {
-    return this.props
   }
 
   changeName(name: PersonName): void {

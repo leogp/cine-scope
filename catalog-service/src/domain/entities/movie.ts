@@ -1,9 +1,18 @@
-export interface MovieProps {
+import { AggregateRoot, EntityProps } from '@cinescope/shared/domain'
+import { LanguageCode } from '../value-objects/languageCode'
+import { MovieTitle } from '../value-objects/movieTitle'
+import { Company } from './company'
+import { ExternalReference } from './externalReference'
+import { Genre } from './genre'
+import { Person } from './person'
+import { Duration } from '../value-objects/runtime'
+
+export interface MovieProps extends EntityProps {
   id: string
   title: MovieTitle
   overview: string | null
   releaseDate: Date | null
-  runtime: number | null
+  duration: Duration | null
   originalLanguage: LanguageCode
   posterPath: string | null
   backdropPath: string | null
@@ -18,8 +27,10 @@ export interface MovieProps {
 
 export type CreateMovieProps = Omit<MovieProps, 'id' | 'createdAt' | 'updatedAt'>
 
-export class Movie {
-  private constructor(private readonly props: MovieProps) {}
+export class Movie extends AggregateRoot<MovieProps> {
+  private constructor(props: MovieProps) {
+    super(props)
+  }
 
   static create(props: CreateMovieProps): Movie {
     return new Movie({
@@ -32,10 +43,6 @@ export class Movie {
 
   static restore(props: MovieProps): Movie {
     return new Movie(props)
-  }
-
-  get data(): Readonly<MovieProps> {
-    return this.props
   }
 
   changeTitle(title: MovieTitle): void {
@@ -95,9 +102,5 @@ export class Movie {
 
     this.props.externalReferences.push(reference)
     this.touch()
-  }
-
-  private touch(): void {
-    this.props.updatedAt = new Date()
   }
 }

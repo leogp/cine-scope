@@ -1,4 +1,7 @@
-export interface GenreProps {
+import { AggregateRoot, EntityProps } from '@cinescope/shared/domain'
+import { GenreName } from '../value-objects/genreName'
+
+export interface GenreProps extends EntityProps {
   id: string
   name: GenreName
   createdAt: Date
@@ -7,8 +10,10 @@ export interface GenreProps {
 
 export type CreateGenreProps = Omit<GenreProps, 'id' | 'createdAt' | 'updatedAt'>
 
-export class Genre {
-  private constructor(private readonly props: GenreProps) {}
+export class Genre extends AggregateRoot<GenreProps> {
+  private constructor(props: GenreProps) {
+    super(props)
+  }
 
   static create(props: CreateGenreProps): Genre {
     return new Genre({
@@ -21,10 +26,6 @@ export class Genre {
 
   static restore(props: GenreProps): Genre {
     return new Genre(props)
-  }
-
-  get data(): Readonly<GenreProps> {
-    return this.props
   }
 
   rename(name: GenreName): void {

@@ -1,4 +1,9 @@
-export interface CompanyProps {
+import { AggregateRoot, EntityProps } from '@cinescope/shared/domain'
+import { CompanyName } from '../value-objects/companyName'
+import { CountryCode } from '../value-objects/countryCode'
+import { ExternalReference } from './externalReference'
+
+export interface CompanyProps extends EntityProps {
   id: string
   name: CompanyName
   logoPath: string | null
@@ -10,8 +15,10 @@ export interface CompanyProps {
 
 export type CreateCompanyProps = Omit<CompanyProps, 'id' | 'createdAt' | 'updatedAt'>
 
-export class Company {
-  private constructor(private readonly props: CompanyProps) {}
+export class Company extends AggregateRoot<CompanyProps> {
+  private constructor(props: CompanyProps) {
+    super(props)
+  }
 
   static create(props: CreateCompanyProps): Company {
     return new Company({
@@ -24,10 +31,6 @@ export class Company {
 
   static restore(props: CompanyProps): Company {
     return new Company(props)
-  }
-
-  get data(): Readonly<CompanyProps> {
-    return this.props
   }
 
   rename(name: CompanyName): void {

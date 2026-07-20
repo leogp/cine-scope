@@ -1,27 +1,18 @@
-export interface ExternalReferenceProps {
+import { Entity, EntityProps } from '@cinescope/shared/domain'
+import { ExternalProvider } from '../value-objects/externalProvider'
+import { ExternalResourceType } from '../value-objects/externalResourceType'
+import { ExternalId } from '../value-objects/externalId'
+
+export interface ExternalReferenceProps extends EntityProps {
   id: string
   provider: ExternalProvider
   resourceType: ExternalResourceType
-  externalId: string
+  externalId: ExternalId
   createdAt: Date
 }
 
-export class ExternalReference {
-  constructor(private props: ExternalReferenceProps) {}
-
-  get id() {
-    return this.props.id
-  }
-
-  get provider() {
-    return this.props.provider
-  }
-
-  get resourceType() {
-    return this.props.resourceType
-  }
-
-  get externalId() {
-    return this.props.externalId
+export class ExternalReference extends Entity<ExternalReferenceProps> {
+  constructor(props: ExternalReferenceProps) {
+    super(props)
   }
 }
