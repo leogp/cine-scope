@@ -4,11 +4,11 @@ import { CountryCode } from '../value-objects/countryCode'
 import { ExternalReference } from './externalReference'
 
 export interface CompanyProps extends EntityProps {
-  id: string
   name: CompanyName
   logoPath: string | null
   countryCode: CountryCode | null
-  externalReferences: ExternalReference[]
+  // readonly at the type level: future add methods must reassign, not push.
+  externalReferences: readonly ExternalReference[]
   createdAt: Date
   updatedAt: Date
 }
@@ -35,6 +35,6 @@ export class Company extends AggregateRoot<CompanyProps> {
 
   rename(name: CompanyName): void {
     this.props.name = name
-    this.props.updatedAt = new Date()
+    this.touch()
   }
 }

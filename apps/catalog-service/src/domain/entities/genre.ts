@@ -2,7 +2,6 @@ import { AggregateRoot, EntityProps } from '@cinescope/shared/domain'
 import { GenreName } from '../value-objects/genreName'
 
 export interface GenreProps extends EntityProps {
-  id: string
   name: GenreName
   createdAt: Date
   updatedAt: Date
@@ -30,6 +29,6 @@ export class Genre extends AggregateRoot<GenreProps> {
 
   rename(name: GenreName): void {
     this.props.name = name
-    this.props.updatedAt = new Date()
+    this.touch()
   }
 }

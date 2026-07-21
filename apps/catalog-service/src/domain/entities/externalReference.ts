@@ -4,7 +4,6 @@ import { ExternalResourceType } from '../value-objects/externalResourceType'
 import { ExternalId } from '../value-objects/externalId'
 
 export interface ExternalReferenceProps extends EntityProps {
-  id: string
   provider: ExternalProvider
   resourceType: ExternalResourceType
   externalId: ExternalId
