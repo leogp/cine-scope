@@ -1,4 +1,4 @@
-import { Series } from '../entities/serie'
+import { Series } from '../entities/series'
 
 export interface SeriesRepository {
   findById(id: string): Promise<Series | null>

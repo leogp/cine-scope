@@ -7,7 +7,6 @@ import { Genre } from './genre'
 import { Person } from './person'
 
 export interface SeriesProps extends EntityProps {
-  id: string
   title: MovieTitle
   overview: string | null
   firstAirDate: Date | null
@@ -15,11 +14,13 @@ export interface SeriesProps extends EntityProps {
   originalLanguage: LanguageCode
   posterPath: string | null
   backdropPath: string | null
-  genres: Genre[]
-  cast: Person[]
-  directors: Person[]
-  productionCompanies: Company[]
-  externalReferences: ExternalReference[]
+  // readonly at the type level: external readers (via `data`) cannot mutate
+  // the collections; future add/remove methods must reassign, not push.
+  genres: readonly Genre[]
+  cast: readonly Person[]
+  directors: readonly Person[]
+  productionCompanies: readonly Company[]
+  externalReferences: readonly ExternalReference[]
   createdAt: Date
   updatedAt: Date
 }

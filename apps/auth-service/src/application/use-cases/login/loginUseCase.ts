@@ -13,6 +13,7 @@ import { LoginRequest } from './loginRequest'
 // Errors
 import { InvalidCredentialsError } from '../../errors/invalidCredentialsError'
 import { UserNotFoundError } from '../../../domain/errors/userNotFoundError'
+import { Email } from '../../../domain/value-objects/email'
 
 export class LoginUseCase implements UseCase<LoginRequest, LoginResponse> {
   private readonly userRepository: UserRepository
@@ -36,7 +37,9 @@ export class LoginUseCase implements UseCase<LoginRequest, LoginResponse> {
   }
 
   async execute(request: LoginRequest): Promise<LoginResponse> {
-    const user = await this.userRepository.findByEmail(request.email)
+    // The DTO carries primitives; the value object (and its validation) is
+    // built here so adapters stay decoupled from the domain.
+    const user = await this.userRepository.findByEmail(new Email(request.email))
 
     if (!user) {
       throw new UserNotFoundError()

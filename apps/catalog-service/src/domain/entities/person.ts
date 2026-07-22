@@ -3,12 +3,12 @@ import { PersonName } from '../value-objects/personName'
 import { ExternalReference } from './externalReference'
 
 export interface PersonProps extends EntityProps {
-  id: string
   name: PersonName
   biography: string | null
   birthDate: Date | null
   profilePath: string | null
-  externalReferences: ExternalReference[]
+  // readonly at the type level: addExternalReference reassigns, not pushes.
+  externalReferences: readonly ExternalReference[]
   createdAt: Date
   updatedAt: Date
 }
@@ -36,11 +36,11 @@ export class Person extends AggregateRoot<PersonProps> {
 
   changeName(name: PersonName): void {
     this.props.name = name
-    this.props.updatedAt = new Date()
+    this.touch()
   }
 
   addExternalReference(reference: ExternalReference): void {
-    this.props.externalReferences.push(reference)
-    this.props.updatedAt = new Date()
+    this.props.externalReferences = [...this.props.externalReferences, reference]
+    this.touch()
   }
 }

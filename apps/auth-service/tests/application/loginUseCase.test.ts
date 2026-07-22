@@ -1,7 +1,7 @@
 import { InvalidCredentialsError } from '../../src/application/errors/invalidCredentialsError'
 import { LoginUseCase } from '../../src/application/use-cases/login/loginUseCase'
 import { UserNotFoundError } from '../../src/domain/errors/userNotFoundError'
-import { Email } from '../../src/domain/value-objects/email'
+import { InvalidEmailError } from '../../src/domain/errors/invalidEmailError'
 import { FakePasswordHasher } from '../fakes/fakePasswordHasher'
 import { FakeAccessTokenGenerator, FakeRefreshTokenGenerator } from '../fakes/fakeTokenGenerators'
 import { InMemoryRefreshTokenRepository } from '../fakes/inMemoryRefreshTokenRepository'
@@ -33,7 +33,7 @@ describe('LoginUseCase', () => {
     const { useCase, user, refreshTokenRepository, accessTokenGenerator } = await makeSut()
 
     const response = await useCase.execute({
-      email: new Email('leo@example.com'),
+      email: 'leo@example.com',
       password: 'Str0ng!Pass',
     })
 
@@ -55,15 +55,23 @@ describe('LoginUseCase', () => {
     const { useCase } = await makeSut()
 
     await expect(
-      useCase.execute({ email: new Email('ghost@example.com'), password: 'Str0ng!Pass' })
+      useCase.execute({ email: 'ghost@example.com', password: 'Str0ng!Pass' })
     ).rejects.toThrow(UserNotFoundError)
+  })
+
+  it('rejects a malformed email before touching the repository', async () => {
+    const { useCase } = await makeSut()
+
+    await expect(
+      useCase.execute({ email: 'not-an-email', password: 'Str0ng!Pass' })
+    ).rejects.toThrow(InvalidEmailError)
   })
 
   it('rejects a wrong password and persists nothing', async () => {
     const { useCase, refreshTokenRepository } = await makeSut()
 
     await expect(
-      useCase.execute({ email: new Email('leo@example.com'), password: 'Wr0ng!Pass' })
+      useCase.execute({ email: 'leo@example.com', password: 'Wr0ng!Pass' })
     ).rejects.toThrow(InvalidCredentialsError)
     expect(refreshTokenRepository.size).toBe(0)
   })

@@ -1,5 +1,5 @@
 import { ValueObject } from '@cinescope/shared/domain'
-import { InvalidDurationError } from '../errors/invalidRuntimeError'
+import { InvalidDurationError } from '../errors/invalidDurationError'
 
 export class Duration extends ValueObject<number> {
   private constructor(value: number) {

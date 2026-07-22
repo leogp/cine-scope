@@ -5,10 +5,9 @@ import { Company } from './company'
 import { ExternalReference } from './externalReference'
 import { Genre } from './genre'
 import { Person } from './person'
-import { Duration } from '../value-objects/runtime'
+import { Duration } from '../value-objects/duration'
 
 export interface MovieProps extends EntityProps {
-  id: string
   title: MovieTitle
   overview: string | null
   releaseDate: Date | null
@@ -16,11 +15,13 @@ export interface MovieProps extends EntityProps {
   originalLanguage: LanguageCode
   posterPath: string | null
   backdropPath: string | null
-  genres: Genre[]
-  cast: Person[]
-  directors: Person[]
-  productionCompanies: Company[]
-  externalReferences: ExternalReference[]
+  // readonly at the type level: external readers (via `data`) cannot mutate
+  // the collections; the add/remove methods reassign instead of pushing.
+  genres: readonly Genre[]
+  cast: readonly Person[]
+  directors: readonly Person[]
+  productionCompanies: readonly Company[]
+  externalReferences: readonly ExternalReference[]
   createdAt: Date
   updatedAt: Date
 }
@@ -56,51 +57,53 @@ export class Movie extends AggregateRoot<MovieProps> {
   }
 
   addGenre(genre: Genre): void {
-    if (this.props.genres.some((g) => g.data.id === genre.data.id)) return
+    if (this.props.genres.some((g) => g.equals(genre))) return
 
-    this.props.genres.push(genre)
+    this.props.genres = [...this.props.genres, genre]
     this.touch()
   }
 
   removeGenre(genreId: string): void {
-    this.props.genres = this.props.genres.filter((g) => g.data.id !== genreId)
+    this.props.genres = this.props.genres.filter((g) => g.id !== genreId)
 
     this.touch()
   }
 
   addCastMember(person: Person): void {
-    if (this.props.cast.some((p) => p.data.id === person.data.id)) return
+    if (this.props.cast.some((p) => p.equals(person))) return
 
-    this.props.cast.push(person)
+    this.props.cast = [...this.props.cast, person]
     this.touch()
   }
 
   addDirector(person: Person): void {
-    if (this.props.directors.some((p) => p.data.id === person.data.id)) return
+    if (this.props.directors.some((p) => p.equals(person))) return
 
-    this.props.directors.push(person)
+    this.props.directors = [...this.props.directors, person]
     this.touch()
   }
 
   addProductionCompany(company: Company): void {
-    if (this.props.productionCompanies.some((c) => c.data.id === company.data.id)) {
+    if (this.props.productionCompanies.some((c) => c.equals(company))) {
       return
     }
 
-    this.props.productionCompanies.push(company)
+    this.props.productionCompanies = [...this.props.productionCompanies, company]
     this.touch()
   }
 
   addExternalReference(reference: ExternalReference): void {
+    // provider and resourceType are value objects — compare by value, not
+    // by reference.
     const exists = this.props.externalReferences.some(
       (r) =>
-        r.data.provider === reference.data.provider &&
-        r.data.resourceType === reference.data.resourceType
+        r.data.provider.equals(reference.data.provider) &&
+        r.data.resourceType.equals(reference.data.resourceType)
     )
 
     if (exists) return
 
-    this.props.externalReferences.push(reference)
+    this.props.externalReferences = [...this.props.externalReferences, reference]
     this.touch()
   }
 }
