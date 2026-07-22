@@ -54,6 +54,51 @@ export class Movie extends AggregateRoot<MovieProps> {
     this.touch()
   }
 
+  changeReleaseDate(releaseDate: Date | null): void {
+    this.props.releaseDate = releaseDate
+    this.touch()
+  }
+
+  changeDuration(duration: Duration | null): void {
+    this.props.duration = duration
+    this.touch()
+  }
+
+  changeOriginalLanguage(originalLanguage: LanguageCode): void {
+    this.props.originalLanguage = originalLanguage
+    this.touch()
+  }
+
+  changePosterPath(posterPath: string | null): void {
+    this.props.posterPath = posterPath
+    this.touch()
+  }
+
+  changeBackdropPath(backdropPath: string | null): void {
+    this.props.backdropPath = backdropPath
+    this.touch()
+  }
+
+  setGenres(genres: Genre[]): void {
+    this.props.genres = [...genres]
+    this.touch()
+  }
+
+  setCast(cast: Person[]): void {
+    this.props.cast = [...cast]
+    this.touch()
+  }
+
+  setDirectors(directors: Person[]): void {
+    this.props.directors = [...directors]
+    this.touch()
+  }
+
+  setProductionCompanies(companies: Company[]): void {
+    this.props.productionCompanies = [...companies]
+    this.touch()
+  }
+
   addGenre(genre: Genre): void {
     if (this.props.genres.some((g) => g.equals(genre))) return
 
