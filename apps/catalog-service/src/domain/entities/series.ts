@@ -2,7 +2,6 @@ import { AggregateRoot, EntityProps } from '@cinescope/shared/domain'
 import { LanguageCode } from '../value-objects/languageCode'
 import { MovieTitle } from '../value-objects/movieTitle'
 import { Company } from './company'
-import { ExternalReference } from './externalReference'
 import { Genre } from './genre'
 import { Person } from './person'
 
@@ -20,7 +19,6 @@ export interface SeriesProps extends EntityProps {
   cast: readonly Person[]
   directors: readonly Person[]
   productionCompanies: readonly Company[]
-  externalReferences: readonly ExternalReference[]
   createdAt: Date
   updatedAt: Date
 }

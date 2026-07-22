@@ -2,7 +2,6 @@ import { AggregateRoot, EntityProps } from '@cinescope/shared/domain'
 import { LanguageCode } from '../value-objects/languageCode'
 import { MovieTitle } from '../value-objects/movieTitle'
 import { Company } from './company'
-import { ExternalReference } from './externalReference'
 import { Genre } from './genre'
 import { Person } from './person'
 import { Duration } from '../value-objects/duration'
@@ -21,7 +20,6 @@ export interface MovieProps extends EntityProps {
   cast: readonly Person[]
   directors: readonly Person[]
   productionCompanies: readonly Company[]
-  externalReferences: readonly ExternalReference[]
   createdAt: Date
   updatedAt: Date
 }
@@ -89,21 +87,6 @@ export class Movie extends AggregateRoot<MovieProps> {
     }
 
     this.props.productionCompanies = [...this.props.productionCompanies, company]
-    this.touch()
-  }
-
-  addExternalReference(reference: ExternalReference): void {
-    // provider and resourceType are value objects — compare by value, not
-    // by reference.
-    const exists = this.props.externalReferences.some(
-      (r) =>
-        r.data.provider.equals(reference.data.provider) &&
-        r.data.resourceType.equals(reference.data.resourceType)
-    )
-
-    if (exists) return
-
-    this.props.externalReferences = [...this.props.externalReferences, reference]
     this.touch()
   }
 }

@@ -10,9 +10,7 @@ import { RefreshToken } from '../../../domain/entities/refreshToken'
 import { RefreshTokenRequest } from './refreshTokenRequest'
 import { RefreshTokenResponse } from './refreshTokenResponse'
 
-export class RefreshTokenUseCase
-  implements UseCase<RefreshTokenRequest, RefreshTokenResponse>
-{
+export class RefreshTokenUseCase implements UseCase<RefreshTokenRequest, RefreshTokenResponse> {
   constructor(
     private readonly userRepository: UserRepository,
     private readonly refreshTokenRepository: RefreshTokenRepository,
