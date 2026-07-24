@@ -1,31 +1,33 @@
 import { UseCase } from '@cinescope/shared/application'
-import { Movie } from '../../../../domain/entities/movie'
-import { CompanyNotFoundError } from '../../../../domain/errors/companyNotFoundError'
-import { GenreNotFoundError } from '../../../../domain/errors/genreNotFoundError'
-import { PersonNotFoundError } from '../../../../domain/errors/personNotFoundError'
-import { CompanyRepository } from '../../../../domain/repositories/companyRepository'
-import { GenreRepository } from '../../../../domain/repositories/genreRepository'
-import { MovieRepository } from '../../../../domain/repositories/movieRepository'
-import { PersonRepository } from '../../../../domain/repositories/personRepository'
-import { Duration } from '../../../../domain/value-objects/duration'
+// entities & value objects
+import { Series } from '../../../../domain/entities/series'
 import { LanguageCode } from '../../../../domain/value-objects/languageCode'
 import { MovieTitle } from '../../../../domain/value-objects/movieTitle'
 import { resolveByIds } from '../../shared/resolveByIds'
-import { CreateMovieRequest } from './createMovieRequest'
-import { CreateMovieResponse } from './createMovieResponse'
+// repositories
+import { CompanyRepository } from '../../../../domain/repositories/companyRepository'
+import { PersonRepository } from '../../../../domain/repositories/personRepository'
+import { GenreRepository } from '../../../../domain/repositories/genreRepository'
+import { SeriesRepository } from '../../../../domain/repositories/seriesRepository'
+// request & response
+import { CreateSeriesRequest } from './createSeriesRequest'
+import { CreateSeriesResponse } from './createSeriesResponse'
+// errors
+import { CompanyNotFoundError } from '../../../../domain/errors/companyNotFoundError'
+import { GenreNotFoundError } from '../../../../domain/errors/genreNotFoundError'
+import { PersonNotFoundError } from '../../../../domain/errors/personNotFoundError'
 
-export class CreateMovieUseCase implements UseCase<CreateMovieRequest, CreateMovieResponse> {
+export class CreateSeriesUseCase implements UseCase<CreateSeriesRequest, CreateSeriesResponse> {
   constructor(
-    private readonly movieRepository: MovieRepository,
+    private readonly seriesRepository: SeriesRepository,
     private readonly genreRepository: GenreRepository,
     private readonly personRepository: PersonRepository,
     private readonly companyRepository: CompanyRepository
   ) {}
 
-  async execute(request: CreateMovieRequest): Promise<CreateMovieResponse> {
+  async execute(request: CreateSeriesRequest): Promise<CreateSeriesResponse> {
     const title = new MovieTitle(request.title)
     const originalLanguage = new LanguageCode(request.originalLanguage)
-    const duration = request.duration !== null ? Duration.create(request.duration) : null
 
     const [genres, cast, directors, productionCompanies] = await Promise.all([
       resolveByIds(request.genreIds, this.genreRepository, () => new GenreNotFoundError()),
@@ -34,11 +36,11 @@ export class CreateMovieUseCase implements UseCase<CreateMovieRequest, CreateMov
       resolveByIds(request.companyIds, this.companyRepository, () => new CompanyNotFoundError()),
     ])
 
-    const movie = Movie.create({
+    const series = Series.create({
       title,
       overview: request.overview,
-      releaseDate: request.releaseDate,
-      duration,
+      firstAirDate: request.firstAirDate,
+      lastAirDate: request.lastAirDate,
       originalLanguage,
       posterPath: request.posterPath,
       backdropPath: request.backdropPath,
@@ -48,10 +50,10 @@ export class CreateMovieUseCase implements UseCase<CreateMovieRequest, CreateMov
       productionCompanies,
     })
 
-    await this.movieRepository.save(movie)
+    await this.seriesRepository.save(series)
 
     return {
-      id: movie.id,
+      id: series.id,
     }
   }
 }

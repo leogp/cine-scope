@@ -1,4 +1,4 @@
-import { Movie } from '../../../../domain/entities/movie'
+import { Series } from '../../../../domain/entities/series'
 import {
   CompanyDTO,
   GenreDTO,
@@ -8,12 +8,12 @@ import {
   toPersonDTO,
 } from '../../shared/relationMappers'
 
-export interface MovieDTO {
+export interface SeriesDTO {
   id: string
   title: string
   overview: string | null
-  releaseDate: Date | null
-  duration: number | null
+  firstAirDate: Date | null
+  lastAirDate: Date | null
   originalLanguage: string
   posterPath: string | null
   backdropPath: string | null
@@ -27,20 +27,20 @@ export interface MovieDTO {
 
 // The list view omits the join-heavy relation arrays; full relations are
 // available through the get use-case.
-export type MovieSummaryDTO = Omit<
-  MovieDTO,
+export type SeriesSummaryDTO = Omit<
+  SeriesDTO,
   'genres' | 'cast' | 'directors' | 'productionCompanies'
 >
 
 /**
- * Unwraps a Movie aggregate (and its relations) into a flat primitive DTO.
+ * Unwraps a Series aggregate (and its relations) into a flat primitive DTO.
  * This is the single place where value objects are unwrapped to primitives.
  */
-export function toMovieDTO(movie: Movie): MovieDTO {
-  const { genres, cast, directors, productionCompanies } = movie.data
+export function toSeriesDTO(series: Series): SeriesDTO {
+  const { genres, cast, directors, productionCompanies } = series.data
 
   return {
-    ...toMovieSummaryDTO(movie),
+    ...toSeriesSummaryDTO(series),
     genres: genres.map(toGenreDTO),
     cast: cast.map(toPersonDTO),
     directors: directors.map(toPersonDTO),
@@ -48,25 +48,25 @@ export function toMovieDTO(movie: Movie): MovieDTO {
   }
 }
 
-export function toMovieSummaryDTO(movie: Movie): MovieSummaryDTO {
+export function toSeriesSummaryDTO(series: Series): SeriesSummaryDTO {
   const {
     title,
     overview,
-    releaseDate,
-    duration,
+    firstAirDate,
+    lastAirDate,
     originalLanguage,
     posterPath,
     backdropPath,
     createdAt,
     updatedAt,
-  } = movie.data
+  } = series.data
 
   return {
-    id: movie.id,
+    id: series.id,
     title: title.value,
     overview,
-    releaseDate,
-    duration: duration?.value ?? null,
+    firstAirDate,
+    lastAirDate,
     originalLanguage: originalLanguage.value,
     posterPath,
     backdropPath,

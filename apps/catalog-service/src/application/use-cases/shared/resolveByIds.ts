@@ -7,7 +7,7 @@ interface Finder<E> {
 /**
  * Resolves a list of ids into their entities via the given finder, throwing
  * `onMissing()` for the first id that has no match. Used to turn the relation
- * id-arrays on create/update requests into the entities the Movie aggregate
+ * id-arrays on create/update requests into the entities the aggregate
  * expects. Resolution runs in parallel; a single miss rejects the whole batch.
  */
 export async function resolveByIds<E>(

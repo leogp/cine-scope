@@ -10,7 +10,7 @@ import { PersonRepository } from '../../../../domain/repositories/personReposito
 import { Duration } from '../../../../domain/value-objects/duration'
 import { LanguageCode } from '../../../../domain/value-objects/languageCode'
 import { MovieTitle } from '../../../../domain/value-objects/movieTitle'
-import { resolveByIds } from '../shared/resolveByIds'
+import { resolveByIds } from '../../shared/resolveByIds'
 import { UpdateMovieRequest } from './updateMovieRequest'
 import { UpdateMovieResponse } from './updateMovieResponse'
 
