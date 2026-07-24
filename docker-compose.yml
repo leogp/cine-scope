@@ -36,7 +36,7 @@ services:
     # runtime), generate Prisma clients (Prisma 7 does not generate on install;
     # the allow-scripts policy also blocks postinstall), then apply migrations
     # and seed so a fresh volume comes up ready.
-    command: sh -c "npm install && npm run build -w @cinescope/shared && npm run generate -w auth-service && npm run migrate:deploy -w auth-service && npm run seed -w auth-service"
+    command: sh -c "npm install && npm run build -w @cinescope/shared && npm run generate -w auth-service && npm run migrate:deploy -w auth-service && npm run seed -w auth-service && npm run generate -w catalog-service && DATABASE_URL=postgresql://${POSTGRES_USER:-cinescope}:${POSTGRES_PASSWORD:-cinescope_secret}@postgres:5432/catalog_db npm run migrate:deploy -w catalog-service"
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER:-cinescope}:${POSTGRES_PASSWORD:-cinescope_secret}@postgres:5432/auth_db
     depends_on:
@@ -58,7 +58,7 @@ services:
       POSTGRES_DB: postgres
       # Comma-separated list of extra databases created on first init
       # (one database per microservice; see infra/postgres/init-databases.sh)
-      POSTGRES_MULTIPLE_DATABASES: auth_db,auth_test_db
+      POSTGRES_MULTIPLE_DATABASES: auth_db,auth_test_db,catalog_db,catalog_test_db
     ports:
       - '5432:5432'
     volumes:
@@ -141,7 +141,7 @@ services:
     environment:
       NODE_ENV: development
       PORT: 4002
-      DATABASE_URL: postgresql://${POSTGRES_USER:-cinescope}:${POSTGRES_PASSWORD:-cinescope_secret}@postgres:5432/${POSTGRES_DB:-cinescope}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-cinescope}:${POSTGRES_PASSWORD:-cinescope_secret}@postgres:5432/catalog_db
       REDIS_URL: redis://redis:6379
       RABBITMQ_URL: amqp://${RABBITMQ_USER:-cinescope}:${RABBITMQ_PASSWORD:-cinescope_secret}@rabbitmq:5672
     depends_on:
