@@ -1,0 +1,4 @@
+{
+  "main": "../../dist/infrastructure/http/index.js",
+  "types": "../../dist/infrastructure/http/index.d.ts"
+}
