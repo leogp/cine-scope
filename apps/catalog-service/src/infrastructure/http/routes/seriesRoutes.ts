@@ -7,8 +7,8 @@ import { createSeriesSchema } from '../schemas/seriesSchemas'
 export function buildSeriesRoutes(controller: SeriesController): Router {
   const router = Router()
 
-  router.post('/series', validateBody(createSeriesSchema), asyncHandler(controller.create))
-  router.get('/series/:id', asyncHandler(controller.get))
+  router.post('/', validateBody(createSeriesSchema), asyncHandler(controller.create))
+  router.get('/:id', asyncHandler(controller.get))
 
   return router
 }

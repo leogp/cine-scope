@@ -7,8 +7,8 @@ import { createCompanySchema } from '../schemas/companySchemas'
 export function buildCompanyRoutes(controller: CompanyController): Router {
   const router = Router()
 
-  router.post('/company', validateBody(createCompanySchema), asyncHandler(controller.create))
-  router.get('/company/:id', asyncHandler(controller.get))
+  router.post('/', validateBody(createCompanySchema), asyncHandler(controller.create))
+  router.get('/:id', asyncHandler(controller.get))
 
   return router
 }

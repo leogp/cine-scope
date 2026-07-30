@@ -7,8 +7,8 @@ import { createPersonSchema } from '../schemas/personSchemas'
 export function buildPersonRoutes(controller: PersonController): Router {
   const router = Router()
 
-  router.post('/person', validateBody(createPersonSchema), asyncHandler(controller.create))
-  router.get('/person/:id', asyncHandler(controller.get))
+  router.post('/', validateBody(createPersonSchema), asyncHandler(controller.create))
+  router.get('/:id', asyncHandler(controller.get))
 
   return router
 }

@@ -7,8 +7,8 @@ import { createGenreSchema } from '../schemas/genreSchemas'
 export function buildGenreRoutes(controller: GenreController): Router {
   const router = Router()
 
-  router.post('/genre', validateBody(createGenreSchema), asyncHandler(controller.create))
-  router.get('/genre/:id', asyncHandler(controller.get))
+  router.post('/', validateBody(createGenreSchema), asyncHandler(controller.create))
+  router.get('/:id', asyncHandler(controller.get))
 
   return router
 }

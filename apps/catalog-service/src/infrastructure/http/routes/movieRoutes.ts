@@ -7,11 +7,11 @@ import { createMovieSchema } from '../schemas/movieSchemas'
 export function buildMovieRoutes(controller: MovieController): Router {
   const router = Router()
 
-  router.get('/movies', asyncHandler(controller.list))
-  router.post('/movies', validateBody(createMovieSchema), asyncHandler(controller.create))
-  router.get('/movies/:id', asyncHandler(controller.get))
-  router.put('/movies/:id', validateBody(createMovieSchema), asyncHandler(controller.update))
-  router.delete('/movies/:id', asyncHandler(controller.delete))
+  router.get('/', asyncHandler(controller.list))
+  router.post('/', validateBody(createMovieSchema), asyncHandler(controller.create))
+  router.get('/:id', asyncHandler(controller.get))
+  router.put('/:id', validateBody(createMovieSchema), asyncHandler(controller.update))
+  router.delete('/:id', asyncHandler(controller.delete))
 
   return router
 }

@@ -1,7 +1,29 @@
-// import { buildErrorHandler } from '@cinescope/shared/infrastructure/http'
+import { buildErrorHandler } from '@cinescope/shared/infrastructure/http'
 
-// import { ApplicationError } from '../../../application/errors/applicationError'
-// import { DomainError } from '../../../domain/errors/domainError'
-// import { MovieNotFoundError } from '../../../domain/errors/movieNotFoundError'
+import { CompanyNotFoundError } from '../../../domain/errors/companyNotFoundError'
+import { DomainError } from '../../../domain/errors/domainError'
+import { GenreNotFoundError } from '../../../domain/errors/genreNotFoundError'
+import { MovieNotFoundError } from '../../../domain/errors/movieNotFoundError'
+import { PersonNotFoundError } from '../../../domain/errors/personNotFoundError'
+import { SeriesNotFoundError } from '../../../domain/errors/seriesNotFoundError'
 
-export const errorHandler = '' // buildErrorHandler(statusFor)
+function statusFor(err: Error): number | undefined {
+  if (
+    err instanceof MovieNotFoundError ||
+    err instanceof SeriesNotFoundError ||
+    err instanceof GenreNotFoundError ||
+    err instanceof CompanyNotFoundError ||
+    err instanceof PersonNotFoundError
+  ) {
+    return 404
+  }
+
+  // Remaining domain errors are invariant violations on caller-supplied data
+  if (err instanceof DomainError) {
+    return 400
+  }
+
+  return undefined
+}
+
+export const errorHandler = buildErrorHandler(statusFor)
