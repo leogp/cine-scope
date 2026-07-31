@@ -2,6 +2,7 @@ import { buildErrorHandler } from '@cinescope/shared/infrastructure/http'
 
 import { CompanyNotFoundError } from '../../../domain/errors/companyNotFoundError'
 import { DomainError } from '../../../domain/errors/domainError'
+import { GenreAlreadyExistsError } from '../../../domain/errors/genreAlreadyExistsError'
 import { GenreNotFoundError } from '../../../domain/errors/genreNotFoundError'
 import { MovieNotFoundError } from '../../../domain/errors/movieNotFoundError'
 import { PersonNotFoundError } from '../../../domain/errors/personNotFoundError'
@@ -16,6 +17,11 @@ function statusFor(err: Error): number | undefined {
     err instanceof PersonNotFoundError
   ) {
     return 404
+  }
+
+  // Must precede the DomainError branch below, which would otherwise claim it
+  if (err instanceof GenreAlreadyExistsError) {
+    return 409
   }
 
   // Remaining domain errors are invariant violations on caller-supplied data

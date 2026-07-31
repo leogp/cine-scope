@@ -17,10 +17,11 @@ import { JwtRefreshTokenGenerator } from '../infrastructure/security/jwtRefreshT
 import { JwtAccessTokenGenerator } from '../infrastructure/security/jwtAccessTokenGenerator'
 
 export function composeApp(): AuthController {
+  // Repositories
   const userRepository = new PrismaUserRepository(prisma)
   const roleRepository = new PrismaRoleRepository(prisma)
   const refreshTokenRepository = new PrismaRefreshTokenRepository(prisma)
-
+  // Security
   const bcryptPasswordHasher = new BcryptPasswordHasher()
   const accessTokenGenerator = new JwtAccessTokenGenerator(
     env.JWT_ACCESS_SECRET,
@@ -30,7 +31,7 @@ export function composeApp(): AuthController {
     env.JWT_REFRESH_SECRET,
     env.JWT_REFRESH_EXPIRES_IN
   )
-
+  // Use Cases
   const signUpUseCase = new SignUpUseCase(userRepository, bcryptPasswordHasher, roleRepository)
   const loginUseCase = new LoginUseCase(
     userRepository,
@@ -47,5 +48,6 @@ export function composeApp(): AuthController {
   )
   const logoutUseCase = new LogoutUseCase(refreshTokenRepository)
 
+  // Controller
   return new AuthController(signUpUseCase, loginUseCase, refreshTokenUseCase, logoutUseCase)
 }
