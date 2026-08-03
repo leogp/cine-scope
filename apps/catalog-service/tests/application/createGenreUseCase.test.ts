@@ -1,5 +1,5 @@
-import { CreateGenreUseCase } from '../../src/application/use-cases/genre/create/createGenreUseCase'
-import { InvalidGenreNameError } from '../../src/domain/errors/invalidGenreNameError'
+import { CreateGenreUseCase } from '@catalog/application/use-cases/genre/create/createGenreUseCase'
+import { InvalidGenreNameError } from '@catalog/domain/errors/invalidGenreNameError'
 import { InMemoryGenreRepository } from '../fakes/inMemoryGenreRepository'
 
 const makeSut = () => {

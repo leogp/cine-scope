@@ -1,5 +1,5 @@
-import { Genre } from '../../../domain/entities/genre'
-import { GenreRepository } from '../../../domain/repositories/genreRepository'
+import { Genre } from '@catalog/domain/entities/genre'
+import { GenreRepository } from '@catalog/domain/repositories/genreRepository'
 import { PrismaClient } from '../generated/client'
 import { PrismaGenreMapper } from './prismaGenreMapper'
 

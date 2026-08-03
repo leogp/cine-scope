@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken'
-import { JwtAccessTokenGenerator } from '../../../src/infrastructure/security/jwtAccessTokenGenerator'
+import { JwtAccessTokenGenerator } from '@auth/infrastructure/security/jwtAccessTokenGenerator'
 
 const SECRET = 'test-access-secret-0123456789'
 

@@ -8,7 +8,7 @@
     "generate": "prisma generate",
     "migrate:deploy": "prisma migrate deploy",
     "seed": "prisma db seed",
-    "build": "tsc",
+    "build": "tsc && tsc-alias",
     "start": "node dist/index.js",
     "test": "jest",
     "test:int": "DATABASE_URL=postgresql://cinescope:cinescope_secret@postgres:5432/auth_test_db sh -c 'prisma migrate deploy && jest -c jest.int.config.js --runInBand'",

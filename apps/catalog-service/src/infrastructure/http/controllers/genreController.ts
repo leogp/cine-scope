@@ -1,7 +1,7 @@
 import { Request, Response } from 'express'
 
-import { CreateGenreUseCase } from '../../../application/use-cases/genre/create/createGenreUseCase'
-import { GetGenreUseCase } from '../../../application/use-cases/genre/get/getGenreUseCase'
+import { CreateGenreUseCase } from '@catalog/application/use-cases/genre/create/createGenreUseCase'
+import { GetGenreUseCase } from '@catalog/application/use-cases/genre/get/getGenreUseCase'
 
 export class GenreController {
   constructor(

@@ -1,5 +1,5 @@
-import { Movie } from '../../src/domain/entities/movie'
-import { MovieRepository } from '../../src/domain/repositories/movieRepository'
+import { Movie } from '@catalog/domain/entities/movie'
+import { MovieRepository } from '@catalog/domain/repositories/movieRepository'
 
 export class InMemoryMovieRepository implements MovieRepository {
   private readonly movies = new Map<string, Movie>()

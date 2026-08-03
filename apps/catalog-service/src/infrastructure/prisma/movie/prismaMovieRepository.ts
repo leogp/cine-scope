@@ -1,5 +1,5 @@
-import { Movie } from '../../../domain/entities/movie'
-import { MovieRepository } from '../../../domain/repositories/movieRepository'
+import { Movie } from '@catalog/domain/entities/movie'
+import { MovieRepository } from '@catalog/domain/repositories/movieRepository'
 import { PrismaClient } from '../generated/client'
 import { PrismaMovieMapper } from './prismaMovieMapper'
 

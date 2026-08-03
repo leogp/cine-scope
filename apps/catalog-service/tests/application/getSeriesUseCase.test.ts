@@ -1,5 +1,5 @@
-import { GetSeriesUseCase } from '../../src/application/use-cases/series/get/getSeriesUseCase'
-import { SeriesNotFoundError } from '../../src/domain/errors/seriesNotFoundError'
+import { GetSeriesUseCase } from '@catalog/application/use-cases/series/get/getSeriesUseCase'
+import { SeriesNotFoundError } from '@catalog/domain/errors/seriesNotFoundError'
 import { InMemorySeriesRepository } from '../fakes/inMemorySeriesRepository'
 import { buildCompany, buildGenre, buildPerson, buildSeries } from '../helpers/builders'
 

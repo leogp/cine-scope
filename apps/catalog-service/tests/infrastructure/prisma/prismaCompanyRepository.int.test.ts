@@ -1,5 +1,5 @@
-import { CompanyName } from '../../../src/domain/value-objects/companyName'
-import { PrismaCompanyRepository } from '../../../src/infrastructure/prisma/company'
+import { CompanyName } from '@catalog/domain/value-objects/companyName'
+import { PrismaCompanyRepository } from '@catalog/infrastructure/prisma/company'
 import { buildCompany } from '../../helpers/builders'
 import { createTestPrisma, truncateAll } from '../../helpers/testDb'
 

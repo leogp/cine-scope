@@ -1,5 +1,5 @@
-import { GetCompanyUseCase } from '../../src/application/use-cases/company/get/getCompanyUseCase'
-import { CompanyNotFoundError } from '../../src/domain/errors/companyNotFoundError'
+import { GetCompanyUseCase } from '@catalog/application/use-cases/company/get/getCompanyUseCase'
+import { CompanyNotFoundError } from '@catalog/domain/errors/companyNotFoundError'
 import { InMemoryCompanyRepository } from '../fakes/inMemoryCompanyRepository'
 import { buildCompany } from '../helpers/builders'
 

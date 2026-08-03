@@ -1,5 +1,5 @@
-import { CompanyName } from '../../../src/domain/value-objects/companyName'
-import { InvalidCompanyNameError } from '../../../src/domain/errors/invalidCompanyNameError'
+import { CompanyName } from '@catalog/domain/value-objects/companyName'
+import { InvalidCompanyNameError } from '@catalog/domain/errors/invalidCompanyNameError'
 
 describe('CompanyName', () => {
   it('exposes a valid name', () => {

@@ -1,5 +1,5 @@
-import { GetPersonUseCase } from '../../src/application/use-cases/person/get/getPersonUseCase'
-import { PersonNotFoundError } from '../../src/domain/errors/personNotFoundError'
+import { GetPersonUseCase } from '@catalog/application/use-cases/person/get/getPersonUseCase'
+import { PersonNotFoundError } from '@catalog/domain/errors/personNotFoundError'
 import { InMemoryPersonRepository } from '../fakes/inMemoryPersonRepository'
 import { buildPerson } from '../helpers/builders'
 

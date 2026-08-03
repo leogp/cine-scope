@@ -1,8 +1,8 @@
 import { UseCase } from '@cinescope/shared/application'
-import { Genre } from '../../../../domain/entities/genre'
-import { GenreAlreadyExistsError } from '../../../../domain/errors/genreAlreadyExistsError'
-import { GenreRepository } from '../../../../domain/repositories/genreRepository'
-import { GenreName } from '../../../../domain/value-objects/genreName'
+import { Genre } from '@catalog/domain/entities/genre'
+import { GenreAlreadyExistsError } from '@catalog/domain/errors/genreAlreadyExistsError'
+import { GenreRepository } from '@catalog/domain/repositories/genreRepository'
+import { GenreName } from '@catalog/domain/value-objects/genreName'
 import { CreateGenreRequest } from './createGenreRequest'
 import { CreateGenreResponse } from './createGenreResponse'
 

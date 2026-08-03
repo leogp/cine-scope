@@ -1,8 +1,8 @@
-import { Role, createRoleProps } from '../../src/domain/entities/role'
-import { CreateUserProps, User } from '../../src/domain/entities/user'
-import { UserStatus } from '../../src/domain/enums/userStatus'
-import { Email } from '../../src/domain/value-objects/email'
-import { Username } from '../../src/domain/value-objects/username'
+import { Role, createRoleProps } from '@auth/domain/entities/role'
+import { CreateUserProps, User } from '@auth/domain/entities/user'
+import { UserStatus } from '@auth/domain/enums/userStatus'
+import { Email } from '@auth/domain/value-objects/email'
+import { Username } from '@auth/domain/value-objects/username'
 
 export const buildRole = (overrides: Partial<createRoleProps> = {}): Role =>
   Role.create({

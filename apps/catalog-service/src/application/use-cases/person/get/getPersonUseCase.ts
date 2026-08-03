@@ -1,6 +1,6 @@
 import { UseCase } from '@cinescope/shared/application'
-import { PersonNotFoundError } from '../../../../domain/errors/personNotFoundError'
-import { PersonRepository } from '../../../../domain/repositories/personRepository'
+import { PersonNotFoundError } from '@catalog/domain/errors/personNotFoundError'
+import { PersonRepository } from '@catalog/domain/repositories/personRepository'
 import { GetPersonRequest } from './getPersonRequest'
 import { GetPersonResponse } from './getPersonResponse'
 

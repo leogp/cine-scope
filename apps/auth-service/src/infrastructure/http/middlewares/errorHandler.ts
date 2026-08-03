@@ -1,15 +1,15 @@
 import { buildErrorHandler } from '@cinescope/shared/infrastructure/http'
 
-import { ApplicationError } from '../../../application/errors/applicationError'
-import { InvalidCredentialsError } from '../../../application/errors/invalidCredentialsError'
-import { InvalidRefreshTokenError } from '../../../application/errors/invalidRefreshTokenError'
-import { RefreshTokenExpiredError } from '../../../application/errors/refreshTokenExpiredError'
-import { RefreshTokenRevokedError } from '../../../application/errors/refreshTokenRevokeError'
-import { DomainError } from '../../../domain/errors/domainError'
-import { EmailAlreadyExistsError } from '../../../domain/errors/emailAlreadyExistsError'
-import { RoleNotFoundError } from '../../../domain/errors/roleNotFoundError'
-import { UserNotFoundError } from '../../../domain/errors/userNotFoundError'
-import { UsernameAlreadyExistsError } from '../../../domain/errors/usernameAlreadyExistsError'
+import { ApplicationError } from '@auth/application/errors/applicationError'
+import { InvalidCredentialsError } from '@auth/application/errors/invalidCredentialsError'
+import { InvalidRefreshTokenError } from '@auth/application/errors/invalidRefreshTokenError'
+import { RefreshTokenExpiredError } from '@auth/application/errors/refreshTokenExpiredError'
+import { RefreshTokenRevokedError } from '@auth/application/errors/refreshTokenRevokeError'
+import { DomainError } from '@auth/domain/errors/domainError'
+import { EmailAlreadyExistsError } from '@auth/domain/errors/emailAlreadyExistsError'
+import { RoleNotFoundError } from '@auth/domain/errors/roleNotFoundError'
+import { UserNotFoundError } from '@auth/domain/errors/userNotFoundError'
+import { UsernameAlreadyExistsError } from '@auth/domain/errors/usernameAlreadyExistsError'
 
 function statusFor(err: Error): number | undefined {
   if (err instanceof EmailAlreadyExistsError || err instanceof UsernameAlreadyExistsError) {

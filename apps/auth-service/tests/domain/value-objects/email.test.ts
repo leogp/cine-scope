@@ -1,5 +1,5 @@
-import { Email } from '../../../src/domain/value-objects/email'
-import { InvalidEmailError } from '../../../src/domain/errors/invalidEmailError'
+import { Email } from '@auth/domain/value-objects/email'
+import { InvalidEmailError } from '@auth/domain/errors/invalidEmailError'
 
 describe('Email', () => {
   it('accepts a valid email and preserves its value', () => {

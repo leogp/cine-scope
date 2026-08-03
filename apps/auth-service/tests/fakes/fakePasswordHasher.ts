@@ -1,4 +1,4 @@
-import { PasswordHasher } from '../../src/domain/services/passwordHasher'
+import { PasswordHasher } from '@auth/domain/services/passwordHasher'
 
 /**
  * Deterministic hasher so tests can build users with a known "hash"

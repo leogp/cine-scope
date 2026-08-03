@@ -1,5 +1,5 @@
-import { CountryCode } from '../../../src/domain/value-objects/countryCode'
-import { InvalidCountryCodeError } from '../../../src/domain/errors/invalidCountryCodeError'
+import { CountryCode } from '@catalog/domain/value-objects/countryCode'
+import { InvalidCountryCodeError } from '@catalog/domain/errors/invalidCountryCodeError'
 
 describe('CountryCode', () => {
   it('accepts a valid ISO 3166-1 alpha-2 code', () => {

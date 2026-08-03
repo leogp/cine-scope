@@ -1,6 +1,6 @@
 import { UseCase } from '@cinescope/shared/application'
-import { CompanyNotFoundError } from '../../../../domain/errors/companyNotFoundError'
-import { CompanyRepository } from '../../../../domain/repositories/companyRepository'
+import { CompanyNotFoundError } from '@catalog/domain/errors/companyNotFoundError'
+import { CompanyRepository } from '@catalog/domain/repositories/companyRepository'
 import { GetCompanyRequest } from './getCompanyRequest'
 import { GetCompanyResponse } from './getCompanyResponse'
 

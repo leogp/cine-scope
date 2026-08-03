@@ -2,7 +2,9 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "rootDir": "./src",
-    "outDir": "./dist"
+    "outDir": "./dist",
+    "baseUrl": ".",
+    "paths": { "@catalog/*": ["./src/*"] }
   },
   "exclude": ["node_modules", "dist", "prisma.config.ts", "tests", "jest.config.js"]
 }

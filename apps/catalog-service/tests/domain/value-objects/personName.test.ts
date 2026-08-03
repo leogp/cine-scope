@@ -1,5 +1,5 @@
-import { PersonName } from '../../../src/domain/value-objects/personName'
-import { InvalidPersonNameError } from '../../../src/domain/errors/invalidPersonNameError'
+import { PersonName } from '@catalog/domain/value-objects/personName'
+import { InvalidPersonNameError } from '@catalog/domain/errors/invalidPersonNameError'
 
 describe('PersonName', () => {
   it('exposes a valid name', () => {

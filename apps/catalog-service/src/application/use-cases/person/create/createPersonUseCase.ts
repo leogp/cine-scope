@@ -1,7 +1,7 @@
 import { UseCase } from '@cinescope/shared/application'
-import { Person } from '../../../../domain/entities/person'
-import { PersonRepository } from '../../../../domain/repositories/personRepository'
-import { PersonName } from '../../../../domain/value-objects/personName'
+import { Person } from '@catalog/domain/entities/person'
+import { PersonRepository } from '@catalog/domain/repositories/personRepository'
+import { PersonName } from '@catalog/domain/value-objects/personName'
 import { CreatePersonRequest } from './createPersonRequest'
 import { CreatePersonResponse } from './createPersonResponse'
 

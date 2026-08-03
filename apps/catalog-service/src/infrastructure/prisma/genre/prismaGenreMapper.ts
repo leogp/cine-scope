@@ -1,5 +1,5 @@
-import { Genre } from '../../../domain/entities/genre'
-import { GenreName } from '../../../domain/value-objects/genreName'
+import { Genre } from '@catalog/domain/entities/genre'
+import { GenreName } from '@catalog/domain/value-objects/genreName'
 import { GenreModel } from '../generated/models'
 
 export type GenreRow = GenreModel

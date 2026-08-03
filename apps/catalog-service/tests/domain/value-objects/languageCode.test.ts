@@ -1,5 +1,5 @@
-import { LanguageCode } from '../../../src/domain/value-objects/languageCode'
-import { InvalidLanguageCodeError } from '../../../src/domain/errors/invalidLanguageCodeError'
+import { LanguageCode } from '@catalog/domain/value-objects/languageCode'
+import { InvalidLanguageCodeError } from '@catalog/domain/errors/invalidLanguageCodeError'
 
 describe('LanguageCode', () => {
   it('accepts a valid ISO 639-1 code', () => {

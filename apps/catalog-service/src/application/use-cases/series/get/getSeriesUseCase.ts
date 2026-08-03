@@ -1,9 +1,9 @@
 import { UseCase } from '@cinescope/shared/application'
-import { SeriesRepository } from '../../../../domain/repositories/seriesRepository'
+import { SeriesRepository } from '@catalog/domain/repositories/seriesRepository'
 import { toSeriesDTO } from '../shared/seriesMappers'
 import { GetSeriesRequest } from './getSeriesRequest'
 import { GetSeriesResponse } from './getSeriesResponse'
-import { SeriesNotFoundError } from '../../../../domain/errors/seriesNotFoundError'
+import { SeriesNotFoundError } from '@catalog/domain/errors/seriesNotFoundError'
 
 export class GetSeriesUseCase implements UseCase<GetSeriesRequest, GetSeriesResponse> {
   constructor(private readonly seriesRepository: SeriesRepository) {}

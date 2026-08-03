@@ -1,7 +1,7 @@
 import { Request, Response } from 'express'
 
-import { CreateSeriesUseCase } from '../../../application/use-cases/series/create/createSeriesUseCase'
-import { GetSeriesUseCase } from '../../../application/use-cases/series/get/getSeriesUseCase'
+import { CreateSeriesUseCase } from '@catalog/application/use-cases/series/create/createSeriesUseCase'
+import { GetSeriesUseCase } from '@catalog/application/use-cases/series/get/getSeriesUseCase'
 
 export class SeriesController {
   constructor(

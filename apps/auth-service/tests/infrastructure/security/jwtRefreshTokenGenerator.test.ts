@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken'
-import { JwtRefreshTokenGenerator } from '../../../src/infrastructure/security/jwtRefreshTokenGenerator'
+import { JwtRefreshTokenGenerator } from '@auth/infrastructure/security/jwtRefreshTokenGenerator'
 
 const SECRET = 'test-refresh-secret-0123456789'
 

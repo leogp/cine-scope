@@ -1,6 +1,6 @@
-import { Series, SeriesProps } from '../../../src/domain/entities/series'
-import { LanguageCode } from '../../../src/domain/value-objects/languageCode'
-import { MovieTitle } from '../../../src/domain/value-objects/movieTitle'
+import { Series, SeriesProps } from '@catalog/domain/entities/series'
+import { LanguageCode } from '@catalog/domain/value-objects/languageCode'
+import { MovieTitle } from '@catalog/domain/value-objects/movieTitle'
 
 const buildProps = (overrides: Partial<SeriesProps> = {}): SeriesProps => ({
   id: 'series-1',

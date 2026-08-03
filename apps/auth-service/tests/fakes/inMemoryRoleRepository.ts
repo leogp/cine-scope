@@ -1,5 +1,5 @@
-import { Role } from '../../src/domain/entities/role'
-import { RoleRepository } from '../../src/domain/repositories/roleRepository'
+import { Role } from '@auth/domain/entities/role'
+import { RoleRepository } from '@auth/domain/repositories/roleRepository'
 
 export class InMemoryRoleRepository implements RoleRepository {
   private readonly roles = new Map<string, Role>()

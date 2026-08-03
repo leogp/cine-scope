@@ -1,8 +1,8 @@
-import { UserStatus } from '../../../src/domain/enums/userStatus'
-import { Email } from '../../../src/domain/value-objects/email'
-import { Username } from '../../../src/domain/value-objects/username'
-import { PrismaRoleRepository } from '../../../src/infrastructure/prisma/role'
-import { PrismaUserRepository } from '../../../src/infrastructure/prisma/user'
+import { UserStatus } from '@auth/domain/enums/userStatus'
+import { Email } from '@auth/domain/value-objects/email'
+import { Username } from '@auth/domain/value-objects/username'
+import { PrismaRoleRepository } from '@auth/infrastructure/prisma/role'
+import { PrismaUserRepository } from '@auth/infrastructure/prisma/user'
 import { buildRole, buildUser } from '../../helpers/builders'
 import { createTestPrisma, truncateAll } from '../../helpers/testDb'
 

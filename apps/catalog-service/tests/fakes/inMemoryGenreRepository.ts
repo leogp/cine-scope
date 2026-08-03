@@ -1,5 +1,5 @@
-import { Genre } from '../../src/domain/entities/genre'
-import { GenreRepository } from '../../src/domain/repositories/genreRepository'
+import { Genre } from '@catalog/domain/entities/genre'
+import { GenreRepository } from '@catalog/domain/repositories/genreRepository'
 
 export class InMemoryGenreRepository implements GenreRepository {
   private readonly genres = new Map<string, Genre>()

@@ -1,7 +1,7 @@
-import { Movie, MovieProps } from '../../../src/domain/entities/movie'
-import { Duration } from '../../../src/domain/value-objects/duration'
-import { LanguageCode } from '../../../src/domain/value-objects/languageCode'
-import { MovieTitle } from '../../../src/domain/value-objects/movieTitle'
+import { Movie, MovieProps } from '@catalog/domain/entities/movie'
+import { Duration } from '@catalog/domain/value-objects/duration'
+import { LanguageCode } from '@catalog/domain/value-objects/languageCode'
+import { MovieTitle } from '@catalog/domain/value-objects/movieTitle'
 import { buildGenre, buildMovie, buildPerson, buildCompany } from '../../helpers/builders'
 
 const buildProps = (overrides: Partial<MovieProps> = {}): MovieProps => ({

@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken'
 
-import { AccessTokenGenerator } from '../../application/ports/accessTokenGenerator'
-import { AccessTokenPayload } from '../../application/ports/accessTokenPayload'
+import { AccessTokenGenerator } from '@auth/application/ports/accessTokenGenerator'
+import { AccessTokenPayload } from '@auth/application/ports/accessTokenPayload'
 
 export class JwtAccessTokenGenerator implements AccessTokenGenerator {
   constructor(

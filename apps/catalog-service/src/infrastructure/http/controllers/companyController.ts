@@ -1,7 +1,7 @@
 import { Request, Response } from 'express'
 
-import { CreateCompanyUseCase } from '../../../application/use-cases/company/create/createCompanyUseCase'
-import { GetCompanyUseCase } from '../../../application/use-cases/company/get/getCompanyUseCase'
+import { CreateCompanyUseCase } from '@catalog/application/use-cases/company/create/createCompanyUseCase'
+import { GetCompanyUseCase } from '@catalog/application/use-cases/company/get/getCompanyUseCase'
 
 export class CompanyController {
   constructor(

@@ -1,6 +1,6 @@
 import { UseCase } from '@cinescope/shared/application'
-import { GenreNotFoundError } from '../../../../domain/errors/genreNotFoundError'
-import { GenreRepository } from '../../../../domain/repositories/genreRepository'
+import { GenreNotFoundError } from '@catalog/domain/errors/genreNotFoundError'
+import { GenreRepository } from '@catalog/domain/repositories/genreRepository'
 import { GetGenreRequest } from './getGenreRequest'
 import { GetGenreResponse } from './getGenreResponse'
 

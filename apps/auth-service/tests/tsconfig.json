@@ -2,7 +2,9 @@
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
     "noEmit": true,
-    "types": ["jest", "node"]
+    "types": ["jest", "node"],
+    "baseUrl": "..",
+    "paths": { "@auth/*": ["./src/*"] }
   },
   "include": ["**/*.ts"]
 }

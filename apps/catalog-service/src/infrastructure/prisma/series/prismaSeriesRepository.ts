@@ -1,5 +1,5 @@
-import { Series } from '../../../domain/entities/series'
-import { SeriesRepository } from '../../../domain/repositories/seriesRepository'
+import { Series } from '@catalog/domain/entities/series'
+import { SeriesRepository } from '@catalog/domain/repositories/seriesRepository'
 import { PrismaClient } from '../generated/client'
 import { PrismaSeriesMapper } from './prismaSeriesMapper'
 

@@ -1,5 +1,5 @@
-import { Genre, GenreProps } from '../../../src/domain/entities/genre'
-import { GenreName } from '../../../src/domain/value-objects/genreName'
+import { Genre, GenreProps } from '@catalog/domain/entities/genre'
+import { GenreName } from '@catalog/domain/value-objects/genreName'
 
 const buildProps = (overrides: Partial<GenreProps> = {}): GenreProps => ({
   id: 'genre-1',

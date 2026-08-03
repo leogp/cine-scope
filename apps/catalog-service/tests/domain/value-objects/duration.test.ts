@@ -1,5 +1,5 @@
-import { Duration } from '../../../src/domain/value-objects/duration'
-import { InvalidDurationError } from '../../../src/domain/errors/invalidDurationError'
+import { Duration } from '@catalog/domain/value-objects/duration'
+import { InvalidDurationError } from '@catalog/domain/errors/invalidDurationError'
 
 describe('Duration', () => {
   it('exposes the number of minutes', () => {

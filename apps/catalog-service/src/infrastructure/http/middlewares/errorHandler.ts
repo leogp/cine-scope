@@ -1,12 +1,12 @@
 import { buildErrorHandler } from '@cinescope/shared/infrastructure/http'
 
-import { CompanyNotFoundError } from '../../../domain/errors/companyNotFoundError'
-import { DomainError } from '../../../domain/errors/domainError'
-import { GenreAlreadyExistsError } from '../../../domain/errors/genreAlreadyExistsError'
-import { GenreNotFoundError } from '../../../domain/errors/genreNotFoundError'
-import { MovieNotFoundError } from '../../../domain/errors/movieNotFoundError'
-import { PersonNotFoundError } from '../../../domain/errors/personNotFoundError'
-import { SeriesNotFoundError } from '../../../domain/errors/seriesNotFoundError'
+import { CompanyNotFoundError } from '@catalog/domain/errors/companyNotFoundError'
+import { DomainError } from '@catalog/domain/errors/domainError'
+import { GenreAlreadyExistsError } from '@catalog/domain/errors/genreAlreadyExistsError'
+import { GenreNotFoundError } from '@catalog/domain/errors/genreNotFoundError'
+import { MovieNotFoundError } from '@catalog/domain/errors/movieNotFoundError'
+import { PersonNotFoundError } from '@catalog/domain/errors/personNotFoundError'
+import { SeriesNotFoundError } from '@catalog/domain/errors/seriesNotFoundError'
 
 function statusFor(err: Error): number | undefined {
   if (

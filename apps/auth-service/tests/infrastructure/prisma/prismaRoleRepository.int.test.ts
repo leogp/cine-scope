@@ -1,4 +1,4 @@
-import { DEFAULT_ROLE_NAME, PrismaRoleRepository } from '../../../src/infrastructure/prisma/role'
+import { DEFAULT_ROLE_NAME, PrismaRoleRepository } from '@auth/infrastructure/prisma/role'
 import { buildRole } from '../../helpers/builders'
 import { createTestPrisma, truncateAll } from '../../helpers/testDb'
 

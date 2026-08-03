@@ -1,6 +1,6 @@
 import { PrismaPg } from '@prisma/adapter-pg'
 
-import { PrismaClient } from '../../src/infrastructure/prisma/generated/client'
+import { PrismaClient } from '@catalog/infrastructure/prisma/generated/client'
 
 /**
  * Prisma client for integration tests, wired like

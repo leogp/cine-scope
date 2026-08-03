@@ -1,6 +1,6 @@
-import { Company } from '../../../domain/entities/company'
-import { Genre } from '../../../domain/entities/genre'
-import { Person } from '../../../domain/entities/person'
+import { Company } from '@catalog/domain/entities/company'
+import { Genre } from '@catalog/domain/entities/genre'
+import { Person } from '@catalog/domain/entities/person'
 
 export interface GenreDTO {
   id: string

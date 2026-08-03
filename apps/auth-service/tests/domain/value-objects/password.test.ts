@@ -1,5 +1,5 @@
-import { Password } from '../../../src/domain/value-objects/password'
-import { InvalidPasswordError } from '../../../src/domain/errors/invalidPasswordError'
+import { Password } from '@auth/domain/value-objects/password'
+import { InvalidPasswordError } from '@auth/domain/errors/invalidPasswordError'
 
 describe('Password', () => {
   it('accepts a password that satisfies the policy', () => {

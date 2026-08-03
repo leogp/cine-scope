@@ -1,4 +1,4 @@
-import { BcryptPasswordHasher } from '../../../src/infrastructure/security/bcryptPasswordHasher'
+import { BcryptPasswordHasher } from '@auth/infrastructure/security/bcryptPasswordHasher'
 
 // bcrypt with cost 12 takes ~300ms per operation, so this suite hashes once
 // and reuses the result.

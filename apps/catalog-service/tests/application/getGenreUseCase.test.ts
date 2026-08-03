@@ -1,5 +1,5 @@
-import { GetGenreUseCase } from '../../src/application/use-cases/genre/get/getGenreUseCase'
-import { GenreNotFoundError } from '../../src/domain/errors/genreNotFoundError'
+import { GetGenreUseCase } from '@catalog/application/use-cases/genre/get/getGenreUseCase'
+import { GenreNotFoundError } from '@catalog/domain/errors/genreNotFoundError'
 import { InMemoryGenreRepository } from '../fakes/inMemoryGenreRepository'
 import { buildGenre } from '../helpers/builders'
 

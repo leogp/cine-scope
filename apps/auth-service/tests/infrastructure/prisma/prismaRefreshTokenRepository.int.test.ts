@@ -1,6 +1,6 @@
-import { RefreshToken } from '../../../src/domain/entities/refreshToken'
-import { PrismaRefreshTokenRepository } from '../../../src/infrastructure/prisma/refresh-token'
-import { PrismaUserRepository } from '../../../src/infrastructure/prisma/user'
+import { RefreshToken } from '@auth/domain/entities/refreshToken'
+import { PrismaRefreshTokenRepository } from '@auth/infrastructure/prisma/refresh-token'
+import { PrismaUserRepository } from '@auth/infrastructure/prisma/user'
 import { buildUser } from '../../helpers/builders'
 import { createTestPrisma, truncateAll } from '../../helpers/testDb'
 

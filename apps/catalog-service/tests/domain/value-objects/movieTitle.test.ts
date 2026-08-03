@@ -1,5 +1,5 @@
-import { MovieTitle } from '../../../src/domain/value-objects/movieTitle'
-import { InvalidMovieTitleError } from '../../../src/domain/errors/invalidMovieTitleError'
+import { MovieTitle } from '@catalog/domain/value-objects/movieTitle'
+import { InvalidMovieTitleError } from '@catalog/domain/errors/invalidMovieTitleError'
 
 describe('MovieTitle', () => {
   it('exposes a valid title', () => {

@@ -1,8 +1,8 @@
-import { User } from '../../../src/domain/entities/user'
-import { Role } from '../../../src/domain/entities/role'
-import { UserStatus } from '../../../src/domain/enums/userStatus'
-import { Email } from '../../../src/domain/value-objects/email'
-import { Username } from '../../../src/domain/value-objects/username'
+import { User } from '@auth/domain/entities/user'
+import { Role } from '@auth/domain/entities/role'
+import { UserStatus } from '@auth/domain/enums/userStatus'
+import { Email } from '@auth/domain/value-objects/email'
+import { Username } from '@auth/domain/value-objects/username'
 
 const buildUser = () =>
   User.create({

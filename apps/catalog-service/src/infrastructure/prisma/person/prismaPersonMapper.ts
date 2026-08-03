@@ -1,5 +1,5 @@
-import { Person } from '../../../domain/entities/person'
-import { PersonName } from '../../../domain/value-objects/personName'
+import { Person } from '@catalog/domain/entities/person'
+import { PersonName } from '@catalog/domain/value-objects/personName'
 import { PersonModel } from '../generated/models'
 
 export type PersonRow = PersonModel

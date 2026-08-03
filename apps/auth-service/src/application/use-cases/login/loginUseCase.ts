@@ -1,19 +1,19 @@
 import { UseCase } from '@cinescope/shared/application'
 // Repositories
-import { RefreshTokenRepository } from '../../../domain/repositories/refreshTokenRepository'
-import { UserRepository } from '../../../domain/repositories/userRepository'
+import { RefreshTokenRepository } from '@auth/domain/repositories/refreshTokenRepository'
+import { UserRepository } from '@auth/domain/repositories/userRepository'
 // domain services and ports
-import { PasswordHasher } from '../../../domain/services/passwordHasher'
-import { RefreshToken } from '../../../domain/entities/refreshToken'
-import { AccessTokenGenerator } from '../../ports/accessTokenGenerator'
-import { RefreshTokenGenerator } from '../../ports/refreshTokenGenerator'
+import { PasswordHasher } from '@auth/domain/services/passwordHasher'
+import { RefreshToken } from '@auth/domain/entities/refreshToken'
+import { AccessTokenGenerator } from '@auth/application/ports/accessTokenGenerator'
+import { RefreshTokenGenerator } from '@auth/application/ports/refreshTokenGenerator'
 // Imports for request and response
 import { LoginResponse } from './loginResponse'
 import { LoginRequest } from './loginRequest'
 // Errors
-import { InvalidCredentialsError } from '../../errors/invalidCredentialsError'
-import { UserNotFoundError } from '../../../domain/errors/userNotFoundError'
-import { Email } from '../../../domain/value-objects/email'
+import { InvalidCredentialsError } from '@auth/application/errors/invalidCredentialsError'
+import { UserNotFoundError } from '@auth/domain/errors/userNotFoundError'
+import { Email } from '@auth/domain/value-objects/email'
 
 export class LoginUseCase implements UseCase<LoginRequest, LoginResponse> {
   private readonly userRepository: UserRepository

@@ -1,11 +1,11 @@
 import { Request, Response } from 'express'
 
-import { CreateMovieUseCase } from '../../../application/use-cases/movie/create/createMovieUseCase'
-import { DeleteMovieUseCase } from '../../../application/use-cases/movie/delete/deleteMovieUseCase'
-import { GetMovieUseCase } from '../../../application/use-cases/movie/get/getMovieUseCase'
-import { ListMoviesRequest } from '../../../application/use-cases/movie/list/listMoviesRequest'
-import { ListMoviesUseCase } from '../../../application/use-cases/movie/list/listMoviesUseCase'
-import { UpdateMovieUseCase } from '../../../application/use-cases/movie/update/updateMovieUseCase'
+import { CreateMovieUseCase } from '@catalog/application/use-cases/movie/create/createMovieUseCase'
+import { DeleteMovieUseCase } from '@catalog/application/use-cases/movie/delete/deleteMovieUseCase'
+import { GetMovieUseCase } from '@catalog/application/use-cases/movie/get/getMovieUseCase'
+import { ListMoviesRequest } from '@catalog/application/use-cases/movie/list/listMoviesRequest'
+import { ListMoviesUseCase } from '@catalog/application/use-cases/movie/list/listMoviesUseCase'
+import { UpdateMovieUseCase } from '@catalog/application/use-cases/movie/update/updateMovieUseCase'
 
 export class MovieController {
   constructor(
