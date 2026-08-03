@@ -1,8 +1,7 @@
+import { asyncHandler, validateBody } from '@cinescope/shared/infrastructure/http'
 import { Router } from 'express'
 
 import { AuthController } from '../controllers/authController'
-import { asyncHandler } from '../middlewares/asyncHandler'
-import { validateBody } from '../middlewares/validateRequest'
 import { logoutSchema, refreshSchema, signUpSchema, loginSchema } from '../schemas/authSchemas'
 
 export function buildAuthRoutes(controller: AuthController): Router {

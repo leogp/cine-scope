@@ -10,6 +10,12 @@ module.exports = {
   roots: ['<rootDir>/tests'],
   testMatch: ['**/*.test.ts'],
   testPathIgnorePatterns: ['\\.int\\.test\\.ts$'],
+  setupFiles: ['<rootDir>/tests/helpers/setup-env.ts'],
   clearMocks: true,
-  collectCoverageFrom: ['src/**/*.ts', '!src/index.ts'],
+  collectCoverageFrom: [
+    'src/**/*.ts',
+    '!src/index.ts',
+    '!src/main/**',
+    '!src/infrastructure/prisma/generated/**',
+  ],
 }

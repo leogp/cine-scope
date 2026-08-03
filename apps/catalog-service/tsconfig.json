@@ -4,5 +4,5 @@
     "rootDir": "./src",
     "outDir": "./dist"
   },
-  "exclude": ["node_modules", "dist", "tests", "jest.config.js"]
+  "exclude": ["node_modules", "dist", "prisma.config.ts", "tests", "jest.config.js"]
 }

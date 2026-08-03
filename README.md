@@ -65,6 +65,73 @@ Services communicate synchronously through REST APIs and asynchronously through 
 - Database per Service
 - Eventual Consistency
 
+## Repository layout
+
+```
+apps/
+  auth-service/            signup, login, refresh, logout (implemented)
+  catalog-service/         movies, series, people, genres, companies (implemented)
+  review-service/          scaffolding
+  watchlist-service/       scaffolding
+  recomendation-service/   scaffolding
+  gateway-service/         scaffolding
+packages/
+  shared/                  @cinescope/shared — building blocks used by every service
+infra/                     compose/database/messaging assets
+```
+
+Each implemented service follows the same Clean Architecture layering:
+
+```
+apps/<service>/
+  src/
+    domain/          entities, value objects, repository interfaces, errors
+    application/     use cases (one folder per use case: request, response, use case)
+    infrastructure/
+      http/          app.ts, controllers/, routes/, middlewares/, schemas/
+      prisma/        repository implementations + domain↔row mappers
+    main/            composition.ts — the composition root
+    config/          env parsing
+    index.ts         dotenv → env → buildApp(composeApp()) → listen
+  tests/             mirrors src/, plus fakes/ and helpers/
+```
+
+## `@cinescope/shared`
+
+Framework-level building blocks, published to the workspace as three subpath
+exports. Each subpath has a thin shim package at
+`packages/shared/<subpath>/package.json` pointing at the compiled `dist/`
+output, so services import them as ordinary module specifiers.
+
+| Subpath                                 | Exports                                                                                                                        |
+| --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `@cinescope/shared/domain`              | `Entity`, `AggregateRoot`, `ValueObject`, `DomainError`                                                                        |
+| `@cinescope/shared/application`         | `UseCase`, `PaginationParams`, `PaginatedResult`, `normalizePagination`, `buildPaginatedResult`                                |
+| `@cinescope/shared/infrastructure/http` | `asyncHandler`, `validateBody`, `validateParams`, `validateQuery`, `notFoundHandler`, `buildHealthRoutes`, `buildErrorHandler` |
+
+`infrastructure/http` holds the Express plumbing that is genuinely
+service-agnostic — the response envelopes (`{error, message}`,
+`{error: 'ValidationError', details}`, `{error: 'NotFound', path}`) and the
+500 fallback. What stays per-service is the **policy**: each service passes
+its own `statusFor(err)` resolver to `buildErrorHandler`, because the
+error→status mapping depends on that service's error classes.
+
+```ts
+// apps/catalog-service/src/infrastructure/http/middlewares/errorHandler.ts
+export const errorHandler = buildErrorHandler(statusFor)
+```
+
+`express` and `zod` are **peer** dependencies, not direct ones: the services
+own the instances. A duplicate copy of zod would break `instanceof ZodType`
+inside `validateBody` and friends.
+
+Shared compiles to `dist/` before the apps — npm workspaces already orders the
+build correctly, but a shared-only rebuild is:
+
+```bash
+docker compose run --rm --no-deps deps npm run build -w @cinescope/shared
+```
+
 ## Development
 
 CineScope is an **npm workspaces** monorepo. All shared dev tooling
@@ -126,8 +193,8 @@ the host. There are two kinds of suites:
 - **Unit / HTTP tests** (`*.test.ts`) — pure Jest + Supertest over in-memory
   fakes, no infrastructure required.
 - **Integration tests** (`*.int.test.ts`) — Prisma repositories exercised
-  against a real Postgres database (`auth_test_db`, created automatically the
-  first time the `postgres` volume is initialised).
+  against a real Postgres database (`auth_test_db` / `catalog_test_db`, both
+  created automatically the first time the `postgres` volume is initialised).
 
 #### Unit tests
 
@@ -148,14 +215,18 @@ docker compose exec auth-service npm test
 
 #### Integration tests
 
-`test:int` applies the service's migrations to `auth_test_db` and then runs
-the `*.int.test.ts` suites serially against it. Its connection string is baked
-into the script and targets `auth_test_db` only, so the development `auth_db`
-is never touched. It needs Postgres, so keep dependencies enabled — Compose
-starts Postgres and waits for it to be healthy:
+`test:int` applies the service's migrations to its `*_test_db` and then runs
+the `*.int.test.ts` suites serially against it. The connection string is baked
+into the script and targets the test database only, so the development
+`auth_db` / `catalog_db` are never touched — and `tests/helpers/testDb.ts`
+refuses to build a client at all if `DATABASE_URL` does not name a test
+database, so a stray override cannot truncate real data. It needs Postgres, so
+keep dependencies enabled — Compose starts Postgres and waits for it to be
+healthy:
 
 ```bash
 docker compose run --rm deps npm run test:int -w auth-service
+docker compose run --rm deps npm run test:int -w catalog-service
 # or, with the stack already up:
 docker compose exec auth-service npm run test:int
 ```
@@ -174,15 +245,54 @@ docker build -f apps/auth-service/Dockerfile -t cinescope/auth-service .
 
 ## Current Status
 
-The repository currently contains the foundational infrastructure required to support the platform:
+Platform infrastructure — Docker environment, container orchestration,
+messaging, database and cache services — is in place, and two business
+services are implemented end to end:
 
-- Docker environment
-- Container orchestration configuration
-- Messaging infrastructure
-- Database services
-- Cache services
+| Service                | Status                                                                                      |
+| ---------------------- | ------------------------------------------------------------------------------------------- |
+| Auth Service           | Implemented — signup, login, refresh, logout; Prisma repositories; HTTP + integration tests |
+| Catalog Service        | Implemented — movie/series/person/genre/company aggregates; Prisma repositories; HTTP tests |
+| Review Service         | Scaffolding                                                                                 |
+| Watchlist Service      | Scaffolding                                                                                 |
+| Recommendation Service | Scaffolding                                                                                 |
+| API Gateway            | Scaffolding                                                                                 |
 
-Additional business services will be introduced incrementally.
+The remaining services will be introduced incrementally.
+
+### Auth Service API
+
+| Route                | Success                   |
+| -------------------- | ------------------------- |
+| `POST /auth/signup`  | 201                       |
+| `POST /auth/login`   | 200 — token pair          |
+| `POST /auth/refresh` | 200 — rotated token pair  |
+| `POST /auth/logout`  | 204                       |
+| `GET /health`        | 200 — `{status, service}` |
+
+### Catalog Service API
+
+Movies are the only aggregate with a full CRUD surface; the rest expose
+create + read while the write use cases are built out.
+
+| Route                                   | Success                              |
+| --------------------------------------- | ------------------------------------ |
+| `POST /movies`                          | 201 — `{id}`                         |
+| `GET /movies?page&pageSize`             | 200 — paginated summaries            |
+| `GET /movies/:id`                       | 200 — full read model with relations |
+| `PUT /movies/:id`                       | 200 — `{id}` (full replace)          |
+| `DELETE /movies/:id`                    | 204                                  |
+| `POST /series`, `GET /series/:id`       | 201 / 200                            |
+| `POST /people`, `GET /people/:id`       | 201 / 200                            |
+| `POST /genres`, `GET /genres/:id`       | 201 / 200                            |
+| `POST /companies`, `GET /companies/:id` | 201 / 200                            |
+| `GET /health`                           | 200 — `{status, service}`            |
+
+Error responses follow the shared envelope: `400` for schema failures
+(`{error: 'ValidationError', details}`) and for domain invariant violations,
+`404` for a missing aggregate or an unresolvable relation id, `409` for a
+duplicate genre name, `500` (`{error: 'InternalServerError'}`, message
+withheld) for anything unmapped.
 
 ## Planned Features
 

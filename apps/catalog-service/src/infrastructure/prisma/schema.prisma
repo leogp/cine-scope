@@ -1,0 +1,196 @@
+generator client {
+  provider = "prisma-client"
+  output   = "./generated"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Movie {
+  id               String    @id
+  title            String    @db.VarChar(255)
+  overview         String?
+  releaseDate      DateTime? @map("release_date") @db.Date
+  duration         Int?
+  originalLanguage String    @map("original_language") @db.Char(2)
+  posterPath       String?   @map("poster_path")
+  backdropPath     String?   @map("backdrop_path")
+
+  genres              MovieGenre[]
+  cast                MovieCastMember[]
+  directors           MovieDirector[]
+  productionCompanies MovieProductionCompany[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([title])
+  @@map("movies")
+}
+
+model Series {
+  id               String    @id
+  title            String    @db.VarChar(255)
+  overview         String?
+  firstAirDate     DateTime? @map("first_air_date") @db.Date
+  lastAirDate      DateTime? @map("last_air_date") @db.Date
+  originalLanguage String    @map("original_language") @db.Char(2)
+  posterPath       String?   @map("poster_path")
+  backdropPath     String?   @map("backdrop_path")
+
+  genres              SeriesGenre[]
+  cast                SeriesCastMember[]
+  directors           SeriesDirector[]
+  productionCompanies SeriesProductionCompany[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([title])
+  @@map("series")
+}
+
+model Person {
+  id          String    @id
+  name        String    @db.VarChar(255)
+  biography   String?
+  birthDate   DateTime? @map("birth_date") @db.Date
+  profilePath String?   @map("profile_path")
+
+  movieCast      MovieCastMember[]
+  movieDirected  MovieDirector[]
+  seriesCast     SeriesCastMember[]
+  seriesDirected SeriesDirector[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([name])
+  @@map("people")
+}
+
+model Company {
+  id          String  @id
+  name        String  @db.VarChar(255)
+  logoPath    String? @map("logo_path")
+  countryCode String? @map("country_code") @db.Char(2)
+
+  movies MovieProductionCompany[]
+  series SeriesProductionCompany[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([name])
+  @@map("companies")
+}
+
+model Genre {
+  id   String @id
+  name String @unique @db.VarChar(255)
+
+  movies MovieGenre[]
+  series SeriesGenre[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("genres")
+}
+
+model MovieGenre {
+  movieId String @map("movie_id")
+  genreId String @map("genre_id")
+
+  movie Movie @relation(fields: [movieId], references: [id], onDelete: Cascade)
+  genre Genre @relation(fields: [genreId], references: [id], onDelete: Cascade)
+
+  @@id([movieId, genreId])
+  @@index([genreId])
+  @@map("movie_genres")
+}
+
+model MovieCastMember {
+  movieId  String @map("movie_id")
+  personId String @map("person_id")
+
+  movie  Movie  @relation(fields: [movieId], references: [id], onDelete: Cascade)
+  person Person @relation(fields: [personId], references: [id], onDelete: Cascade)
+
+  @@id([movieId, personId])
+  @@index([personId])
+  @@map("movie_cast")
+}
+
+model MovieDirector {
+  movieId  String @map("movie_id")
+  personId String @map("person_id")
+
+  movie  Movie  @relation(fields: [movieId], references: [id], onDelete: Cascade)
+  person Person @relation(fields: [personId], references: [id], onDelete: Cascade)
+
+  @@id([movieId, personId])
+  @@index([personId])
+  @@map("movie_directors")
+}
+
+model MovieProductionCompany {
+  movieId   String @map("movie_id")
+  companyId String @map("company_id")
+
+  movie   Movie   @relation(fields: [movieId], references: [id], onDelete: Cascade)
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@id([movieId, companyId])
+  @@index([companyId])
+  @@map("movie_production_companies")
+}
+
+model SeriesGenre {
+  seriesId String @map("series_id")
+  genreId  String @map("genre_id")
+
+  series Series @relation(fields: [seriesId], references: [id], onDelete: Cascade)
+  genre  Genre  @relation(fields: [genreId], references: [id], onDelete: Cascade)
+
+  @@id([seriesId, genreId])
+  @@index([genreId])
+  @@map("series_genres")
+}
+
+model SeriesCastMember {
+  seriesId String @map("series_id")
+  personId String @map("person_id")
+
+  series Series @relation(fields: [seriesId], references: [id], onDelete: Cascade)
+  person Person @relation(fields: [personId], references: [id], onDelete: Cascade)
+
+  @@id([seriesId, personId])
+  @@index([personId])
+  @@map("series_cast")
+}
+
+model SeriesDirector {
+  seriesId String @map("series_id")
+  personId String @map("person_id")
+
+  series Series @relation(fields: [seriesId], references: [id], onDelete: Cascade)
+  person Person @relation(fields: [personId], references: [id], onDelete: Cascade)
+
+  @@id([seriesId, personId])
+  @@index([personId])
+  @@map("series_directors")
+}
+
+model SeriesProductionCompany {
+  seriesId  String @map("series_id")
+  companyId String @map("company_id")
+
+  series  Series  @relation(fields: [seriesId], references: [id], onDelete: Cascade)
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@id([seriesId, companyId])
+  @@index([companyId])
+  @@map("series_production_companies")
+}
