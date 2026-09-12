@@ -1,7 +1,7 @@
 import { Request, Response } from 'express'
 
-import { CreatePersonUseCase } from '../../../application/use-cases/person/create/createPersonUseCase'
-import { GetPersonUseCase } from '../../../application/use-cases/person/get/getPersonUseCase'
+import { CreatePersonUseCase } from '@catalog/application/use-cases/person/create/createPersonUseCase'
+import { GetPersonUseCase } from '@catalog/application/use-cases/person/get/getPersonUseCase'
 
 export class PersonController {
   constructor(

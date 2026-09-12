@@ -1,5 +1,5 @@
-import { Role } from '../../../domain/entities/role'
-import { RoleRepository } from '../../../domain/repositories/roleRepository'
+import { Role } from '@auth/domain/entities/role'
+import { RoleRepository } from '@auth/domain/repositories/roleRepository'
 import { PrismaClient } from '../generated/client'
 import { PrismaRoleMapper } from './prismaRoleMapper'
 

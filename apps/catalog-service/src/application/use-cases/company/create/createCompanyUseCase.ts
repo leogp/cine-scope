@@ -1,8 +1,8 @@
 import { UseCase } from '@cinescope/shared/application'
-import { Company } from '../../../../domain/entities/company'
-import { CompanyRepository } from '../../../../domain/repositories/companyRepository'
-import { CompanyName } from '../../../../domain/value-objects/companyName'
-import { CountryCode } from '../../../../domain/value-objects/countryCode'
+import { Company } from '@catalog/domain/entities/company'
+import { CompanyRepository } from '@catalog/domain/repositories/companyRepository'
+import { CompanyName } from '@catalog/domain/value-objects/companyName'
+import { CountryCode } from '@catalog/domain/value-objects/countryCode'
 import { CreateCompanyRequest } from './createCompanyRequest'
 import { CreateCompanyResponse } from './createCompanyResponse'
 

@@ -1,5 +1,5 @@
-import { CreatePersonUseCase } from '../../src/application/use-cases/person/create/createPersonUseCase'
-import { InvalidPersonNameError } from '../../src/domain/errors/invalidPersonNameError'
+import { CreatePersonUseCase } from '@catalog/application/use-cases/person/create/createPersonUseCase'
+import { InvalidPersonNameError } from '@catalog/domain/errors/invalidPersonNameError'
 import { InMemoryPersonRepository } from '../fakes/inMemoryPersonRepository'
 
 const makeSut = () => {

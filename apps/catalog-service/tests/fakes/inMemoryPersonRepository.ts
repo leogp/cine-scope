@@ -1,5 +1,5 @@
-import { Person } from '../../src/domain/entities/person'
-import { PersonRepository } from '../../src/domain/repositories/personRepository'
+import { Person } from '@catalog/domain/entities/person'
+import { PersonRepository } from '@catalog/domain/repositories/personRepository'
 
 export class InMemoryPersonRepository implements PersonRepository {
   private readonly people = new Map<string, Person>()

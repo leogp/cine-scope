@@ -1,5 +1,5 @@
-import { Username } from '../../../src/domain/value-objects/username'
-import { InvalidUsernameError } from '../../../src/domain/errors/invalidUsernameError'
+import { Username } from '@auth/domain/value-objects/username'
+import { InvalidUsernameError } from '@auth/domain/errors/invalidUsernameError'
 
 describe('Username', () => {
   it('accepts a valid username and preserves its value', () => {

@@ -1,6 +1,6 @@
-import { Company } from '../../../domain/entities/company'
-import { CompanyName } from '../../../domain/value-objects/companyName'
-import { CountryCode } from '../../../domain/value-objects/countryCode'
+import { Company } from '@catalog/domain/entities/company'
+import { CompanyName } from '@catalog/domain/value-objects/companyName'
+import { CountryCode } from '@catalog/domain/value-objects/countryCode'
 import { CompanyModel } from '../generated/models'
 
 export type CompanyRow = CompanyModel

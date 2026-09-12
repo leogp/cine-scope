@@ -1,5 +1,5 @@
-import { GenreName } from '../../../src/domain/value-objects/genreName'
-import { InvalidGenreNameError } from '../../../src/domain/errors/invalidGenreNameError'
+import { GenreName } from '@catalog/domain/value-objects/genreName'
+import { InvalidGenreNameError } from '@catalog/domain/errors/invalidGenreNameError'
 
 describe('GenreName', () => {
   it('exposes a valid name', () => {

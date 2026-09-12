@@ -1,4 +1,4 @@
-import { Permission } from '../../../domain/entities/permission'
+import { Permission } from '@auth/domain/entities/permission'
 import { PermissionModel } from '../generated/models'
 
 export interface PermissionPersistence {

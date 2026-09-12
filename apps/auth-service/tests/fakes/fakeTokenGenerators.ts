@@ -1,7 +1,7 @@
-import { AccessTokenGenerator } from '../../src/application/ports/accessTokenGenerator'
-import { AccessTokenPayload } from '../../src/application/ports/accessTokenPayload'
-import { GeneratedRefreshToken } from '../../src/application/ports/generatedRefreshToken'
-import { RefreshTokenGenerator } from '../../src/application/ports/refreshTokenGenerator'
+import { AccessTokenGenerator } from '@auth/application/ports/accessTokenGenerator'
+import { AccessTokenPayload } from '@auth/application/ports/accessTokenPayload'
+import { GeneratedRefreshToken } from '@auth/application/ports/generatedRefreshToken'
+import { RefreshTokenGenerator } from '@auth/application/ports/refreshTokenGenerator'
 
 export class FakeAccessTokenGenerator implements AccessTokenGenerator {
   lastPayload: AccessTokenPayload | null = null

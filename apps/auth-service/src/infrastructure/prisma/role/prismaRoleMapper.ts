@@ -1,4 +1,4 @@
-import { Role } from '../../../domain/entities/role'
+import { Role } from '@auth/domain/entities/role'
 import { PermissionModel, RoleModel } from '../generated/models'
 import { PrismaPermissionMapper } from '../permission/prismaPermissionMapper'
 

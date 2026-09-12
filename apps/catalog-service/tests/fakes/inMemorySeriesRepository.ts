@@ -1,5 +1,5 @@
-import { Series } from '../../src/domain/entities/series'
-import { SeriesRepository } from '../../src/domain/repositories/seriesRepository'
+import { Series } from '@catalog/domain/entities/series'
+import { SeriesRepository } from '@catalog/domain/repositories/seriesRepository'
 
 export class InMemorySeriesRepository implements SeriesRepository {
   private readonly series = new Map<string, Series>()

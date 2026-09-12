@@ -1,21 +1,21 @@
 import { UseCase } from '@cinescope/shared/application'
 // entities & value objects
-import { Series } from '../../../../domain/entities/series'
-import { LanguageCode } from '../../../../domain/value-objects/languageCode'
-import { MovieTitle } from '../../../../domain/value-objects/movieTitle'
-import { resolveByIds } from '../../shared/resolveByIds'
+import { Series } from '@catalog/domain/entities/series'
+import { LanguageCode } from '@catalog/domain/value-objects/languageCode'
+import { MovieTitle } from '@catalog/domain/value-objects/movieTitle'
+import { resolveByIds } from '@catalog/application/use-cases/shared/resolveByIds'
 // repositories
-import { CompanyRepository } from '../../../../domain/repositories/companyRepository'
-import { PersonRepository } from '../../../../domain/repositories/personRepository'
-import { GenreRepository } from '../../../../domain/repositories/genreRepository'
-import { SeriesRepository } from '../../../../domain/repositories/seriesRepository'
+import { CompanyRepository } from '@catalog/domain/repositories/companyRepository'
+import { PersonRepository } from '@catalog/domain/repositories/personRepository'
+import { GenreRepository } from '@catalog/domain/repositories/genreRepository'
+import { SeriesRepository } from '@catalog/domain/repositories/seriesRepository'
 // request & response
 import { CreateSeriesRequest } from './createSeriesRequest'
 import { CreateSeriesResponse } from './createSeriesResponse'
 // errors
-import { CompanyNotFoundError } from '../../../../domain/errors/companyNotFoundError'
-import { GenreNotFoundError } from '../../../../domain/errors/genreNotFoundError'
-import { PersonNotFoundError } from '../../../../domain/errors/personNotFoundError'
+import { CompanyNotFoundError } from '@catalog/domain/errors/companyNotFoundError'
+import { GenreNotFoundError } from '@catalog/domain/errors/genreNotFoundError'
+import { PersonNotFoundError } from '@catalog/domain/errors/personNotFoundError'
 
 export class CreateSeriesUseCase implements UseCase<CreateSeriesRequest, CreateSeriesResponse> {
   constructor(

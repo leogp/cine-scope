@@ -1,5 +1,5 @@
-import { RefreshToken } from '../../../domain/entities/refreshToken'
-import { RefreshTokenRepository } from '../../../domain/repositories/refreshTokenRepository'
+import { RefreshToken } from '@auth/domain/entities/refreshToken'
+import { RefreshTokenRepository } from '@auth/domain/repositories/refreshTokenRepository'
 import { PrismaClient } from '../generated/client'
 import { PrismaRefreshTokenMapper } from './prismaRefreshTokenMapper'
 

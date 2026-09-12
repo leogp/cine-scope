@@ -1,5 +1,5 @@
-import { Person } from '../../../domain/entities/person'
-import { PersonRepository } from '../../../domain/repositories/personRepository'
+import { Person } from '@catalog/domain/entities/person'
+import { PersonRepository } from '@catalog/domain/repositories/personRepository'
 import { PrismaClient } from '../generated/client'
 import { PrismaPersonMapper } from './prismaPersonMapper'
 

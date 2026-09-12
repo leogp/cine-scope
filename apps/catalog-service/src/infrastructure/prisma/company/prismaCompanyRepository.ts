@@ -1,5 +1,5 @@
-import { Company } from '../../../domain/entities/company'
-import { CompanyRepository } from '../../../domain/repositories/companyRepository'
+import { Company } from '@catalog/domain/entities/company'
+import { CompanyRepository } from '@catalog/domain/repositories/companyRepository'
 import { PrismaClient } from '../generated/client'
 import { PrismaCompanyMapper } from './prismaCompanyMapper'
 

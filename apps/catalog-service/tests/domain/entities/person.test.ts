@@ -1,5 +1,5 @@
-import { Person, PersonProps } from '../../../src/domain/entities/person'
-import { PersonName } from '../../../src/domain/value-objects/personName'
+import { Person, PersonProps } from '@catalog/domain/entities/person'
+import { PersonName } from '@catalog/domain/value-objects/personName'
 
 const buildProps = (overrides: Partial<PersonProps> = {}): PersonProps => ({
   id: 'person-1',

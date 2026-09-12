@@ -1,5 +1,5 @@
-import { PersonName } from '../../../src/domain/value-objects/personName'
-import { PrismaPersonRepository } from '../../../src/infrastructure/prisma/person'
+import { PersonName } from '@catalog/domain/value-objects/personName'
+import { PrismaPersonRepository } from '@catalog/infrastructure/prisma/person'
 import { buildPerson } from '../../helpers/builders'
 import { createTestPrisma, truncateAll } from '../../helpers/testDb'
 

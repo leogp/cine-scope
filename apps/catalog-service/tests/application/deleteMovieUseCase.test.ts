@@ -1,5 +1,5 @@
-import { DeleteMovieUseCase } from '../../src/application/use-cases/movie/delete/deleteMovieUseCase'
-import { MovieNotFoundError } from '../../src/domain/errors/movieNotFoundError'
+import { DeleteMovieUseCase } from '@catalog/application/use-cases/movie/delete/deleteMovieUseCase'
+import { MovieNotFoundError } from '@catalog/domain/errors/movieNotFoundError'
 import { InMemoryMovieRepository } from '../fakes/inMemoryMovieRepository'
 import { buildMovie } from '../helpers/builders'
 

@@ -1,5 +1,5 @@
-import { GenreName } from '../../../src/domain/value-objects/genreName'
-import { PrismaGenreRepository } from '../../../src/infrastructure/prisma/genre'
+import { GenreName } from '@catalog/domain/value-objects/genreName'
+import { PrismaGenreRepository } from '@catalog/infrastructure/prisma/genre'
 import { buildGenre } from '../../helpers/builders'
 import { createTestPrisma, truncateAll } from '../../helpers/testDb'
 

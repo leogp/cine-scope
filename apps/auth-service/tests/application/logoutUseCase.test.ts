@@ -1,5 +1,5 @@
-import { LogoutUseCase } from '../../src/application/use-cases/logout/logoutUseCase'
-import { RefreshToken } from '../../src/domain/entities/refreshToken'
+import { LogoutUseCase } from '@auth/application/use-cases/logout/logoutUseCase'
+import { RefreshToken } from '@auth/domain/entities/refreshToken'
 import { InMemoryRefreshTokenRepository } from '../fakes/inMemoryRefreshTokenRepository'
 
 const makeSut = async () => {

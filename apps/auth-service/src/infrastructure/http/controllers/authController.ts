@@ -1,9 +1,9 @@
 import { Request, Response } from 'express'
 
-import { SignUpUseCase } from '../../../application/use-cases/signup/signUpUseCase'
-import { LoginUseCase } from '../../../application/use-cases/login/loginUseCase'
-import { RefreshTokenUseCase } from '../../../application/use-cases/refresh-token/refreshTokenUseCase'
-import { LogoutUseCase } from '../../../application/use-cases/logout/logoutUseCase'
+import { SignUpUseCase } from '@auth/application/use-cases/signup/signUpUseCase'
+import { LoginUseCase } from '@auth/application/use-cases/login/loginUseCase'
+import { RefreshTokenUseCase } from '@auth/application/use-cases/refresh-token/refreshTokenUseCase'
+import { LogoutUseCase } from '@auth/application/use-cases/logout/logoutUseCase'
 
 export class AuthController {
   constructor(

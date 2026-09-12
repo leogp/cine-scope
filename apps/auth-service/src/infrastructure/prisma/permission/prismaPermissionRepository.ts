@@ -1,5 +1,5 @@
-import { Permission } from '../../../domain/entities/permission'
-import { PermissionRepository } from '../../../domain/repositories/permissionRepository'
+import { Permission } from '@auth/domain/entities/permission'
+import { PermissionRepository } from '@auth/domain/repositories/permissionRepository'
 import { PrismaClient } from '../generated/client'
 import { PrismaPermissionMapper } from './prismaPermissionMapper'
 

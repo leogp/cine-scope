@@ -1,5 +1,5 @@
 import { UseCase, buildPaginatedResult, normalizePagination } from '@cinescope/shared/application'
-import { MovieRepository } from '../../../../domain/repositories/movieRepository'
+import { MovieRepository } from '@catalog/domain/repositories/movieRepository'
 import { toMovieSummaryDTO } from '../shared/movieMappers'
 import { ListMoviesRequest } from './listMoviesRequest'
 import { ListMoviesResponse } from './listMoviesResponse'

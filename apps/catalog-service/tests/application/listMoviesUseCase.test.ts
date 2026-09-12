@@ -1,4 +1,4 @@
-import { ListMoviesUseCase } from '../../src/application/use-cases/movie/list/listMoviesUseCase'
+import { ListMoviesUseCase } from '@catalog/application/use-cases/movie/list/listMoviesUseCase'
 import { InMemoryMovieRepository } from '../fakes/inMemoryMovieRepository'
 import { buildMovie } from '../helpers/builders'
 

@@ -1,4 +1,4 @@
-import { RefreshToken } from '../../../src/domain/entities/refreshToken'
+import { RefreshToken } from '@auth/domain/entities/refreshToken'
 
 const buildToken = (overrides: Partial<Parameters<typeof RefreshToken.create>[0]> = {}) =>
   RefreshToken.create({

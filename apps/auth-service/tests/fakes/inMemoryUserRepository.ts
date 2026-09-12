@@ -1,7 +1,7 @@
-import { User } from '../../src/domain/entities/user'
-import { UserRepository } from '../../src/domain/repositories/userRepository'
-import { Email } from '../../src/domain/value-objects/email'
-import { Username } from '../../src/domain/value-objects/username'
+import { User } from '@auth/domain/entities/user'
+import { UserRepository } from '@auth/domain/repositories/userRepository'
+import { Email } from '@auth/domain/value-objects/email'
+import { Username } from '@auth/domain/value-objects/username'
 
 export class InMemoryUserRepository implements UserRepository {
   private readonly users = new Map<string, User>()

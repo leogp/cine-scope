@@ -1,5 +1,5 @@
 import { UseCase } from '@cinescope/shared/application'
-import { RefreshTokenRepository } from '../../../domain/repositories/refreshTokenRepository'
+import { RefreshTokenRepository } from '@auth/domain/repositories/refreshTokenRepository'
 import { LogoutRequest } from './logoutRequest'
 
 export class LogoutUseCase implements UseCase<LogoutRequest, void> {

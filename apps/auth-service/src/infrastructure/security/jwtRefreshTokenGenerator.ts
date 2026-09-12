@@ -1,8 +1,8 @@
 import jwt from 'jsonwebtoken'
 import { randomUUID } from 'crypto'
 
-import { RefreshTokenGenerator } from '../../application/ports/refreshTokenGenerator'
-import { GeneratedRefreshToken } from '../../application/ports/generatedRefreshToken'
+import { RefreshTokenGenerator } from '@auth/application/ports/refreshTokenGenerator'
+import { GeneratedRefreshToken } from '@auth/application/ports/generatedRefreshToken'
 
 export class JwtRefreshTokenGenerator implements RefreshTokenGenerator {
   constructor(

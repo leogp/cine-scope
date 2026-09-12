@@ -1,4 +1,4 @@
-import { RefreshToken } from '../../../domain/entities/refreshToken'
+import { RefreshToken } from '@auth/domain/entities/refreshToken'
 import { RefreshTokenModel } from '../generated/models'
 
 export interface RefreshTokenPersistence {

@@ -1,6 +1,6 @@
 import { UseCase } from '@cinescope/shared/application'
-import { MovieNotFoundError } from '../../../../domain/errors/movieNotFoundError'
-import { MovieRepository } from '../../../../domain/repositories/movieRepository'
+import { MovieNotFoundError } from '@catalog/domain/errors/movieNotFoundError'
+import { MovieRepository } from '@catalog/domain/repositories/movieRepository'
 import { DeleteMovieRequest } from './deleteMovieRequest'
 import { DeleteMovieResponse } from './deleteMovieResponse'
 

@@ -6,6 +6,9 @@ module.exports = {
     // ts-jest at the tests tsconfig instead.
     '^.+\\.ts$': ['ts-jest', { tsconfig: '<rootDir>/tests/tsconfig.json' }],
   },
+  // Jest's resolver does not read tsconfig `paths` — keep this in sync with
+  // the alias in tsconfig.json.
+  moduleNameMapper: { '^@auth/(.*)$': '<rootDir>/src/$1' },
   testEnvironment: 'node',
   roots: ['<rootDir>/tests'],
   testMatch: ['**/*.test.ts'],

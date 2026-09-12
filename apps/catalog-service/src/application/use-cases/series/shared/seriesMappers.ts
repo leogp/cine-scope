@@ -1,4 +1,4 @@
-import { Series } from '../../../../domain/entities/series'
+import { Series } from '@catalog/domain/entities/series'
 import {
   CompanyDTO,
   GenreDTO,
@@ -6,7 +6,7 @@ import {
   toCompanyDTO,
   toGenreDTO,
   toPersonDTO,
-} from '../../shared/relationMappers'
+} from '@catalog/application/use-cases/shared/relationMappers'
 
 export interface SeriesDTO {
   id: string

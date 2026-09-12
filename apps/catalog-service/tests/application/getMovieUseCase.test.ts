@@ -1,6 +1,6 @@
-import { GetMovieUseCase } from '../../src/application/use-cases/movie/get/getMovieUseCase'
-import { MovieNotFoundError } from '../../src/domain/errors/movieNotFoundError'
-import { Duration } from '../../src/domain/value-objects/duration'
+import { GetMovieUseCase } from '@catalog/application/use-cases/movie/get/getMovieUseCase'
+import { MovieNotFoundError } from '@catalog/domain/errors/movieNotFoundError'
+import { Duration } from '@catalog/domain/value-objects/duration'
 import { InMemoryMovieRepository } from '../fakes/inMemoryMovieRepository'
 import { buildCompany, buildGenre, buildMovie, buildPerson } from '../helpers/builders'
 

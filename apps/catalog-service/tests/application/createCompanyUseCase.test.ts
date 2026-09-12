@@ -1,6 +1,6 @@
-import { CreateCompanyUseCase } from '../../src/application/use-cases/company/create/createCompanyUseCase'
-import { InvalidCompanyNameError } from '../../src/domain/errors/invalidCompanyNameError'
-import { InvalidCountryCodeError } from '../../src/domain/errors/invalidCountryCodeError'
+import { CreateCompanyUseCase } from '@catalog/application/use-cases/company/create/createCompanyUseCase'
+import { InvalidCompanyNameError } from '@catalog/domain/errors/invalidCompanyNameError'
+import { InvalidCountryCodeError } from '@catalog/domain/errors/invalidCountryCodeError'
 import { InMemoryCompanyRepository } from '../fakes/inMemoryCompanyRepository'
 
 const makeSut = () => {

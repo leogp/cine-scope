@@ -1,4 +1,4 @@
-import { Movie } from '../../../../domain/entities/movie'
+import { Movie } from '@catalog/domain/entities/movie'
 import {
   CompanyDTO,
   GenreDTO,
@@ -6,7 +6,7 @@ import {
   toCompanyDTO,
   toGenreDTO,
   toPersonDTO,
-} from '../../shared/relationMappers'
+} from '@catalog/application/use-cases/shared/relationMappers'
 
 export interface MovieDTO {
   id: string

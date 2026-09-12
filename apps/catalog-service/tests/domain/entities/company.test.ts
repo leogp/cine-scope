@@ -1,6 +1,6 @@
-import { Company, CompanyProps } from '../../../src/domain/entities/company'
-import { CompanyName } from '../../../src/domain/value-objects/companyName'
-import { CountryCode } from '../../../src/domain/value-objects/countryCode'
+import { Company, CompanyProps } from '@catalog/domain/entities/company'
+import { CompanyName } from '@catalog/domain/value-objects/companyName'
+import { CountryCode } from '@catalog/domain/value-objects/countryCode'
 
 const buildProps = (overrides: Partial<CompanyProps> = {}): CompanyProps => ({
   id: 'company-1',

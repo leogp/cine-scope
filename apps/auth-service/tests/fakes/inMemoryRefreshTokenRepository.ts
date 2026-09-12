@@ -1,5 +1,5 @@
-import { RefreshToken } from '../../src/domain/entities/refreshToken'
-import { RefreshTokenRepository } from '../../src/domain/repositories/refreshTokenRepository'
+import { RefreshToken } from '@auth/domain/entities/refreshToken'
+import { RefreshTokenRepository } from '@auth/domain/repositories/refreshTokenRepository'
 
 export class InMemoryRefreshTokenRepository implements RefreshTokenRepository {
   private readonly tokens = new Map<string, RefreshToken>()
