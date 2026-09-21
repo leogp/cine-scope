@@ -1,5 +1,5 @@
 {
-  "name": "recomendation-service",
+  "name": "recommendation-service",
   "version": "1.0.0",
   "description": "Movie recommendation service",
   "main": "dist/index.js",

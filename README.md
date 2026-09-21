@@ -73,7 +73,7 @@ apps/
   catalog-service/         movies, series, people, genres, companies (implemented)
   review-service/          scaffolding
   watchlist-service/       scaffolding
-  recomendation-service/   scaffolding
+  recommendation-service/  scaffolding
   gateway-service/         scaffolding
 packages/
   shared/                  @cinescope/shared — building blocks used by every service
