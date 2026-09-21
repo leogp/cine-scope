@@ -7,7 +7,7 @@ import { InMemoryCompanyRepository } from '../fakes/inMemoryCompanyRepository'
 import { InMemoryGenreRepository } from '../fakes/inMemoryGenreRepository'
 import { InMemoryMovieRepository } from '../fakes/inMemoryMovieRepository'
 import { InMemoryPersonRepository } from '../fakes/inMemoryPersonRepository'
-import { buildGenre, buildMovie, buildPerson } from '../helpers/builders'
+import { buildGenre, buildMovie } from '../helpers/builders'
 
 const makeSut = () => {
   const movieRepository = new InMemoryMovieRepository()
