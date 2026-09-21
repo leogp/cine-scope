@@ -44,6 +44,7 @@ export class RefreshTokenUseCase implements UseCase<RefreshTokenRequest, Refresh
       username: user.data.username.toString(),
       email: user.data.email.toString(),
       roles: user.data.roles.map((role) => role.data.name),
+      permissions: user.permissionNames(),
     })
 
     currentRefreshToken.revoke()

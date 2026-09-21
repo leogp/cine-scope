@@ -16,6 +16,7 @@ export class JwtAccessTokenGenerator implements AccessTokenGenerator {
         username: payload.username,
         email: payload.email,
         roles: payload.roles,
+        permissions: payload.permissions,
       },
       this.secret,
       {

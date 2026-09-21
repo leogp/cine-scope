@@ -1,12 +1,16 @@
 import request from 'supertest'
 
+import { authHeader } from '../../helpers/authToken'
 import { buildTestApp, validPersonBody } from '../../helpers/buildTestApp'
 
 describe('POST /people', () => {
   it('responds 201 with the new id and persists the person', async () => {
     const { app, personRepository } = buildTestApp()
 
-    const response = await request(app).post('/people').send(validPersonBody)
+    const response = await request(app)
+      .post('/people')
+      .set('Authorization', authHeader())
+      .send(validPersonBody)
 
     expect(response.status).toBe(201)
     expect(response.body).toEqual({ id: expect.any(String) })
@@ -16,7 +20,10 @@ describe('POST /people', () => {
   it('accepts a body that omits the optional fields', async () => {
     const { app } = buildTestApp()
 
-    const response = await request(app).post('/people').send({ name: 'Saoirse Ronan' })
+    const response = await request(app)
+      .post('/people')
+      .set('Authorization', authHeader())
+      .send({ name: 'Saoirse Ronan' })
 
     expect(response.status).toBe(201)
   })
@@ -26,6 +33,7 @@ describe('POST /people', () => {
 
     const created = await request(app)
       .post('/people')
+      .set('Authorization', authHeader())
       .send({ ...validPersonBody, birthDate: '1983-08-04' })
 
     const response = await request(app).get(`/people/${created.body.id}`)
@@ -38,6 +46,7 @@ describe('POST /people', () => {
 
     const response = await request(app)
       .post('/people')
+      .set('Authorization', authHeader())
       .send({ ...validPersonBody, name: '' })
 
     expect(response.status).toBe(400)
@@ -49,7 +58,10 @@ describe('POST /people', () => {
 describe('GET /people/:id', () => {
   it('responds 200 with the person', async () => {
     const { app } = buildTestApp()
-    const created = await request(app).post('/people').send(validPersonBody)
+    const created = await request(app)
+      .post('/people')
+      .set('Authorization', authHeader())
+      .send(validPersonBody)
 
     const response = await request(app).get(`/people/${created.body.id}`)
 

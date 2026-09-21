@@ -1,12 +1,16 @@
 import request from 'supertest'
 
+import { authHeader } from '../../helpers/authToken'
 import { buildTestApp, validGenreBody, validMovieBody } from '../../helpers/buildTestApp'
 
 describe('POST /movies', () => {
   it('responds 201 with the new id and persists the movie', async () => {
     const { app, movieRepository } = buildTestApp()
 
-    const response = await request(app).post('/movies').send(validMovieBody)
+    const response = await request(app)
+      .post('/movies')
+      .set('Authorization', authHeader())
+      .send(validMovieBody)
 
     expect(response.status).toBe(201)
     expect(response.body).toEqual({ id: expect.any(String) })
@@ -15,10 +19,14 @@ describe('POST /movies', () => {
 
   it('resolves relation ids into the aggregate', async () => {
     const { app } = buildTestApp()
-    const genre = await request(app).post('/genres').send(validGenreBody)
+    const genre = await request(app)
+      .post('/genres')
+      .set('Authorization', authHeader())
+      .send(validGenreBody)
 
     const created = await request(app)
       .post('/movies')
+      .set('Authorization', authHeader())
       .send({ ...validMovieBody, genreIds: [genre.body.id] })
 
     const movie = await request(app).get(`/movies/${created.body.id}`)
@@ -32,6 +40,7 @@ describe('POST /movies', () => {
 
     const response = await request(app)
       .post('/movies')
+      .set('Authorization', authHeader())
       .send({ ...validMovieBody, title: '' })
 
     expect(response.status).toBe(400)
@@ -49,6 +58,7 @@ describe('POST /movies', () => {
 
     const response = await request(app)
       .post('/movies')
+      .set('Authorization', authHeader())
       .send({ ...validMovieBody, originalLanguage: 'english' })
 
     expect(response.status).toBe(400)
@@ -60,6 +70,7 @@ describe('POST /movies', () => {
 
     const response = await request(app)
       .post('/movies')
+      .set('Authorization', authHeader())
       .send({ ...validMovieBody, genreIds: ['missing-genre'] })
 
     expect(response.status).toBe(404)
@@ -70,7 +81,7 @@ describe('POST /movies', () => {
 describe('GET /movies', () => {
   it('responds 200 with a paginated envelope', async () => {
     const { app } = buildTestApp()
-    await request(app).post('/movies').send(validMovieBody)
+    await request(app).post('/movies').set('Authorization', authHeader()).send(validMovieBody)
 
     const response = await request(app).get('/movies')
 
@@ -86,9 +97,11 @@ describe('GET /movies', () => {
     const { app } = buildTestApp()
     await request(app)
       .post('/movies')
+      .set('Authorization', authHeader())
       .send({ ...validMovieBody, title: 'First' })
     await request(app)
       .post('/movies')
+      .set('Authorization', authHeader())
       .send({ ...validMovieBody, title: 'Second' })
 
     const response = await request(app).get('/movies').query({ page: 2, pageSize: 1 })
@@ -111,7 +124,10 @@ describe('GET /movies', () => {
 describe('GET /movies/:id', () => {
   it('responds 200 with the full movie read model', async () => {
     const { app } = buildTestApp()
-    const created = await request(app).post('/movies').send(validMovieBody)
+    const created = await request(app)
+      .post('/movies')
+      .set('Authorization', authHeader())
+      .send(validMovieBody)
 
     const response = await request(app).get(`/movies/${created.body.id}`)
 
@@ -141,10 +157,14 @@ describe('GET /movies/:id', () => {
 describe('PUT /movies/:id', () => {
   it('responds 200 and replaces the movie', async () => {
     const { app } = buildTestApp()
-    const created = await request(app).post('/movies').send(validMovieBody)
+    const created = await request(app)
+      .post('/movies')
+      .set('Authorization', authHeader())
+      .send(validMovieBody)
 
     const response = await request(app)
       .put(`/movies/${created.body.id}`)
+      .set('Authorization', authHeader())
       .send({ ...validMovieBody, title: 'Little Women', duration: 135 })
 
     expect(response.status).toBe(200)
@@ -157,7 +177,10 @@ describe('PUT /movies/:id', () => {
   it('responds 404 for an unknown id', async () => {
     const { app } = buildTestApp()
 
-    const response = await request(app).put('/movies/does-not-exist').send(validMovieBody)
+    const response = await request(app)
+      .put('/movies/does-not-exist')
+      .set('Authorization', authHeader())
+      .send(validMovieBody)
 
     expect(response.status).toBe(404)
     expect(response.body.error).toBe('MovieNotFoundError')
@@ -165,9 +188,15 @@ describe('PUT /movies/:id', () => {
 
   it('responds 400 for a body that misses the schema', async () => {
     const { app } = buildTestApp()
-    const created = await request(app).post('/movies').send(validMovieBody)
+    const created = await request(app)
+      .post('/movies')
+      .set('Authorization', authHeader())
+      .send(validMovieBody)
 
-    const response = await request(app).put(`/movies/${created.body.id}`).send({ title: 'Partial' })
+    const response = await request(app)
+      .put(`/movies/${created.body.id}`)
+      .set('Authorization', authHeader())
+      .send({ title: 'Partial' })
 
     expect(response.status).toBe(400)
     expect(response.body.error).toBe('ValidationError')
@@ -177,9 +206,14 @@ describe('PUT /movies/:id', () => {
 describe('DELETE /movies/:id', () => {
   it('responds 204 with no body and removes the movie', async () => {
     const { app, movieRepository } = buildTestApp()
-    const created = await request(app).post('/movies').send(validMovieBody)
+    const created = await request(app)
+      .post('/movies')
+      .set('Authorization', authHeader())
+      .send(validMovieBody)
 
-    const response = await request(app).delete(`/movies/${created.body.id}`)
+    const response = await request(app)
+      .delete(`/movies/${created.body.id}`)
+      .set('Authorization', authHeader())
 
     expect(response.status).toBe(204)
     expect(response.body).toEqual({})
@@ -189,7 +223,9 @@ describe('DELETE /movies/:id', () => {
   it('responds 404 for an unknown id', async () => {
     const { app } = buildTestApp()
 
-    const response = await request(app).delete('/movies/does-not-exist')
+    const response = await request(app)
+      .delete('/movies/does-not-exist')
+      .set('Authorization', authHeader())
 
     expect(response.status).toBe(404)
     expect(response.body.error).toBe('MovieNotFoundError')

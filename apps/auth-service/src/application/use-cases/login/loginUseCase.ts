@@ -60,6 +60,7 @@ export class LoginUseCase implements UseCase<LoginRequest, LoginResponse> {
       username: user.data.username.toString(),
       email: user.data.email.toString(),
       roles: user.data.roles.map((role) => role.data.name),
+      permissions: user.permissionNames(),
     })
 
     const generatedRefreshToken = await this.refreshTokenGenerator.generate(user.id)

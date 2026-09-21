@@ -1,5 +1,11 @@
+import { buildRequireAuth, requirePermission } from '@cinescope/shared/infrastructure/http'
+import { RequestHandler } from 'express'
+
+// config
+import { env } from '../config/env'
 // http
 import { CatalogControllers } from '../infrastructure/http/app'
+import { CATALOG_WRITE } from '../infrastructure/http/permissions'
 import { CompanyController } from '../infrastructure/http/controllers/companyController'
 import { SeriesController } from '../infrastructure/http/controllers/seriesController'
 import { MovieController } from '../infrastructure/http/controllers/movieController'
@@ -83,4 +89,19 @@ export function composeApp(): CatalogControllers {
     company: new CompanyController(createCompanyUseCase, getCompanyUseCase),
     person: new PersonController(createPersonUseCase, getPersonUseCase),
   }
+}
+
+/**
+ * Guards for the catalog's write surface: verify the access token auth-service
+ * signed, then require `catalog:write`.
+ *
+ * The secret lives here rather than in the HTTP layer so route modules stay free
+ * of configuration. Issuer is pinned so a token minted by another service in the
+ * platform cannot stand in for one from auth-service.
+ */
+export function composeWriteGuards(): readonly RequestHandler[] {
+  return [
+    buildRequireAuth({ secret: env.JWT_ACCESS_SECRET, issuer: 'auth-service' }),
+    requirePermission(CATALOG_WRITE),
+  ]
 }

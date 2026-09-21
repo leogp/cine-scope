@@ -4,6 +4,10 @@ const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
   PORT: z.coerce.number().int().positive().default(4002),
   DATABASE_URL: z.url(),
+  // Shared with auth-service, which signs the access tokens this service verifies.
+  // Required, not optional: booting without it would silently leave the write
+  // routes unguarded.
+  JWT_ACCESS_SECRET: z.string().min(16),
   REDIS_URL: z.url().optional(),
   RABBITMQ_URL: z.url().optional(),
 })

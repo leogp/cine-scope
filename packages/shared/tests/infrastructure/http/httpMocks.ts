@@ -13,7 +13,7 @@ export interface MockResponse {
 }
 
 export const createMockRequest = (overrides: Partial<Request> = {}): Request =>
-  ({ body: {}, params: {}, query: {}, originalUrl: '/', ...overrides }) as Request
+  ({ body: {}, params: {}, query: {}, headers: {}, originalUrl: '/', ...overrides }) as Request
 
 export const createMockResponse = (): MockResponse => {
   const res: MockResponse = {

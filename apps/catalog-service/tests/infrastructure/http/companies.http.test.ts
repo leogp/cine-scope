@@ -1,12 +1,16 @@
 import request from 'supertest'
 
+import { authHeader } from '../../helpers/authToken'
 import { buildTestApp, validCompanyBody } from '../../helpers/buildTestApp'
 
 describe('POST /companies', () => {
   it('responds 201 with the new id and persists the company', async () => {
     const { app, companyRepository } = buildTestApp()
 
-    const response = await request(app).post('/companies').send(validCompanyBody)
+    const response = await request(app)
+      .post('/companies')
+      .set('Authorization', authHeader())
+      .send(validCompanyBody)
 
     expect(response.status).toBe(201)
     expect(response.body).toEqual({ id: expect.any(String) })
@@ -16,7 +20,10 @@ describe('POST /companies', () => {
   it('accepts a body that omits the optional fields', async () => {
     const { app } = buildTestApp()
 
-    const response = await request(app).post('/companies').send({ name: 'Neon' })
+    const response = await request(app)
+      .post('/companies')
+      .set('Authorization', authHeader())
+      .send({ name: 'Neon' })
 
     expect(response.status).toBe(201)
   })
@@ -26,6 +33,7 @@ describe('POST /companies', () => {
 
     const response = await request(app)
       .post('/companies')
+      .set('Authorization', authHeader())
       .send({ ...validCompanyBody, name: '' })
 
     expect(response.status).toBe(400)
@@ -38,6 +46,7 @@ describe('POST /companies', () => {
 
     const response = await request(app)
       .post('/companies')
+      .set('Authorization', authHeader())
       .send({ ...validCompanyBody, countryCode: 'usa' })
 
     expect(response.status).toBe(400)
@@ -48,7 +57,10 @@ describe('POST /companies', () => {
 describe('GET /companies/:id', () => {
   it('responds 200 with the company', async () => {
     const { app } = buildTestApp()
-    const created = await request(app).post('/companies').send(validCompanyBody)
+    const created = await request(app)
+      .post('/companies')
+      .set('Authorization', authHeader())
+      .send(validCompanyBody)
 
     const response = await request(app).get(`/companies/${created.body.id}`)
 

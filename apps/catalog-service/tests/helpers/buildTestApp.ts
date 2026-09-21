@@ -1,3 +1,4 @@
+import { buildRequireAuth, requirePermission } from '@cinescope/shared/infrastructure/http'
 import { Application } from 'express'
 
 import { CreateCompanyUseCase } from '@catalog/application/use-cases/company/create/createCompanyUseCase'
@@ -24,6 +25,8 @@ import { InMemoryGenreRepository } from '../fakes/inMemoryGenreRepository'
 import { InMemoryMovieRepository } from '../fakes/inMemoryMovieRepository'
 import { InMemoryPersonRepository } from '../fakes/inMemoryPersonRepository'
 import { InMemorySeriesRepository } from '../fakes/inMemorySeriesRepository'
+import { CATALOG_WRITE } from '@catalog/infrastructure/http/permissions'
+import { TEST_JWT_ISSUER, TEST_JWT_SECRET } from './authToken'
 
 interface TestApp {
   app: Application
@@ -38,6 +41,9 @@ interface TestApp {
  * Real use cases, controllers and Express app wired against in-memory fakes:
  * the whole HTTP layer under test without a database. Mirrors
  * `src/main/composition.ts`, swapping only the repository implementations.
+ *
+ * The write guards are the production ones, not stubs — suites authenticate with
+ * a token from `./authToken`, so the guard chain itself stays under test.
  */
 export const buildTestApp = (): TestApp => {
   const movieRepository = new InMemoryMovieRepository()
@@ -46,36 +52,52 @@ export const buildTestApp = (): TestApp => {
   const personRepository = new InMemoryPersonRepository()
   const companyRepository = new InMemoryCompanyRepository()
 
-  const app = buildApp({
-    movie: new MovieController(
-      new CreateMovieUseCase(movieRepository, genreRepository, personRepository, companyRepository),
-      new GetMovieUseCase(movieRepository),
-      new ListMoviesUseCase(movieRepository),
-      new UpdateMovieUseCase(movieRepository, genreRepository, personRepository, companyRepository),
-      new DeleteMovieUseCase(movieRepository)
-    ),
-    series: new SeriesController(
-      new CreateSeriesUseCase(
-        seriesRepository,
-        genreRepository,
-        personRepository,
-        companyRepository
+  const app = buildApp(
+    {
+      movie: new MovieController(
+        new CreateMovieUseCase(
+          movieRepository,
+          genreRepository,
+          personRepository,
+          companyRepository
+        ),
+        new GetMovieUseCase(movieRepository),
+        new ListMoviesUseCase(movieRepository),
+        new UpdateMovieUseCase(
+          movieRepository,
+          genreRepository,
+          personRepository,
+          companyRepository
+        ),
+        new DeleteMovieUseCase(movieRepository)
       ),
-      new GetSeriesUseCase(seriesRepository)
-    ),
-    genre: new GenreController(
-      new CreateGenreUseCase(genreRepository),
-      new GetGenreUseCase(genreRepository)
-    ),
-    company: new CompanyController(
-      new CreateCompanyUseCase(companyRepository),
-      new GetCompanyUseCase(companyRepository)
-    ),
-    person: new PersonController(
-      new CreatePersonUseCase(personRepository),
-      new GetPersonUseCase(personRepository)
-    ),
-  })
+      series: new SeriesController(
+        new CreateSeriesUseCase(
+          seriesRepository,
+          genreRepository,
+          personRepository,
+          companyRepository
+        ),
+        new GetSeriesUseCase(seriesRepository)
+      ),
+      genre: new GenreController(
+        new CreateGenreUseCase(genreRepository),
+        new GetGenreUseCase(genreRepository)
+      ),
+      company: new CompanyController(
+        new CreateCompanyUseCase(companyRepository),
+        new GetCompanyUseCase(companyRepository)
+      ),
+      person: new PersonController(
+        new CreatePersonUseCase(personRepository),
+        new GetPersonUseCase(personRepository)
+      ),
+    },
+    [
+      buildRequireAuth({ secret: TEST_JWT_SECRET, issuer: TEST_JWT_ISSUER }),
+      requirePermission(CATALOG_WRITE),
+    ]
+  )
 
   return {
     app,

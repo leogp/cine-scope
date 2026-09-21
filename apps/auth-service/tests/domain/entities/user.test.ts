@@ -16,6 +16,20 @@ const buildUser = () =>
 
 const buildRole = (id = 'role-1') => Role.create({ id, name: 'user', description: 'Default role' })
 
+const buildPermission = (name: string) => ({
+  id: `permission-${name}`,
+  name,
+  description: `Allows ${name}`,
+})
+
+const buildRoleWith = (id: string, name: string, permissions: string[]) =>
+  Role.create({
+    id,
+    name,
+    description: `${name} role`,
+    permissions: permissions.map(buildPermission),
+  })
+
 describe('User', () => {
   it('creates a user with the given props and no roles by default', () => {
     const user = buildUser()
@@ -79,5 +93,51 @@ describe('User', () => {
 
     user.activate()
     expect(user.data.status).toBe(UserStatus.ACTIVE)
+  })
+
+  describe('permissionNames', () => {
+    it('has no permissions without roles', () => {
+      expect(buildUser().permissionNames()).toEqual([])
+    })
+
+    it('has no permissions when its roles grant none', () => {
+      const user = buildUser()
+
+      user.assignRole(buildRole())
+
+      expect(user.permissionNames()).toEqual([])
+    })
+
+    it('collects the permissions of a single role', () => {
+      const user = buildUser()
+
+      user.assignRole(buildRoleWith('role-1', 'editor', ['catalog:write', 'catalog:read']))
+
+      expect(user.permissionNames()).toEqual(['catalog:read', 'catalog:write'])
+    })
+
+    it('unions the permissions of every role, deduplicating overlaps', () => {
+      const user = buildUser()
+
+      user.assignRole(buildRoleWith('role-1', 'user', ['catalog:read', 'reviews:write']))
+      user.assignRole(buildRoleWith('role-2', 'editor', ['catalog:read', 'catalog:write']))
+
+      // catalog:read is granted by both roles but must appear once — the access
+      // token claim is a set, not a tally.
+      expect(user.permissionNames()).toEqual(['catalog:read', 'catalog:write', 'reviews:write'])
+    })
+
+    it('returns names sorted, independently of role assignment order', () => {
+      const first = buildUser()
+      first.assignRole(buildRoleWith('role-1', 'a', ['users:manage']))
+      first.assignRole(buildRoleWith('role-2', 'b', ['catalog:write']))
+
+      const second = buildUser()
+      second.assignRole(buildRoleWith('role-2', 'b', ['catalog:write']))
+      second.assignRole(buildRoleWith('role-1', 'a', ['users:manage']))
+
+      expect(first.permissionNames()).toEqual(second.permissionNames())
+      expect(first.permissionNames()).toEqual(['catalog:write', 'users:manage'])
+    })
   })
 })
