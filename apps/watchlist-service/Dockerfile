@@ -16,7 +16,7 @@ WORKDIR /workspace
 COPY package.json package-lock.json ./
 COPY apps/auth-service/package.json ./apps/auth-service/
 COPY apps/catalog-service/package.json ./apps/catalog-service/
-COPY apps/recomendation-service/package.json ./apps/recomendation-service/
+COPY apps/recommendation-service/package.json ./apps/recommendation-service/
 COPY apps/review-service/package.json ./apps/review-service/
 COPY apps/watchlist-service/package.json ./apps/watchlist-service/
 COPY apps/gateway-service/package.json ./apps/gateway-service/
@@ -37,7 +37,7 @@ WORKDIR /workspace
 COPY package.json package-lock.json ./
 COPY apps/auth-service/package.json ./apps/auth-service/
 COPY apps/catalog-service/package.json ./apps/catalog-service/
-COPY apps/recomendation-service/package.json ./apps/recomendation-service/
+COPY apps/recommendation-service/package.json ./apps/recommendation-service/
 COPY apps/review-service/package.json ./apps/review-service/
 COPY apps/watchlist-service/package.json ./apps/watchlist-service/
 COPY apps/gateway-service/package.json ./apps/gateway-service/

@@ -1,7 +1,7 @@
-# recomendation-service — production image (npm workspaces monorepo)
+# recommendation-service — production image (npm workspaces monorepo)
 #
 # NOTE: build from the repository ROOT so the workspace lockfile is in context:
-#   docker build -f apps/recomendation-service/Dockerfile -t recomendation-service .
+#   docker build -f apps/recommendation-service/Dockerfile -t recommendation-service .
 
 # ─── Stage 1: builder — install full workspace and compile this service ──────
 FROM node:24-alpine AS builder
@@ -16,7 +16,7 @@ WORKDIR /workspace
 COPY package.json package-lock.json ./
 COPY apps/auth-service/package.json ./apps/auth-service/
 COPY apps/catalog-service/package.json ./apps/catalog-service/
-COPY apps/recomendation-service/package.json ./apps/recomendation-service/
+COPY apps/recommendation-service/package.json ./apps/recommendation-service/
 COPY apps/review-service/package.json ./apps/review-service/
 COPY apps/watchlist-service/package.json ./apps/watchlist-service/
 COPY apps/gateway-service/package.json ./apps/gateway-service/
@@ -24,8 +24,8 @@ RUN npm ci
 
 # Compile just this service.
 COPY tsconfig.base.json ./
-COPY apps/recomendation-service ./apps/recomendation-service
-RUN npm run build -w recomendation-service
+COPY apps/recommendation-service ./apps/recommendation-service
+RUN npm run build -w recommendation-service
 
 # ─── Stage 2: prod-deps — production-only dependencies ───────────────────────
 FROM node:24-alpine AS prod-deps
@@ -37,7 +37,7 @@ WORKDIR /workspace
 COPY package.json package-lock.json ./
 COPY apps/auth-service/package.json ./apps/auth-service/
 COPY apps/catalog-service/package.json ./apps/catalog-service/
-COPY apps/recomendation-service/package.json ./apps/recomendation-service/
+COPY apps/recommendation-service/package.json ./apps/recommendation-service/
 COPY apps/review-service/package.json ./apps/review-service/
 COPY apps/watchlist-service/package.json ./apps/watchlist-service/
 COPY apps/gateway-service/package.json ./apps/gateway-service/
@@ -46,7 +46,7 @@ RUN npm ci --omit=dev
 # ─── Stage 3: production — lean runtime image ────────────────────────────────
 FROM node:24-alpine AS production
 
-LABEL service="recomendation-service"
+LABEL service="recommendation-service"
 
 RUN addgroup -g 1001 -S appgroup && \
     adduser -S appuser -u 1001 -G appgroup
@@ -54,8 +54,8 @@ RUN addgroup -g 1001 -S appgroup && \
 WORKDIR /app
 
 COPY --from=prod-deps --chown=appuser:appgroup /workspace/node_modules ./node_modules
-COPY --from=builder --chown=appuser:appgroup /workspace/apps/recomendation-service/dist ./dist
-COPY --chown=appuser:appgroup apps/recomendation-service/package.json ./package.json
+COPY --from=builder --chown=appuser:appgroup /workspace/apps/recommendation-service/dist ./dist
+COPY --chown=appuser:appgroup apps/recommendation-service/package.json ./package.json
 
 USER appuser
 

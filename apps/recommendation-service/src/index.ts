@@ -7,9 +7,9 @@ const PORT = process.env.PORT ?? 4003
 app.use(express.json())
 
 app.get('/health', (_req: Request, res: Response) => {
-  res.json({ status: 'ok', service: 'recomendation-service' })
+  res.json({ status: 'ok', service: 'recommendation-service' })
 })
 
 app.listen(PORT, () => {
-  console.log(`recomendation-service running on port ${PORT}`)
+  console.log(`recommendation-service running on port ${PORT}`)
 })

@@ -20,7 +20,7 @@ Scope is deliberately kept narrow: the goal is to exercise microservice patterns
 - [x] `catalog/infrastructure`
 - [x] `auth/authorization` — expose permissions in the access token payload, add `requirePermission` to `@cinescope/shared/infrastructure/http`, enforce `catalog:write` on catalog write routes
 - [x] `chore/ci-pipeline` — lint, typecheck and unit tests on every PR
-- [ ] `chore/recommendation-rename` — fix the `recomendation-service` spelling across folder, package, container and env vars, before it reaches queue names and Kubernetes manifests
+- [x] `chore/recommendation-rename` — fix the `recomendation-service` spelling across folder, package, container and env vars, before it reaches queue names and Kubernetes manifests
 
 ## Phase 2 — Gateway
 

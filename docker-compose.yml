@@ -154,10 +154,10 @@ services:
       rabbitmq:
         condition: service_healthy
 
-  recomendation-service:
+  recommendation-service:
     <<: *node-dev
-    container_name: recomendation-service
-    working_dir: /workspace/apps/recomendation-service
+    container_name: recommendation-service
+    working_dir: /workspace/apps/recommendation-service
     command: npm run dev
     ports:
       - '4003:4003'
@@ -235,7 +235,7 @@ services:
       PORT: 4000
       AUTH_SERVICE_URL: http://auth-service:4001
       CATALOG_SERVICE_URL: http://catalog-service:4002
-      RECOMENDATION_SERVICE_URL: http://recomendation-service:4003
+      RECOMMENDATION_SERVICE_URL: http://recommendation-service:4003
       REVIEW_SERVICE_URL: http://review-service:4004
       WATCHLIST_SERVICE_URL: http://watchlist-service:4005
     depends_on:
@@ -245,7 +245,7 @@ services:
         condition: service_started
       catalog-service:
         condition: service_started
-      recomendation-service:
+      recommendation-service:
         condition: service_started
       review-service:
         condition: service_started
