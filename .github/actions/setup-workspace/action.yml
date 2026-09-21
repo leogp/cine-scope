@@ -1,0 +1,32 @@
+name: Set up workspace
+description: >-
+  Install the npm workspace and produce the build artifacts every quality check
+  depends on — the same cold-start sequence the compose `deps` service runs.
+
+runs:
+  using: composite
+  steps:
+    # Keep in sync with the base image in Dockerfile.dev.
+    - uses: actions/setup-node@v4
+      with:
+        node-version: 24
+        cache: npm
+
+    - name: Install dependencies
+      shell: bash
+      run: npm ci
+
+    # The package exports of @cinescope/shared point at ./dist, so services
+    # cannot resolve its types (or import it in tests) until it is built.
+    - name: Build @cinescope/shared
+      shell: bash
+      run: npm run build -w @cinescope/shared
+
+    # Prisma 7 does not generate clients on install. prisma.config.ts resolves
+    # DATABASE_URL while loading, so generation needs a syntactically valid URL
+    # even though no database is contacted.
+    - name: Generate Prisma clients
+      shell: bash
+      env:
+        DATABASE_URL: postgresql://ci:ci@localhost:5432/ci
+      run: npm run generate
