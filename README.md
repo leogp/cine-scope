@@ -180,10 +180,27 @@ docker compose exec deps npm install -D <package>
 the root and apply to every service.
 
 ```bash
-docker compose run --rm deps npm run lint        # ESLint (type-aware)
-docker compose run --rm deps npm run typecheck    # tsc --noEmit per service
-docker compose run --rm deps npm run build        # compile every service
+docker compose run --rm deps npm run lint          # ESLint (type-aware)
+docker compose run --rm deps npm run format:check  # Prettier, no writes
+docker compose run --rm deps npm run typecheck     # tsc --noEmit per service
+docker compose run --rm deps npm run build         # compile every service
 ```
+
+### Continuous integration
+
+`.github/workflows/ci.yml` runs on every pull request to `main` and on every
+push to `main`, as three parallel jobs that report as separate checks:
+
+| Job        | Runs                                      |
+| ---------- | ----------------------------------------- |
+| Lint       | `npm run lint` and `npm run format:check` |
+| Typecheck  | `npm run typecheck`                       |
+| Unit tests | `npm test`                                |
+
+Each job first goes through `.github/actions/setup-workspace` — `npm ci`,
+build `@cinescope/shared`, then `npm run generate` for the Prisma clients (with
+a placeholder `DATABASE_URL`; no database is contacted). Integration tests need
+Postgres and are not part of CI yet — run them locally as described below.
 
 ### Running tests
 
