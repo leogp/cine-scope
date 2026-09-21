@@ -6,12 +6,16 @@ import { PrismaClient } from '../generated/client'
 import { PrismaUserMapper } from './prismaUserMapper'
 
 /**
- * Rehydrating a User loads its user_roles join rows plus their Role.
- * Role permissions are not loaded here — fetch them through RoleRepository
- * when needed.
+ * Rehydrating a User loads its user_roles join rows, their Role, and each role's
+ * permissions — the full authorization picture in one query.
+ *
+ * Permissions are eager rather than fetched on demand because every access token
+ * carries them, so `User.permissionNames()` must never see a half-loaded
+ * aggregate: a silently empty permission set reads as "this user may do nothing"
+ * and would deny writes rather than fail loudly.
  */
 const userWithRolesInclude = {
-  roles: { include: { role: true } },
+  roles: { include: { role: { include: { permissions: { include: { permission: true } } } } } },
 } as const
 
 export class PrismaUserRepository implements UserRepository {

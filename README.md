@@ -270,29 +270,48 @@ The remaining services will be introduced incrementally.
 | `POST /auth/logout`  | 204                       |
 | `GET /health`        | 200 — `{status, service}` |
 
+The access token carries `{sub, username, email, roles, permissions}`.
+`permissions` is the union of every permission granted by the user's roles and is
+what downstream services authorize against — see the seeded role/permission grid
+in `apps/auth-service/src/infrastructure/prisma/seed.ts`.
+
 ### Catalog Service API
 
 Movies are the only aggregate with a full CRUD surface; the rest expose
 create + read while the write use cases are built out.
 
-| Route                                   | Success                              |
-| --------------------------------------- | ------------------------------------ |
-| `POST /movies`                          | 201 — `{id}`                         |
-| `GET /movies?page&pageSize`             | 200 — paginated summaries            |
-| `GET /movies/:id`                       | 200 — full read model with relations |
-| `PUT /movies/:id`                       | 200 — `{id}` (full replace)          |
-| `DELETE /movies/:id`                    | 204                                  |
-| `POST /series`, `GET /series/:id`       | 201 / 200                            |
-| `POST /people`, `GET /people/:id`       | 201 / 200                            |
-| `POST /genres`, `GET /genres/:id`       | 201 / 200                            |
-| `POST /companies`, `GET /companies/:id` | 201 / 200                            |
-| `GET /health`                           | 200 — `{status, service}`            |
+The catalog is **public to read and closed to write**: every mutating route
+requires a valid access token carrying the `catalog:write` permission, which the
+seed grants to the `editor` and `admin` roles but not to the default `user` role.
+Reads and the health check need no credentials.
+
+| Route                                   | Auth                     | Success                              |
+| --------------------------------------- | ------------------------ | ------------------------------------ |
+| `POST /movies`                          | `catalog:write`          | 201 — `{id}`                         |
+| `GET /movies?page&pageSize`             | public                   | 200 — paginated summaries            |
+| `GET /movies/:id`                       | public                   | 200 — full read model with relations |
+| `PUT /movies/:id`                       | `catalog:write`          | 200 — `{id}` (full replace)          |
+| `DELETE /movies/:id`                    | `catalog:write`          | 204                                  |
+| `POST /series`, `GET /series/:id`       | `catalog:write` / public | 201 / 200                            |
+| `POST /people`, `GET /people/:id`       | `catalog:write` / public | 201 / 200                            |
+| `POST /genres`, `GET /genres/:id`       | `catalog:write` / public | 201 / 200                            |
+| `POST /companies`, `GET /companies/:id` | `catalog:write` / public | 201 / 200                            |
+| `GET /health`                           | public                   | 200 — `{status, service}`            |
+
+Verification happens in catalog-service itself, against the `JWT_ACCESS_SECRET`
+it shares with auth-service — the gateway does not exist yet, and when
+`gateway/jwt-propagation` lands this check is kept as defense-in-depth.
 
 Error responses follow the shared envelope: `400` for schema failures
 (`{error: 'ValidationError', details}`) and for domain invariant violations,
-`404` for a missing aggregate or an unresolvable relation id, `409` for a
-duplicate genre name, `500` (`{error: 'InternalServerError'}`, message
-withheld) for anything unmapped.
+`401` (`{error: 'Unauthorized'}`) for a missing, malformed, expired or
+wrongly-issued token, `403` (`{error: 'Forbidden'}`) for a valid token lacking
+the required permission, `404` for a missing aggregate or an unresolvable
+relation id, `409` for a duplicate genre name, `500`
+(`{error: 'InternalServerError'}`, message withheld) for anything unmapped.
+
+Guards run before body validation, so an unauthenticated write is rejected with
+`401` rather than a `400` that would leak the schema.
 
 ## Planned Features
 

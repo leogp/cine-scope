@@ -1,12 +1,16 @@
 import request from 'supertest'
 
+import { authHeader } from '../../helpers/authToken'
 import { buildTestApp, validGenreBody } from '../../helpers/buildTestApp'
 
 describe('POST /genres', () => {
   it('responds 201 with the new id and persists the genre', async () => {
     const { app, genreRepository } = buildTestApp()
 
-    const response = await request(app).post('/genres').send(validGenreBody)
+    const response = await request(app)
+      .post('/genres')
+      .set('Authorization', authHeader())
+      .send(validGenreBody)
 
     expect(response.status).toBe(201)
     expect(response.body).toEqual({ id: expect.any(String) })
@@ -17,9 +21,12 @@ describe('POST /genres', () => {
   // than an invariant violation — 409, not the DomainError default of 400.
   it('responds 409 for a duplicate name', async () => {
     const { app, genreRepository } = buildTestApp()
-    await request(app).post('/genres').send(validGenreBody)
+    await request(app).post('/genres').set('Authorization', authHeader()).send(validGenreBody)
 
-    const response = await request(app).post('/genres').send(validGenreBody)
+    const response = await request(app)
+      .post('/genres')
+      .set('Authorization', authHeader())
+      .send(validGenreBody)
 
     expect(response.status).toBe(409)
     expect(response.body.error).toBe('GenreAlreadyExistsError')
@@ -29,7 +36,10 @@ describe('POST /genres', () => {
   it('responds 400 for an empty name', async () => {
     const { app } = buildTestApp()
 
-    const response = await request(app).post('/genres').send({ name: '' })
+    const response = await request(app)
+      .post('/genres')
+      .set('Authorization', authHeader())
+      .send({ name: '' })
 
     expect(response.status).toBe(400)
     expect(response.body.error).toBe('ValidationError')
@@ -40,7 +50,10 @@ describe('POST /genres', () => {
   it('responds 400 when the value object rejects a schema-valid name', async () => {
     const { app } = buildTestApp()
 
-    const response = await request(app).post('/genres').send({ name: '   ' })
+    const response = await request(app)
+      .post('/genres')
+      .set('Authorization', authHeader())
+      .send({ name: '   ' })
 
     expect(response.status).toBe(400)
     expect(response.body.error).toBe('InvalidGenreNameError')
@@ -50,7 +63,10 @@ describe('POST /genres', () => {
 describe('GET /genres/:id', () => {
   it('responds 200 with the genre', async () => {
     const { app } = buildTestApp()
-    const created = await request(app).post('/genres').send(validGenreBody)
+    const created = await request(app)
+      .post('/genres')
+      .set('Authorization', authHeader())
+      .send(validGenreBody)
 
     const response = await request(app).get(`/genres/${created.body.id}`)
 

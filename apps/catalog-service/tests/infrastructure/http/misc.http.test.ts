@@ -1,5 +1,6 @@
 import request from 'supertest'
 
+import { authHeader } from '../../helpers/authToken'
 import { buildTestApp, validMovieBody } from '../../helpers/buildTestApp'
 
 describe('app', () => {
@@ -24,7 +25,7 @@ describe('app', () => {
   it('responds 404 for a method the collection does not serve', async () => {
     const { app } = buildTestApp()
 
-    const response = await request(app).delete('/genres/some-id')
+    const response = await request(app).delete('/genres/some-id').set('Authorization', authHeader())
 
     expect(response.status).toBe(404)
     expect(response.body.error).toBe('NotFound')
@@ -35,6 +36,7 @@ describe('app', () => {
 
     const response = await request(app)
       .post('/movies')
+      .set('Authorization', authHeader())
       .set('Content-Type', 'application/json')
       .send(JSON.stringify(validMovieBody))
 
@@ -46,6 +48,7 @@ describe('app', () => {
 
     const response = await request(app)
       .post('/movies')
+      .set('Authorization', authHeader())
       .send({ ...validMovieBody, title: '', originalLanguage: '' })
 
     expect(response.status).toBe(400)

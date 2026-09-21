@@ -1,5 +1,5 @@
 import { buildHealthRoutes, notFoundHandler } from '@cinescope/shared/infrastructure/http'
-import express, { Application } from 'express'
+import express, { Application, RequestHandler } from 'express'
 import { errorHandler } from './middlewares/errorHandler'
 
 import { MovieController } from './controllers/movieController'
@@ -29,17 +29,28 @@ export interface CatalogControllers {
   person: PersonController
 }
 
-export const buildApp = (controllers: CatalogControllers): Application => {
+/**
+ * Guards applied to every write route — authentication followed by the
+ * `catalog:write` permission check.
+ *
+ * Injected rather than built here so the JWT secret stays in the composition
+ * root, and mounted per route rather than app- or prefix-wide: `/movies` serves
+ * both reads and writes, and the catalog is public to read.
+ */
+export const buildApp = (
+  controllers: CatalogControllers,
+  writeGuards: readonly RequestHandler[]
+): Application => {
   const app = express()
 
   app.use(express.json())
 
   app.use(buildHealthRoutes('catalog-service'))
-  app.use('/movies', buildMovieRoutes(controllers.movie))
-  app.use('/series', buildSeriesRoutes(controllers.series))
-  app.use('/genres', buildGenreRoutes(controllers.genre))
-  app.use('/companies', buildCompanyRoutes(controllers.company))
-  app.use('/people', buildPersonRoutes(controllers.person))
+  app.use('/movies', buildMovieRoutes(controllers.movie, writeGuards))
+  app.use('/series', buildSeriesRoutes(controllers.series, writeGuards))
+  app.use('/genres', buildGenreRoutes(controllers.genre, writeGuards))
+  app.use('/companies', buildCompanyRoutes(controllers.company, writeGuards))
+  app.use('/people', buildPersonRoutes(controllers.person, writeGuards))
 
   app.use(notFoundHandler)
   app.use(errorHandler)

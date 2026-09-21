@@ -45,6 +45,26 @@ export class User extends AggregateRoot<UserProps> {
     })
   }
 
+  /**
+   * The caller's effective permissions: every permission granted by any assigned
+   * role, deduplicated and sorted.
+   *
+   * It lives on the aggregate rather than in the use cases because both login and
+   * refresh need the same answer, and "what may this user do" is a question about
+   * the user, not about token issuance.
+   */
+  permissionNames(): string[] {
+    const names = new Set<string>()
+
+    for (const role of this.props.roles) {
+      for (const permission of role.data.permissions) {
+        names.add(permission.name)
+      }
+    }
+
+    return [...names].sort()
+  }
+
   assignRole(role: Role): void {
     const alreadyAssigned = this.props.roles.some((r) => r.id === role.id)
 

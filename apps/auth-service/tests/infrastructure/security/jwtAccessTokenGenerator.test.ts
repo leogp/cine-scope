@@ -7,7 +7,8 @@ const payload = {
   subject: 'user-1',
   username: 'leo_dev',
   email: 'leo@example.com',
-  roles: ['user'],
+  roles: ['editor'],
+  permissions: ['catalog:read', 'catalog:write'],
 }
 
 describe('JwtAccessTokenGenerator', () => {
@@ -20,7 +21,9 @@ describe('JwtAccessTokenGenerator', () => {
     expect(decoded.sub).toBe('user-1')
     expect(decoded.username).toBe('leo_dev')
     expect(decoded.email).toBe('leo@example.com')
-    expect(decoded.roles).toEqual(['user'])
+    expect(decoded.roles).toEqual(['editor'])
+    // Downstream services authorize against this claim — it must survive signing.
+    expect(decoded.permissions).toEqual(['catalog:read', 'catalog:write'])
     expect(decoded.iss).toBe('auth-service')
   })
 

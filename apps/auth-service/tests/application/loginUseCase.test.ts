@@ -43,6 +43,7 @@ describe('LoginUseCase', () => {
       username: 'leo_dev',
       email: 'leo@example.com',
       roles: ['user'],
+      permissions: ['catalog:read'],
     })
 
     const persisted = await refreshTokenRepository.findByToken(response.refreshToken)

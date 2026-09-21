@@ -1,12 +1,16 @@
 import request from 'supertest'
 
+import { authHeader } from '../../helpers/authToken'
 import { buildTestApp, validGenreBody, validSeriesBody } from '../../helpers/buildTestApp'
 
 describe('POST /series', () => {
   it('responds 201 with the new id and persists the series', async () => {
     const { app, seriesRepository } = buildTestApp()
 
-    const response = await request(app).post('/series').send(validSeriesBody)
+    const response = await request(app)
+      .post('/series')
+      .set('Authorization', authHeader())
+      .send(validSeriesBody)
 
     expect(response.status).toBe(201)
     expect(response.body).toEqual({ id: expect.any(String) })
@@ -18,6 +22,7 @@ describe('POST /series', () => {
 
     const created = await request(app)
       .post('/series')
+      .set('Authorization', authHeader())
       .send({ ...validSeriesBody, firstAirDate: '2016-07-21' })
 
     const response = await request(app).get(`/series/${created.body.id}`)
@@ -31,6 +36,7 @@ describe('POST /series', () => {
 
     const response = await request(app)
       .post('/series')
+      .set('Authorization', authHeader())
       .send({ ...validSeriesBody, title: '' })
 
     expect(response.status).toBe(400)
@@ -43,6 +49,7 @@ describe('POST /series', () => {
 
     const response = await request(app)
       .post('/series')
+      .set('Authorization', authHeader())
       .send({ ...validSeriesBody, castIds: ['missing-person'] })
 
     expect(response.status).toBe(404)
@@ -51,10 +58,14 @@ describe('POST /series', () => {
 
   it('resolves relation ids into the aggregate', async () => {
     const { app } = buildTestApp()
-    const genre = await request(app).post('/genres').send(validGenreBody)
+    const genre = await request(app)
+      .post('/genres')
+      .set('Authorization', authHeader())
+      .send(validGenreBody)
 
     const created = await request(app)
       .post('/series')
+      .set('Authorization', authHeader())
       .send({ ...validSeriesBody, genreIds: [genre.body.id] })
 
     const response = await request(app).get(`/series/${created.body.id}`)
@@ -66,7 +77,10 @@ describe('POST /series', () => {
 describe('GET /series/:id', () => {
   it('responds 200 with the full series read model', async () => {
     const { app } = buildTestApp()
-    const created = await request(app).post('/series').send(validSeriesBody)
+    const created = await request(app)
+      .post('/series')
+      .set('Authorization', authHeader())
+      .send(validSeriesBody)
 
     const response = await request(app).get(`/series/${created.body.id}`)
 
