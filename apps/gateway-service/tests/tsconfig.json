@@ -1,0 +1,10 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "types": ["jest", "node"],
+    "baseUrl": "..",
+    "paths": { "@gateway/*": ["./src/*"] }
+  },
+  "include": ["**/*.ts"]
+}

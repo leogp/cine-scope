@@ -1,15 +1,11 @@
 import 'dotenv/config'
-import express, { Request, Response } from 'express'
+import { env } from './config/env'
+import { buildApp } from './infrastructure/http/app'
+import { buildRouteTable } from './infrastructure/http/proxy/routeTable'
 
-const app = express()
-const PORT = process.env.PORT ?? 4000
-
-app.use(express.json())
-
-app.get('/health', (_req: Request, res: Response) => {
-  res.json({ status: 'ok', service: 'gateway-service' })
+const app = buildApp({
+  routes: buildRouteTable(env),
+  proxyTimeoutMs: env.PROXY_TIMEOUT_MS,
 })
 
-app.listen(PORT, () => {
-  console.log(`gateway-service running on port ${PORT}`)
-})
+app.listen(env.PORT, () => console.log(`gateway-service running on port ${env.PORT}`))
