@@ -10,7 +10,10 @@ export const buildApp = (authController: AuthController): Application => {
   app.use(express.json())
 
   app.use(buildHealthRoutes('auth-service'))
-  app.use('/auth', buildAuthRoutes(authController))
+  // Mounted at the root, like every other service: the public `/auth` prefix is
+  // the gateway's to own. Self-prefixing here would stack with the gateway's
+  // mount and expose the routes as /auth/auth/login.
+  app.use(buildAuthRoutes(authController))
 
   app.use(notFoundHandler)
   app.use(errorHandler)
