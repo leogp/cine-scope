@@ -2,14 +2,14 @@ import request from 'supertest'
 
 import { buildTestApp, validSignUpBody } from '../../helpers/buildTestApp'
 
-describe('POST /auth/login', () => {
+describe('POST /login', () => {
   const loginBody = { email: validSignUpBody.email, password: validSignUpBody.password }
 
   it('responds 200 with a token pair for valid credentials', async () => {
     const { app } = buildTestApp()
-    await request(app).post('/auth/signup').send(validSignUpBody)
+    await request(app).post('/signup').send(validSignUpBody)
 
-    const response = await request(app).post('/auth/login').send(loginBody)
+    const response = await request(app).post('/login').send(loginBody)
 
     expect(response.status).toBe(200)
     expect(response.body).toEqual({
@@ -20,10 +20,10 @@ describe('POST /auth/login', () => {
 
   it('responds 401 for a wrong password', async () => {
     const { app } = buildTestApp()
-    await request(app).post('/auth/signup').send(validSignUpBody)
+    await request(app).post('/signup').send(validSignUpBody)
 
     const response = await request(app)
-      .post('/auth/login')
+      .post('/login')
       .send({ ...loginBody, password: 'Wr0ng!Pass' })
 
     expect(response.status).toBe(401)
@@ -35,7 +35,7 @@ describe('POST /auth/login', () => {
   it('responds 404 for an unknown email', async () => {
     const { app } = buildTestApp()
 
-    const response = await request(app).post('/auth/login').send(loginBody)
+    const response = await request(app).post('/login').send(loginBody)
 
     expect(response.status).toBe(404)
     expect(response.body.error).toBe('UserNotFoundError')
@@ -45,7 +45,7 @@ describe('POST /auth/login', () => {
     const { app } = buildTestApp()
 
     const response = await request(app)
-      .post('/auth/login')
+      .post('/login')
       .send({ ...loginBody, email: 'not-an-email' })
 
     expect(response.status).toBe(400)

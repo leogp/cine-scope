@@ -279,13 +279,17 @@ The remaining services will be introduced incrementally.
 
 ### Auth Service API
 
-| Route                | Success                   |
-| -------------------- | ------------------------- |
-| `POST /auth/signup`  | 201                       |
-| `POST /auth/login`   | 200 — token pair          |
-| `POST /auth/refresh` | 200 — rotated token pair  |
-| `POST /auth/logout`  | 204                       |
-| `GET /health`        | 200 — `{status, service}` |
+Routes are mounted at the service root; the public `/auth` prefix belongs to the
+gateway, which strips it before forwarding. Through the gateway these are
+`POST /auth/signup`, `POST /auth/login` and so on.
+
+| Route           | Success                   |
+| --------------- | ------------------------- |
+| `POST /signup`  | 201                       |
+| `POST /login`   | 200 — token pair          |
+| `POST /refresh` | 200 — rotated token pair  |
+| `POST /logout`  | 204                       |
+| `GET /health`   | 200 — `{status, service}` |
 
 The access token carries `{sub, username, email, roles, permissions}`.
 `permissions` is the union of every permission granted by the user's roles and is

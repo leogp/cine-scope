@@ -2,11 +2,11 @@ import request from 'supertest'
 
 import { buildTestApp, validSignUpBody } from '../../helpers/buildTestApp'
 
-describe('POST /auth/signup', () => {
+describe('POST /signup', () => {
   it('creates the user and responds 201 with its id', async () => {
     const { app } = buildTestApp()
 
-    const response = await request(app).post('/auth/signup').send(validSignUpBody)
+    const response = await request(app).post('/signup').send(validSignUpBody)
 
     expect(response.status).toBe(201)
     expect(response.body).toEqual({ id: expect.any(String) })
@@ -14,10 +14,10 @@ describe('POST /auth/signup', () => {
 
   it('responds 409 for a duplicate email', async () => {
     const { app } = buildTestApp()
-    await request(app).post('/auth/signup').send(validSignUpBody)
+    await request(app).post('/signup').send(validSignUpBody)
 
     const response = await request(app)
-      .post('/auth/signup')
+      .post('/signup')
       .send({ ...validSignUpBody, username: 'other_user' })
 
     expect(response.status).toBe(409)
@@ -29,10 +29,10 @@ describe('POST /auth/signup', () => {
 
   it('responds 409 for a duplicate username', async () => {
     const { app } = buildTestApp()
-    await request(app).post('/auth/signup').send(validSignUpBody)
+    await request(app).post('/signup').send(validSignUpBody)
 
     const response = await request(app)
-      .post('/auth/signup')
+      .post('/signup')
       .send({ ...validSignUpBody, email: 'other@example.com' })
 
     expect(response.status).toBe(409)
@@ -43,7 +43,7 @@ describe('POST /auth/signup', () => {
     const { app } = buildTestApp()
 
     const response = await request(app)
-      .post('/auth/signup')
+      .post('/signup')
       .send({ ...validSignUpBody, password: 'weak' })
 
     expect(response.status).toBe(400)
@@ -54,7 +54,7 @@ describe('POST /auth/signup', () => {
     const { app } = buildTestApp()
 
     const response = await request(app)
-      .post('/auth/signup')
+      .post('/signup')
       .send({ email: 'leo@example.com', password: 'Str0ng!Pass' })
 
     expect(response.status).toBe(400)
