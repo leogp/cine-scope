@@ -1,35 +1,8 @@
 import { NextFunction, Request, RequestHandler, Response } from 'express'
-import jwt from 'jsonwebtoken'
 
-import { AuthContext } from './authContext'
+import { AccessTokenOptions, verifyBearerHeader } from './bearerToken'
 
-export interface RequireAuthOptions {
-  secret: string
-  issuer?: string
-}
-
-const BEARER_PREFIX = 'Bearer '
-
-/**
- * Only string arrays survive; a claim of any other shape is treated as absent
- * rather than trusted, so a malformed token can never widen a caller's rights.
- */
-const stringArrayClaim = (value: unknown): string[] =>
-  Array.isArray(value) ? value.filter((item): item is string => typeof item === 'string') : []
-
-const toAuthContext = (payload: jwt.JwtPayload): AuthContext | null => {
-  if (typeof payload.sub !== 'string' || payload.sub.length === 0) {
-    return null
-  }
-
-  return {
-    userId: payload.sub,
-    username: typeof payload.username === 'string' ? payload.username : '',
-    email: typeof payload.email === 'string' ? payload.email : '',
-    roles: stringArrayClaim(payload.roles),
-    permissions: stringArrayClaim(payload.permissions),
-  }
-}
+export type RequireAuthOptions = AccessTokenOptions
 
 /**
  * Verifies the `Authorization: Bearer <token>` access token and populates
@@ -43,26 +16,8 @@ const toAuthContext = (payload: jwt.JwtPayload): AuthContext | null => {
 export function buildRequireAuth(options: RequireAuthOptions): RequestHandler {
   return (req: Request, res: Response, next: NextFunction) => {
     const header = req.headers.authorization
-
-    if (!header || !header.startsWith(BEARER_PREFIX)) {
-      res.status(401).json({ error: 'Unauthorized' })
-      return
-    }
-
-    const token = header.slice(BEARER_PREFIX.length).trim()
-
-    let payload: string | jwt.JwtPayload
-
-    try {
-      payload = jwt.verify(token, options.secret, { issuer: options.issuer })
-    } catch {
-      // Signature, expiry and issuer failures are deliberately indistinguishable
-      // to the caller — the reason is not theirs to learn.
-      res.status(401).json({ error: 'Unauthorized' })
-      return
-    }
-
-    const auth = typeof payload === 'string' ? null : toAuthContext(payload)
+    // An empty header is as absent as a missing one: both are a 401 here.
+    const auth = header ? verifyBearerHeader(header, options) : null
 
     if (!auth) {
       res.status(401).json({ error: 'Unauthorized' })

@@ -1,5 +1,6 @@
 /**
- * The verified caller, as `requireAuth` reconstructs it from the access token.
+ * The verified caller, as `requireAuth` / `optionalAuth` reconstruct it from the
+ * access token.
  *
  * Authorization decisions are made against `permissions`; `roles` is carried for
  * logging and for coarser rules (the gateway) that reason in roles rather than

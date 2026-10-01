@@ -12,6 +12,11 @@ const envSchema = z.object({
   REVIEW_SERVICE_URL: z.url(),
   WATCHLIST_SERVICE_URL: z.url(),
 
+  // Shared with auth-service, which signs the access tokens the gateway verifies
+  // (catalog-service verifies them again with the same key). Required, not
+  // optional: without it the gateway could not tell a valid token from a forged one.
+  JWT_ACCESS_SECRET: z.string().min(16),
+
   // http-proxy applies no timeout by default: a downstream service that accepts
   // the connection and then never answers would pin the client socket open for
   // as long as the kernel allows.

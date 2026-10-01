@@ -1,7 +1,11 @@
+import type { RequestHandler } from 'express'
 import request from 'supertest'
 
 import { buildApp } from '@gateway/infrastructure/http/app'
 import { startStubService, type StubService } from './helpers/startStubService'
+
+// Authentication has its own suite (auth.test.ts); here it is a no-op.
+const passThrough: RequestHandler = (_req, _res, next) => next()
 
 describe('gateway proxy', () => {
   let catalog: StubService
@@ -12,6 +16,7 @@ describe('gateway proxy', () => {
     app = buildApp({
       routes: [{ prefix: '/catalog', target: catalog.url }],
       proxyTimeoutMs: 2_000,
+      authenticate: passThrough,
     })
   })
 
