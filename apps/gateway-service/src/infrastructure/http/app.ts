@@ -1,5 +1,5 @@
 import { buildHealthRoutes, notFoundHandler } from '@cinescope/shared/infrastructure/http'
-import express, { Application } from 'express'
+import express, { Application, RequestHandler } from 'express'
 
 import { errorHandler } from './middlewares/errorHandler'
 import { stripForwardedHeaders } from './middlewares/stripForwardedHeaders'
@@ -9,6 +9,11 @@ import type { ProxyRoute } from './proxy/routeTable'
 export interface GatewayAppConfig {
   readonly routes: readonly ProxyRoute[]
   readonly proxyTimeoutMs: number
+  /**
+   * Identifies the caller (sets `req.auth`) without gating anything. Built in
+   * the composition root so the JWT secret never reaches the HTTP layer.
+   */
+  readonly authenticate: RequestHandler
 }
 
 /**
@@ -20,7 +25,11 @@ export interface GatewayAppConfig {
  * call hangs until the timeout. Gateway-only routes that need JSON get their own
  * parser (step 5).
  */
-export const buildApp = ({ routes, proxyTimeoutMs }: GatewayAppConfig): Application => {
+export const buildApp = ({
+  routes,
+  proxyTimeoutMs,
+  authenticate,
+}: GatewayAppConfig): Application => {
   const app = express()
 
   // 1. Do not advertise the stack.
@@ -32,8 +41,13 @@ export const buildApp = ({ routes, proxyTimeoutMs }: GatewayAppConfig): Applicat
   // 3. The gateway's own liveness, answered without touching any service.
   app.use(buildHealthRoutes('gateway-service'))
 
-  // 4. Reserved: authentication (gateway/auth) then authorization
-  //    (gateway/authorization) mount here — after health, before the proxies.
+  // 4. Authentication: who is calling. A request without a token passes through
+  //    as anonymous; a token that is present but unusable is a 401 here, before
+  //    any service sees it. Nothing is gated yet — authorization
+  //    (gateway/authorization) is still reserved and mounts right after this.
+  //    `req.auth` is gateway-local: downstream services keep verifying the
+  //    forwarded token themselves.
+  app.use(authenticate)
 
   // 5. The proxies. Express strips `route.prefix` from req.url before the
   //    handler runs, which is what turns /catalog/movies into /movies.

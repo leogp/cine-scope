@@ -24,8 +24,8 @@ Scope is deliberately kept narrow: the goal is to exercise microservice patterns
 
 ## Phase 2 — Gateway
 
-- [ ] `gateway/proxy`
-- [ ] `gateway/auth`
+- [x] `gateway/proxy`
+- [x] `gateway/auth`
 - [ ] `gateway/jwt-propagation`
 - [ ] `gateway/authorization`
 - [ ] `gateway/composition`
