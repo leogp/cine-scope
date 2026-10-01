@@ -14,6 +14,7 @@ WORKDIR /workspace
 # Copy root manifests + every workspace manifest first so `npm ci` resolves the
 # whole graph deterministically from the single root lockfile (better caching).
 COPY package.json package-lock.json ./
+COPY packages/shared/package.json ./packages/shared/
 COPY apps/auth-service/package.json ./apps/auth-service/
 COPY apps/catalog-service/package.json ./apps/catalog-service/
 COPY apps/recommendation-service/package.json ./apps/recommendation-service/
@@ -35,6 +36,7 @@ RUN apk add --no-cache python3 make g++
 WORKDIR /workspace
 
 COPY package.json package-lock.json ./
+COPY packages/shared/package.json ./packages/shared/
 COPY apps/auth-service/package.json ./apps/auth-service/
 COPY apps/catalog-service/package.json ./apps/catalog-service/
 COPY apps/recommendation-service/package.json ./apps/recommendation-service/

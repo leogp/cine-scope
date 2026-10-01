@@ -5,15 +5,18 @@ node_modules
 dist
 **/dist
 *.tsbuildinfo
+# Generated in the builder from the schema; a host copy would mask a missing step.
+**/prisma/generated
 
 .git
 .gitignore
 .dockerignore
 
-# Env & secrets
-.env
-.env.*
-!.env.example
+# Env & secrets. The `**/` forms matter: a bare `.env` only matches at the
+# context root, and every service keeps its secrets in apps/<service>/.env.
+**/.env
+**/.env.*
+!**/.env.example
 
 # Logs & coverage
 *.log

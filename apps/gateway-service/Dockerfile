@@ -14,6 +14,7 @@ WORKDIR /workspace
 # Copy root manifests + every workspace manifest first so `npm ci` resolves the
 # whole graph deterministically from the single root lockfile (better caching).
 COPY package.json package-lock.json ./
+COPY packages/shared/package.json ./packages/shared/
 COPY apps/auth-service/package.json ./apps/auth-service/
 COPY apps/catalog-service/package.json ./apps/catalog-service/
 COPY apps/recommendation-service/package.json ./apps/recommendation-service/
@@ -22,8 +23,14 @@ COPY apps/watchlist-service/package.json ./apps/watchlist-service/
 COPY apps/gateway-service/package.json ./apps/gateway-service/
 RUN npm ci
 
-# Compile just this service.
 COPY tsconfig.base.json ./
+
+# @cinescope/shared resolves through its package exports to ./dist, so it must
+# be compiled before anything that imports it.
+COPY packages/shared ./packages/shared
+RUN npm run build -w @cinescope/shared
+
+# Compile just this service.
 COPY apps/gateway-service ./apps/gateway-service
 RUN npm run build -w gateway-service
 
@@ -35,6 +42,7 @@ RUN apk add --no-cache python3 make g++
 WORKDIR /workspace
 
 COPY package.json package-lock.json ./
+COPY packages/shared/package.json ./packages/shared/
 COPY apps/auth-service/package.json ./apps/auth-service/
 COPY apps/catalog-service/package.json ./apps/catalog-service/
 COPY apps/recommendation-service/package.json ./apps/recommendation-service/
@@ -54,6 +62,11 @@ RUN addgroup -g 1001 -S appgroup && \
 WORKDIR /app
 
 COPY --from=prod-deps --chown=appuser:appgroup /workspace/node_modules ./node_modules
+# node_modules/@cinescope/shared is a workspace symlink to ../../packages/shared:
+# ship the package where it points. Node resolves it via `exports`, so only the
+# manifest and the compiled output are needed.
+COPY --from=builder --chown=appuser:appgroup /workspace/packages/shared/package.json ./packages/shared/package.json
+COPY --from=builder --chown=appuser:appgroup /workspace/packages/shared/dist ./packages/shared/dist
 COPY --from=builder --chown=appuser:appgroup /workspace/apps/gateway-service/dist ./dist
 COPY --chown=appuser:appgroup apps/gateway-service/package.json ./package.json
 
