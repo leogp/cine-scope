@@ -5,9 +5,19 @@
 # compile modules such as bcrypt). Dependencies are NOT baked in: they are
 # installed at runtime by the `deps` service into the bind-mounted workspace,
 # so the host sees a single hoisted node_modules and never needs Node locally.
+#
+# Compose runs these containers as the host user (`user: UID:GID`) so files
+# written into the bind mount stay owned by that user. That UID may have no
+# passwd entry in this image, which would leave HOME=/ and npm unable to write
+# its cache, so HOME is a fixed, world-writable directory instead.
 FROM node:24-alpine
 
 # Toolchain required to build native addons (e.g. bcrypt) on Alpine/musl.
 RUN apk add --no-cache python3 make g++
+
+# Sticky + world-writable, like /tmp: any UID can create its own files here.
+# .npm is pre-created so the `npm_cache` named volume inherits these modes.
+RUN mkdir -p /home/dev/.npm /home/dev/.cache && chmod -R 1777 /home/dev
+ENV HOME=/home/dev
 
 WORKDIR /workspace

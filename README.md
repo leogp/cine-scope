@@ -157,6 +157,25 @@ On the first run the one-shot `deps` service runs `npm install` for the whole
 workspace (populating the shared `node_modules` on the host), then every
 service starts with hot-reload via `tsx watch`.
 
+### File ownership
+
+The Node containers run as UID/GID `1000:1000` rather than root, so everything
+they write into the repository (`node_modules`, `dist/`, generated Prisma
+clients) stays owned by you.
+
+- **Linux** — if `id -u` / `id -g` is not 1000, copy `.env.example` to `.env`
+  and set `UID` / `GID` there.
+- **macOS** — nothing to do; Docker Desktop maps bind-mount files to your user.
+- **Windows** — keep the repository inside the WSL2 filesystem, where it
+  behaves like Linux.
+
+Checkouts created before containers ran as your user may still hold
+root-owned files. Hand them back once (Linux / WSL2):
+
+```bash
+docker compose run --rm --no-deps --user root deps chown -R "$(id -u):$(id -g)" /workspace
+```
+
 ### Adding a dependency to a service
 
 Run the install **inside a container** so nothing is installed on your host.
