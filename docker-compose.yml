@@ -2,6 +2,8 @@ volumes:
   postgres_data:
   redis_data:
   rabbitmq_data:
+  # npm's download cache, kept across `docker compose run --rm` invocations.
+  npm_cache:
 
 networks:
   cinescope-net:
@@ -18,8 +20,13 @@ x-node-dev: &node-dev
     context: .
     dockerfile: Dockerfile.dev
   image: cinescope-dev:latest
+  # Run as the host user so node_modules, dist/ and generated Prisma clients
+  # written into the bind mount are not root-owned on the host. Defaults to
+  # 1000:1000; set UID/GID in the root .env if `id -u` / `id -g` differ.
+  user: '${UID:-1000}:${GID:-1000}'
   volumes:
     - .:/workspace
+    - npm_cache:/home/dev/.npm
   networks:
     - cinescope-net
 
