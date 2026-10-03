@@ -47,3 +47,43 @@ jobs:
       # Unit suites only: jest.config.js excludes *.int.test.ts, which need Postgres.
       - name: Jest
         run: npm test
+
+  integration:
+    name: Integration tests (${{ matrix.service }})
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    strategy:
+      # One service's failure should not hide the other's result.
+      fail-fast: false
+      matrix:
+        include:
+          - service: auth-service
+            database: auth_test_db
+          - service: catalog-service
+            database: catalog_test_db
+    services:
+      postgres:
+        # Keep in sync with the postgres image in docker-compose.yml.
+        image: postgres:16
+        env:
+          POSTGRES_USER: cinescope
+          POSTGRES_PASSWORD: cinescope_secret
+          POSTGRES_DB: ${{ matrix.database }}
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U cinescope -d ${{ matrix.database }}"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ./.github/actions/setup-workspace
+      # test:int targets the compose hostname `postgres` on purpose, so it can
+      # never reach a development database. Here the service container is
+      # published on the runner's localhost, so give it that name.
+      - name: Alias the postgres hostname
+        run: echo '127.0.0.1 postgres' | sudo tee -a /etc/hosts
+      # Applies the migrations to the test database, then runs *.int.test.ts serially.
+      - name: Jest (integration)
+        run: npm run test:int -w ${{ matrix.service }}
