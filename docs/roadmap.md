@@ -26,7 +26,7 @@ Scope is deliberately kept narrow: the goal is to exercise microservice patterns
 
 - [x] `gateway/proxy`
 - [x] `gateway/auth`
-- [ ] `gateway/jwt-propagation`
+- [x] `gateway/jwt-propagation` — [ADR 0001](adr/0001-jwt-propagation.md): the gateway forwards the caller's access token unchanged; catalog-service's own check, introduced in `auth/authorization` before the gateway existed, is kept as defense in depth
 - [ ] `gateway/authorization`
 - [ ] `gateway/composition`
 - [ ] `gateway/rate-limiting`
@@ -75,7 +75,6 @@ Authentication currently relies on self-issued JWTs and rotating refresh tokens.
 
 Design decisions are documented as they are made, independently of the phase they belong to.
 
-- [ ] `docs/adr-jwt-propagation` — note the interim decision made in `auth/authorization`: catalog-service verifies the access token itself (JWT secret in its own env), since the gateway does not exist yet; once `gateway/jwt-propagation` lands, this check is kept as defense-in-depth rather than removed
 - [ ] `docs/adr-engagement-bounded-context`
 - [ ] `docs/adr-outbox`
 - [ ] `docs/adr-db-per-service-minikube`
