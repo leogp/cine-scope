@@ -208,18 +208,20 @@ docker compose run --rm deps npm run build         # compile every service
 ### Continuous integration
 
 `.github/workflows/ci.yml` runs on every pull request to `main` and on every
-push to `main`, as three parallel jobs that report as separate checks:
+push to `main`, as parallel jobs that report as separate checks:
 
-| Job        | Runs                                      |
-| ---------- | ----------------------------------------- |
-| Lint       | `npm run lint` and `npm run format:check` |
-| Typecheck  | `npm run typecheck`                       |
-| Unit tests | `npm test`                                |
+| Job                             | Runs                                                    |
+| ------------------------------- | ------------------------------------------------------- |
+| Lint                            | `npm run lint` and `npm run format:check`               |
+| Typecheck                       | `npm run typecheck`                                     |
+| Unit tests                      | `npm test`                                              |
+| Integration tests (per service) | `npm run test:int` against a Postgres service container |
 
 Each job first goes through `.github/actions/setup-workspace` — `npm ci`,
 build `@cinescope/shared`, then `npm run generate` for the Prisma clients (with
-a placeholder `DATABASE_URL`; no database is contacted). Integration tests need
-Postgres and are not part of CI yet — run them locally as described below.
+a placeholder `DATABASE_URL`; no database is contacted). The integration jobs
+add a `postgres:16` service container holding only that service's `*_test_db`,
+and alias the `postgres` hostname that `test:int` targets to it.
 
 ### Running tests
 
