@@ -28,11 +28,14 @@ Scope is deliberately kept narrow: the goal is to exercise microservice patterns
 - [x] `gateway/auth`
 - [x] `gateway/jwt-propagation` — [ADR 0001](adr/0001-jwt-propagation.md): the gateway forwards the caller's access token unchanged; catalog-service's own check, introduced in `auth/authorization` before the gateway existed, is kept as defense in depth
 - [x] `fix/inactive-users` — reject login and token refresh for inactive users
-- [ ] `gateway/authorization`
+- [x] `gateway/authorization`
 - [ ] `gateway/composition`
 - [ ] `gateway/rate-limiting`
 - [ ] `gateway/cache`
 - [ ] `gateway/tests`
+- [ ] `packages/shared-jwks` — token verifiers accept a remote JWKS as well as a shared secret
+- [ ] `auth/jwks` — RS256 key pair and a `/.well-known/jwks.json` endpoint
+- [ ] `chore/jwks-cutover` — auth-service signs with RS256; gateway-service and catalog-service verify against its JWKS and drop `JWT_ACCESS_SECRET`
 
 ## Phase 3 — Engagement service
 
@@ -76,6 +79,8 @@ Authentication currently relies on self-issued JWTs and rotating refresh tokens.
 
 Design decisions are documented as they are made, independently of the phase they belong to.
 
+- [x] `docs/adr-jwt-propagation`
+- [ ] `docs/adr-asymmetric-tokens` — ADR 0002, superseding the shared-secret consequences of ADR 0001
 - [ ] `docs/adr-engagement-bounded-context`
 - [ ] `docs/adr-outbox`
 - [ ] `docs/adr-db-per-service-minikube`
