@@ -45,6 +45,21 @@ describe('PrismaUserRepository', () => {
     expect(found!.permissionNames()).toEqual(['catalog:read'])
   })
 
+  it('round-trips an INACTIVE status, on save and on update', async () => {
+    const user = buildUser({ status: UserStatus.INACTIVE })
+    await userRepository.save(user)
+
+    const saved = await userRepository.findById(user.id)
+    expect(saved!.data.status).toBe(UserStatus.INACTIVE)
+    expect(saved!.isActive()).toBe(false)
+
+    saved!.activate()
+    await userRepository.update(saved!)
+
+    const reactivated = await userRepository.findById(user.id)
+    expect(reactivated!.isActive()).toBe(true)
+  })
+
   it('finds a user by username and by id', async () => {
     const user = buildUser()
     await userRepository.save(user)

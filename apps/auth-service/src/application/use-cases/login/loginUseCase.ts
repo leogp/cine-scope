@@ -12,6 +12,7 @@ import { LoginResponse } from './loginResponse'
 import { LoginRequest } from './loginRequest'
 // Errors
 import { InvalidCredentialsError } from '@auth/application/errors/invalidCredentialsError'
+import { UserInactiveError } from '@auth/application/errors/userInactiveError'
 import { UserNotFoundError } from '@auth/domain/errors/userNotFoundError'
 import { Email } from '@auth/domain/value-objects/email'
 
@@ -51,6 +52,12 @@ export class LoginUseCase implements UseCase<LoginRequest, LoginResponse> {
     )
     if (!isPasswordValid) {
       throw new InvalidCredentialsError()
+    }
+
+    // After the password check: only someone holding the right password learns
+    // the account is inactive.
+    if (!user.isActive()) {
+      throw new UserInactiveError()
     }
 
     // generate access token and refresh token

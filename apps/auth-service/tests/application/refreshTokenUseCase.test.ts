@@ -1,6 +1,7 @@
 import { InvalidRefreshTokenError } from '@auth/application/errors/invalidRefreshTokenError'
 import { RefreshTokenExpiredError } from '@auth/application/errors/refreshTokenExpiredError'
 import { RefreshTokenRevokedError } from '@auth/application/errors/refreshTokenRevokeError'
+import { UserInactiveError } from '@auth/application/errors/userInactiveError'
 import { RefreshTokenUseCase } from '@auth/application/use-cases/refresh-token/refreshTokenUseCase'
 import { RefreshToken } from '@auth/domain/entities/refreshToken'
 import { FakeAccessTokenGenerator, FakeRefreshTokenGenerator } from '../fakes/fakeTokenGenerators'
@@ -11,6 +12,7 @@ import { buildRole, buildUser } from '../helpers/builders'
 const makeSut = async (tokenOverrides: Partial<Parameters<typeof RefreshToken.create>[0]> = {}) => {
   const userRepository = new InMemoryUserRepository()
   const refreshTokenRepository = new InMemoryRefreshTokenRepository()
+  const accessTokenGenerator = new FakeAccessTokenGenerator()
 
   const user = buildUser()
   user.assignRole(buildRole())
@@ -29,11 +31,11 @@ const makeSut = async (tokenOverrides: Partial<Parameters<typeof RefreshToken.cr
   const useCase = new RefreshTokenUseCase(
     userRepository,
     refreshTokenRepository,
-    new FakeAccessTokenGenerator(),
+    accessTokenGenerator,
     new FakeRefreshTokenGenerator()
   )
 
-  return { useCase, user, userRepository, refreshTokenRepository }
+  return { useCase, user, userRepository, refreshTokenRepository, accessTokenGenerator }
 }
 
 describe('RefreshTokenUseCase', () => {
@@ -89,6 +91,31 @@ describe('RefreshTokenUseCase', () => {
 
     await expect(useCase.execute({ refreshToken: 'old-token' })).rejects.toThrow(
       InvalidRefreshTokenError
+    )
+  })
+
+  it('rejects an inactive user, revokes the presented token and issues nothing', async () => {
+    const { useCase, user, refreshTokenRepository, accessTokenGenerator } = await makeSut()
+    user.deactivate()
+
+    await expect(useCase.execute({ refreshToken: 'old-token' })).rejects.toThrow(UserInactiveError)
+
+    const presented = await refreshTokenRepository.findByToken('old-token')
+    expect(presented!.isRevoked()).toBe(true)
+    expect(refreshTokenRepository.size).toBe(1)
+    expect(accessTokenGenerator.lastPayload).toBeNull()
+
+    await expect(useCase.execute({ refreshToken: 'old-token' })).rejects.toThrow(
+      RefreshTokenRevokedError
+    )
+  })
+
+  it('reports a revoked token before the inactive user', async () => {
+    const { useCase, user } = await makeSut({ revoked: true })
+    user.deactivate()
+
+    await expect(useCase.execute({ refreshToken: 'old-token' })).rejects.toThrow(
+      RefreshTokenRevokedError
     )
   })
 })
