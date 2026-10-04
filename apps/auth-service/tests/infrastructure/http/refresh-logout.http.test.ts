@@ -1,6 +1,7 @@
 import { Application } from 'express'
 import request from 'supertest'
 
+import { Email } from '@auth/domain/value-objects/email'
 import { buildTestApp, validSignUpBody } from '../../helpers/buildTestApp'
 
 const signUpAndLogin = async (app: Application): Promise<string> => {
@@ -40,6 +41,24 @@ describe('POST /refresh', () => {
 
     expect(response.status).toBe(401)
     expect(response.body.error).toBe('InvalidRefreshTokenError')
+  })
+
+  it('responds 403 for an inactive user and rejects the retry with the revoked token', async () => {
+    const { app, userRepository } = buildTestApp()
+    const refreshToken = await signUpAndLogin(app)
+    const user = await userRepository.findByEmail(new Email(validSignUpBody.email))
+    user!.deactivate()
+    await userRepository.update(user!)
+
+    const refresh = await request(app).post('/refresh').send({ refreshToken })
+
+    expect(refresh.status).toBe(403)
+    expect(refresh.body.error).toBe('UserInactiveError')
+
+    const retry = await request(app).post('/refresh').send({ refreshToken })
+
+    expect(retry.status).toBe(401)
+    expect(retry.body.error).toBe('RefreshTokenRevokedError')
   })
 })
 

@@ -2,6 +2,7 @@ import { UseCase } from '@cinescope/shared/application'
 import { InvalidRefreshTokenError } from '@auth/application/errors/invalidRefreshTokenError'
 import { RefreshTokenExpiredError } from '@auth/application/errors/refreshTokenExpiredError'
 import { RefreshTokenRevokedError } from '@auth/application/errors/refreshTokenRevokeError'
+import { UserInactiveError } from '@auth/application/errors/userInactiveError'
 import { RefreshTokenRepository } from '@auth/domain/repositories/refreshTokenRepository'
 import { UserRepository } from '@auth/domain/repositories/userRepository'
 import { AccessTokenGenerator } from '@auth/application/ports/accessTokenGenerator'
@@ -37,6 +38,14 @@ export class RefreshTokenUseCase implements UseCase<RefreshTokenRequest, Refresh
 
     if (!user) {
       throw new InvalidRefreshTokenError()
+    }
+
+    if (!user.isActive()) {
+      // Revoke before refusing so the same token cannot be retried.
+      currentRefreshToken.revoke()
+      await this.refreshTokenRepository.update(currentRefreshToken)
+
+      throw new UserInactiveError()
     }
 
     const accessToken = await this.accessTokenGenerator.generate({

@@ -65,6 +65,15 @@ export class User extends AggregateRoot<UserProps> {
     return [...names].sort()
   }
 
+  /**
+   * Whether the account may sign in and refresh tokens. Compared against the
+   * enum member explicitly: UserStatus is numeric and ACTIVE is 0, so a
+   * truthiness check on `status` would invert the answer.
+   */
+  isActive(): boolean {
+    return this.props.status === UserStatus.ACTIVE
+  }
+
   assignRole(role: Role): void {
     const alreadyAssigned = this.props.roles.some((r) => r.id === role.id)
 

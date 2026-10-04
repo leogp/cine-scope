@@ -1,5 +1,6 @@
 import request from 'supertest'
 
+import { Email } from '@auth/domain/value-objects/email'
 import { buildTestApp, validSignUpBody } from '../../helpers/buildTestApp'
 
 describe('POST /login', () => {
@@ -28,6 +29,19 @@ describe('POST /login', () => {
 
     expect(response.status).toBe(401)
     expect(response.body.error).toBe('InvalidCredentialsError')
+  })
+
+  it('responds 403 for an inactive user with the correct password', async () => {
+    const { app, userRepository } = buildTestApp()
+    await request(app).post('/signup').send(validSignUpBody)
+    const user = await userRepository.findByEmail(new Email(validSignUpBody.email))
+    user!.deactivate()
+    await userRepository.update(user!)
+
+    const response = await request(app).post('/login').send(loginBody)
+
+    expect(response.status).toBe(403)
+    expect(response.body.error).toBe('UserInactiveError')
   })
 
   // Current errorHandler mapping: UserNotFoundError → 404. It leaks account

@@ -5,6 +5,7 @@ import { InvalidCredentialsError } from '@auth/application/errors/invalidCredent
 import { InvalidRefreshTokenError } from '@auth/application/errors/invalidRefreshTokenError'
 import { RefreshTokenExpiredError } from '@auth/application/errors/refreshTokenExpiredError'
 import { RefreshTokenRevokedError } from '@auth/application/errors/refreshTokenRevokeError'
+import { UserInactiveError } from '@auth/application/errors/userInactiveError'
 import { DomainError } from '@auth/domain/errors/domainError'
 import { EmailAlreadyExistsError } from '@auth/domain/errors/emailAlreadyExistsError'
 import { RoleNotFoundError } from '@auth/domain/errors/roleNotFoundError'
@@ -29,6 +30,10 @@ function statusFor(err: Error): number | undefined {
     err instanceof RefreshTokenRevokedError
   ) {
     return 401
+  }
+
+  if (err instanceof UserInactiveError) {
+    return 403
   }
 
   if (err instanceof DomainError || err instanceof ApplicationError) {

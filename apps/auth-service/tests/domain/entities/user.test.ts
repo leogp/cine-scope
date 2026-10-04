@@ -95,6 +95,22 @@ describe('User', () => {
     expect(user.data.status).toBe(UserStatus.ACTIVE)
   })
 
+  describe('isActive', () => {
+    it('is true for a new active user', () => {
+      expect(buildUser().isActive()).toBe(true)
+    })
+
+    it('is false after deactivate() and true again after activate()', () => {
+      const user = buildUser()
+
+      user.deactivate()
+      expect(user.isActive()).toBe(false)
+
+      user.activate()
+      expect(user.isActive()).toBe(true)
+    })
+  })
+
   describe('permissionNames', () => {
     it('has no permissions without roles', () => {
       expect(buildUser().permissionNames()).toEqual([])
