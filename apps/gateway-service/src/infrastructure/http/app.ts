@@ -14,6 +14,12 @@ export interface GatewayAppConfig {
    * the composition root so the JWT secret never reaches the HTTP layer.
    */
   readonly authenticate: RequestHandler
+  /**
+   * Applies the access policy to the identified caller before any service is
+   * called. Built in the composition root, like `authenticate`, so the policy
+   * stays out of the HTTP layer and the suites can inject a pass-through.
+   */
+  readonly authorize: RequestHandler
 }
 
 /**
@@ -29,6 +35,7 @@ export const buildApp = ({
   routes,
   proxyTimeoutMs,
   authenticate,
+  authorize,
 }: GatewayAppConfig): Application => {
   const app = express()
 
@@ -41,25 +48,31 @@ export const buildApp = ({
   // 3. The gateway's own liveness, answered without touching any service.
   app.use(buildHealthRoutes('gateway-service'))
 
-  // 4. Authentication: who is calling. A request without a token passes through
-  //    as anonymous; a token that is present but unusable is a 401 here, before
-  //    any service sees it. Nothing is gated yet — authorization
-  //    (gateway/authorization) is still reserved and mounts right after this.
-  //    `req.auth` is gateway-local: downstream services keep verifying the
-  //    forwarded token themselves.
+  // 4. Authentication, then authorization. `authenticate` identifies the caller:
+  //    no token passes as anonymous, a present but unusable token is a 401.
+  //    `authorize` then applies the access policy under each proxied prefix
+  //    (public, authenticated or a named permission, failing closed to
+  //    authenticated) and answers 401/403 before any service is called.
+  //    `req.auth` is gateway-local: services keep verifying the forwarded token
+  //    and enforcing their own guards.
+  //    CORS, when added, mounts before this step: preflight OPTIONS requests
+  //    carry no credentials and would be refused here.
   app.use(authenticate)
+  app.use(authorize)
 
-  // 5. The proxies. Express strips `route.prefix` from req.url before the
+  // 5. The proxies, reached only by requests step 4 let through. Express strips `route.prefix` from req.url before the
   //    handler runs, which is what turns /catalog/movies into /movies.
   for (const route of routes) {
     app.use(route.prefix, createServiceProxy({ route, timeoutMs: proxyTimeoutMs }))
   }
 
   // 6. Reserved: gateway-only routes (composition endpoints), each with a
-  //    locally scoped parser and a prefix that overlaps no proxy prefix:
+  //    locally scoped parser, a prefix that overlaps no proxy prefix and its
+  //    own access check, since `authorize` guards proxied prefixes only:
   //      app.use('/compose', express.json(), buildComposeRoutes(...))
 
-  // 7. Anything unmatched — `/`, `/engagement`, `/catalogue` — is a gateway 404.
+  // 7. Anything unmatched — `/`, `/engagement`, `/catalogue` — is a gateway 404;
+  //    authorization never touched it.
   app.use(notFoundHandler)
   app.use(errorHandler)
 
