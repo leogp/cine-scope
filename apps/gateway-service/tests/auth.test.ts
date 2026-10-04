@@ -15,6 +15,9 @@ const sign = (
   secret: string = SECRET
 ): string => jwt.sign(payload, secret, { issuer: ISSUER, expiresIn: '15m', ...options })
 
+// Authorization has its own suite (authorization.test.ts); here it is a no-op.
+const passThrough: RequestHandler = (_req, _res, next) => next()
+
 const validClaims = {
   sub: 'user-1',
   username: 'ripley',
@@ -52,6 +55,7 @@ describe('gateway authentication', () => {
       ],
       proxyTimeoutMs: 2_000,
       authenticate,
+      authorize: passThrough,
     })
   })
 

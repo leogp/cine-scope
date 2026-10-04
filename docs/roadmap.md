@@ -28,7 +28,7 @@ Scope is deliberately kept narrow: the goal is to exercise microservice patterns
 - [x] `gateway/auth`
 - [x] `gateway/jwt-propagation` — [ADR 0001](adr/0001-jwt-propagation.md): the gateway forwards the caller's access token unchanged; catalog-service's own check, introduced in `auth/authorization` before the gateway existed, is kept as defense in depth
 - [x] `fix/inactive-users` — reject login and token refresh for inactive users
-- [ ] `gateway/authorization`
+- [x] `gateway/authorization`
 - [ ] `gateway/composition`
 - [ ] `gateway/rate-limiting`
 - [ ] `gateway/cache`
