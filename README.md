@@ -1,373 +1,102 @@
 # CineScope
 
-CineScope is a cloud-native movie and TV platform built with a microservices architecture.
+A movie and TV platform built as a set of microservices. It exists to exercise Domain-Driven Design, Clean Architecture and event-driven patterns end to end, from an API gateway down to a Kubernetes deployment on minikube.
 
-The platform is designed around Domain-Driven Design (DDD), Clean Architecture and event-driven communication principles. Each bounded context is implemented as an independent service with its own database and deployment lifecycle.
+```mermaid
+flowchart LR
+    client([Client]) --> gateway[API Gateway]
 
-## Architecture
+    gateway --> auth[Auth Service]
+    gateway --> catalog[Catalog Service]
+    gateway -.-> engagement[Engagement Service]
+    gateway -.-> recommendation[Recommendation Service]
 
-CineScope is composed of multiple backend services:
+    auth --> authdb[(auth_db)]
+    catalog --> catalogdb[(catalog_db)]
+    engagement -.-> engagementdb[(engagement_db)]
+    recommendation -.-> recommendationdb[(recommendation_db)]
 
-- **Auth Service**
-- **Catalog Service**
-- **Review Service**
-- **Watchlist Service**
-- **Recommendation Service**
-- **API Gateway**
+        catalog -.->|movie and series events| bus{{RabbitMQ}}
+    bus -.-> recommendation
+    bus -.-> engagement
 
-Services communicate synchronously through REST APIs and asynchronously through events.
+    classDef planned stroke-dasharray: 5 5
+    class engagement,recommendation,engagementdb,recommendationdb,bus planned
+```
 
-## Tech Stack
+Solid lines are implemented and dashed lines are planned. Every request enters through the gateway, which verifies the caller's JWT, applies a static access policy and forwards the token unchanged. Services verify it again on their own ([ADR 0001](docs/adr/0001-jwt-propagation.md)).
 
-### Backend
+## Services
 
-- Node.js
-- TypeScript
-- Express
+| Service        | Status                                            | Responsibility                                                                            |
+| -------------- | ------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| API Gateway    | In progress: proxy, authentication, authorization | Single entry point: routing, JWT verification, access policy                              |
+| Auth           | Implemented                                       | Signup, login, rotating refresh tokens, roles and permissions                             |
+| Catalog        | Implemented                                       | Movies with full CRUD (series in progress); people, genres and companies with create/read | create/read |
+| Recommendation | Planned (Phase 3)                                 | Builds recommendations from the events Catalog publishes                                  |
+| Engagement     | Planned (Phase 4)                                 | Reviews and watchlists, with ownership-based authorization                                |
 
-### Data
+Until `chore/engagement-merge` lands, Engagement still exists as the `review-service` and `watchlist-service` placeholders, which expose only `/health`.
 
-- PostgreSQL
-- Redis
+## Tech stack
 
-### Messaging
+### Implemented
 
-- RabbitMQ
+- **Runtime:** Node.js 24, TypeScript, Express, Zod, http-proxy-middleware
+- **Data:** PostgreSQL 16 with Prisma
+- **Security:** HS256 JWT access tokens, rotating refresh tokens, permission-based RBAC enforced at the gateway and in each service
+- **Testing:** Jest and Supertest, plus integration suites against a real Postgres
+- **Tooling:** npm workspaces, Docker, Docker Compose, ESLint, Prettier, GitHub Actions
 
-### Infrastructure
+### Planned
 
-- Docker
-- Docker Compose
-- Kubernetes
-- Minikube
+- **Messaging:** RabbitMQ, with outbox, inbox, retries and dead-letter queues (Phase 3)
+- **Cache:** Redis, already provisioned in Compose but not yet used by any service
+- **Deployment:** Kubernetes on minikube (Phase 5)
+- **Security:** RS256 with JWKS, then OAuth 2.0 Authorization Code and OpenID Connect (Phase 6)
 
-## Security
+## Design principles
 
-- JWT Access Tokens
-- Refresh Tokens
-- OAuth 2.0 Authorization Code Flow
-- OpenID Connect (OIDC)
-- Role-Based Access Control (RBAC)
-- Token-based Authentication
+- One bounded context per service, with Clean (hexagonal) Architecture inside each one
+- Database per service
+- Defense in depth: coarse-grained authorization at the gateway, fine-grained checks in the services
+- Integration through domain events and eventual consistency (planned)
 
-## Testing
+## Documentation
 
-- Jest
-- Supertest
-
-## Architectural Principles
-
-- Microservices-first approach
-- Domain-Driven Design (DDD)
-- Clean Architecture
-- Hexagonal Architecture
-- Event-Driven Architecture
-- Database per Service
-- Eventual Consistency
+- [Roadmap](docs/roadmap.md): phases and the branch behind every step
+- [Architecture Decision Records](docs/adr/)
+- [OpenAPI spec](docs/api/cinescope.openapi.json): every route reachable through the gateway
+- [Development guide](docs/development.md): workspace setup, testing, CI and production images
 
 ## Repository layout
 
 ```
-apps/
-  auth-service/            signup, login, refresh, logout (implemented)
-  catalog-service/         movies, series, people, genres, companies (implemented)
-  review-service/          scaffolding
-  watchlist-service/       scaffolding
-  recommendation-service/  scaffolding
-  gateway-service/         scaffolding
+apps/        one folder per service
 packages/
-  shared/                  @cinescope/shared — building blocks used by every service
-infra/                     compose/database/messaging assets
+  shared/    @cinescope/shared: domain, application and HTTP building blocks
+infra/       Postgres initialisation
+docs/        roadmap, ADRs, OpenAPI spec, development guide
 ```
 
-Each implemented service follows the same Clean Architecture layering:
+Business services share the same layering: `domain/`, `application/`, `infrastructure/` and a `main/` composition root.
 
-```
-apps/<service>/
-  src/
-    domain/          entities, value objects, repository interfaces, errors
-    application/     use cases (one folder per use case: request, response, use case)
-    infrastructure/
-      http/          app.ts, controllers/, routes/, middlewares/, schemas/
-      prisma/        repository implementations + domain↔row mappers
-    main/            composition.ts — the composition root
-    config/          env parsing
-    index.ts         dotenv → env → buildApp(composeApp()) → listen
-  tests/             mirrors src/, plus fakes/ and helpers/
-```
+## Getting started
 
-## `@cinescope/shared`
-
-Framework-level building blocks, published to the workspace as three subpath
-exports. Each subpath has a thin shim package at
-`packages/shared/<subpath>/package.json` pointing at the compiled `dist/`
-output, so services import them as ordinary module specifiers.
-
-| Subpath                                 | Exports                                                                                                                        |
-| --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| `@cinescope/shared/domain`              | `Entity`, `AggregateRoot`, `ValueObject`, `DomainError`                                                                        |
-| `@cinescope/shared/application`         | `UseCase`, `PaginationParams`, `PaginatedResult`, `normalizePagination`, `buildPaginatedResult`                                |
-| `@cinescope/shared/infrastructure/http` | `asyncHandler`, `validateBody`, `validateParams`, `validateQuery`, `notFoundHandler`, `buildHealthRoutes`, `buildErrorHandler` |
-
-`infrastructure/http` holds the Express plumbing that is genuinely
-service-agnostic — the response envelopes (`{error, message}`,
-`{error: 'ValidationError', details}`, `{error: 'NotFound', path}`) and the
-500 fallback. What stays per-service is the **policy**: each service passes
-its own `statusFor(err)` resolver to `buildErrorHandler`, because the
-error→status mapping depends on that service's error classes.
-
-```ts
-// apps/catalog-service/src/infrastructure/http/middlewares/errorHandler.ts
-export const errorHandler = buildErrorHandler(statusFor)
-```
-
-`express` and `zod` are **peer** dependencies, not direct ones: the services
-own the instances. A duplicate copy of zod would break `instanceof ZodType`
-inside `validateBody` and friends.
-
-Shared compiles to `dist/` before the apps — npm workspaces already orders the
-build correctly, but a shared-only rebuild is:
-
-```bash
-docker compose run --rm --no-deps deps npm run build -w @cinescope/shared
-```
-
-## Development
-
-CineScope is an **npm workspaces** monorepo. All shared dev tooling
-(`typescript`, `@types/node`, `eslint`, `prettier`, `jest`, `tsx`, …) lives in
-the root `package.json`; each service only declares its own runtime
-dependencies. There is a **single hoisted `node_modules` at the repo root**.
-
-You do **not** need Node.js installed on your host. Everything runs inside
-Docker, and the workspace's `node_modules` is bind-mounted back to the host so
-your editor resolves every package with no red squiggles.
-
-### Requirements
-
-- Docker + Docker Compose
-
-### Start the stack
+Only Docker is required; Node.js does not need to be installed on the host.
 
 ```bash
 docker compose up
 ```
 
-On the first run the one-shot `deps` service runs `npm install` for the whole
-workspace (populating the shared `node_modules` on the host), then every
-service starts with hot-reload via `tsx watch`.
-
-### File ownership
-
-The Node containers run as UID/GID `1000:1000` rather than root, so everything
-they write into the repository (`node_modules`, `dist/`, generated Prisma
-clients) stays owned by you.
-
-- **Linux** — if `id -u` / `id -g` is not 1000, copy `.env.example` to `.env`
-  and set `UID` / `GID` there.
-- **macOS** — nothing to do; Docker Desktop maps bind-mount files to your user.
-- **Windows** — keep the repository inside the WSL2 filesystem, where it
-  behaves like Linux.
-
-Checkouts created before containers ran as your user may still hold
-root-owned files. Hand them back once (Linux / WSL2):
+The first run installs the workspace, builds the shared package, applies migrations and seeds auth-service. The gateway listens on `http://localhost:4000`.
 
 ```bash
-docker compose run --rm --no-deps --user root deps chown -R "$(id -u):$(id -g)" /workspace
+docker compose run --rm --no-deps deps npm test                    # unit and HTTP tests
+docker compose run --rm deps npm run test:int -w catalog-service   # integration tests (starts Postgres)
+docker compose run --rm deps npm run lint
 ```
-
-### Adding a dependency to a service
-
-Run the install **inside a container** so nothing is installed on your host.
-The change lands in the shared `node_modules` immediately and VS Code picks it
-up right away:
-
-```bash
-docker compose exec auth-service npm install <package> -w auth-service
-```
-
-For a dev-only tool shared by every service, add it at the workspace root:
-
-```bash
-docker compose exec deps npm install -D <package>
-# (or run `docker compose run --rm deps npm install -D <package>`)
-```
-
-### Quality tooling (shared across all services)
-
-`tsconfig.base.json`, `eslint.config.js` and `.prettierrc` are defined once at
-the root and apply to every service.
-
-```bash
-docker compose run --rm deps npm run lint          # ESLint (type-aware)
-docker compose run --rm deps npm run format:check  # Prettier, no writes
-docker compose run --rm deps npm run typecheck     # tsc --noEmit per service
-docker compose run --rm deps npm run build         # compile every service
-```
-
-### Continuous integration
-
-`.github/workflows/ci.yml` runs on every pull request to `main` and on every
-push to `main`, as parallel jobs that report as separate checks:
-
-| Job                             | Runs                                                    |
-| ------------------------------- | ------------------------------------------------------- |
-| Lint                            | `npm run lint` and `npm run format:check`               |
-| Typecheck                       | `npm run typecheck`                                     |
-| Unit tests                      | `npm test`                                              |
-| Integration tests (per service) | `npm run test:int` against a Postgres service container |
-
-Each job first goes through `.github/actions/setup-workspace` — `npm ci`,
-build `@cinescope/shared`, then `npm run generate` for the Prisma clients (with
-a placeholder `DATABASE_URL`; no database is contacted). The integration jobs
-add a `postgres:16` service container holding only that service's `*_test_db`,
-and alias the `postgres` hostname that `test:int` targets to it.
-
-### Running tests
-
-Like everything else, tests run **inside containers** — no Node.js needed on
-the host. There are two kinds of suites:
-
-- **Unit / HTTP tests** (`*.test.ts`) — pure Jest + Supertest over in-memory
-  fakes, no infrastructure required.
-- **Integration tests** (`*.int.test.ts`) — Prisma repositories exercised
-  against a real Postgres database (`auth_test_db` / `catalog_test_db`, both
-  created automatically the first time the `postgres` volume is initialised).
-
-#### Unit tests
-
-Run the whole workspace through a one-off `deps` container (`--no-deps` skips
-starting Postgres and friends, which unit tests don't need):
-
-```bash
-docker compose run --rm --no-deps deps npm test                    # every service
-docker compose run --rm --no-deps deps npm test -w auth-service    # one service
-```
-
-If the stack is already running (`docker compose up`), exec into the service
-container instead:
-
-```bash
-docker compose exec auth-service npm test
-```
-
-#### Integration tests
-
-`test:int` applies the service's migrations to its `*_test_db` and then runs
-the `*.int.test.ts` suites serially against it. The connection string is baked
-into the script and targets the test database only, so the development
-`auth_db` / `catalog_db` are never touched — and `tests/helpers/testDb.ts`
-refuses to build a client at all if `DATABASE_URL` does not name a test
-database, so a stray override cannot truncate real data. It needs Postgres, so
-keep dependencies enabled — Compose starts Postgres and waits for it to be
-healthy:
-
-```bash
-docker compose run --rm deps npm run test:int -w auth-service
-docker compose run --rm deps npm run test:int -w catalog-service
-# or, with the stack already up:
-docker compose exec auth-service npm run test:int
-```
-
-### Production images
-
-Each service ships a multi-stage `Dockerfile`. Because of the single workspace
-lockfile, build them from the repository **root**:
-
-```bash
-docker build -f apps/auth-service/Dockerfile -t cinescope/auth-service .
-```
-
-> Note: when Prisma schemas are added, give each service its own generated
-> client `output` path so the hoisted `node_modules` clients don't collide.
-
-## Current Status
-
-Platform infrastructure — Docker environment, container orchestration,
-messaging, database and cache services — is in place, and two business
-services are implemented end to end:
-
-| Service                | Status                                                                                      |
-| ---------------------- | ------------------------------------------------------------------------------------------- |
-| Auth Service           | Implemented — signup, login, refresh, logout; Prisma repositories; HTTP + integration tests |
-| Catalog Service        | Implemented — movie/series/person/genre/company aggregates; Prisma repositories; HTTP tests |
-| Review Service         | Scaffolding                                                                                 |
-| Watchlist Service      | Scaffolding                                                                                 |
-| Recommendation Service | Scaffolding                                                                                 |
-| API Gateway            | Scaffolding                                                                                 |
-
-The remaining services will be introduced incrementally.
-
-### Auth Service API
-
-Routes are mounted at the service root; the public `/auth` prefix belongs to the
-gateway, which strips it before forwarding. Through the gateway these are
-`POST /auth/signup`, `POST /auth/login` and so on.
-
-| Route           | Success                   |
-| --------------- | ------------------------- |
-| `POST /signup`  | 201                       |
-| `POST /login`   | 200 — token pair          |
-| `POST /refresh` | 200 — rotated token pair  |
-| `POST /logout`  | 204                       |
-| `GET /health`   | 200 — `{status, service}` |
-
-The access token carries `{sub, username, email, roles, permissions}`.
-`permissions` is the union of every permission granted by the user's roles and is
-what downstream services authorize against — see the seeded role/permission grid
-in `apps/auth-service/src/infrastructure/prisma/seed.ts`.
-
-### Catalog Service API
-
-Movies are the only aggregate with a full CRUD surface; the rest expose
-create + read while the write use cases are built out.
-
-The catalog is **public to read and closed to write**: every mutating route
-requires a valid access token carrying the `catalog:write` permission, which the
-seed grants to the `editor` and `admin` roles but not to the default `user` role.
-Reads and the health check need no credentials.
-
-| Route                                   | Auth                     | Success                              |
-| --------------------------------------- | ------------------------ | ------------------------------------ |
-| `POST /movies`                          | `catalog:write`          | 201 — `{id}`                         |
-| `GET /movies?page&pageSize`             | public                   | 200 — paginated summaries            |
-| `GET /movies/:id`                       | public                   | 200 — full read model with relations |
-| `PUT /movies/:id`                       | `catalog:write`          | 200 — `{id}` (full replace)          |
-| `DELETE /movies/:id`                    | `catalog:write`          | 204                                  |
-| `POST /series`, `GET /series/:id`       | `catalog:write` / public | 201 / 200                            |
-| `POST /people`, `GET /people/:id`       | `catalog:write` / public | 201 / 200                            |
-| `POST /genres`, `GET /genres/:id`       | `catalog:write` / public | 201 / 200                            |
-| `POST /companies`, `GET /companies/:id` | `catalog:write` / public | 201 / 200                            |
-| `GET /health`                           | public                   | 200 — `{status, service}`            |
-
-Verification happens in catalog-service itself, against the `JWT_ACCESS_SECRET`
-it shares with auth-service — the gateway does not exist yet, and when
-`gateway/jwt-propagation` lands this check is kept as defense-in-depth.
-
-Error responses follow the shared envelope: `400` for schema failures
-(`{error: 'ValidationError', details}`) and for domain invariant violations,
-`401` (`{error: 'Unauthorized'}`) for a missing, malformed, expired or
-wrongly-issued token, `403` (`{error: 'Forbidden'}`) for a valid token lacking
-the required permission, `404` for a missing aggregate or an unresolvable
-relation id, `409` for a duplicate genre name, `500`
-(`{error: 'InternalServerError'}`, message withheld) for anything unmapped.
-
-Guards run before body validation, so an unauthenticated write is rejected with
-`401` rather than a `400` that would leak the schema.
-
-## Planned Features
-
-- Authentication and authorization
-- Movie and TV catalog
-- Ratings and reviews
-- Favorites and watchlists
-- Recommendations
-- API Gateway
-- Event-driven communication
-- Outbox Pattern
-- Saga Pattern
-- Kubernetes deployment
 
 ## License
 
-This project is released under the MIT License.
+Released under the MIT License.
