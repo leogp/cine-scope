@@ -41,14 +41,5 @@ Thumbs.db
 *.swp
 *.swo
 
-# Claude
-.claude/
-CLAUDE.md
-.claudeignore
-claude.json
-*.claude
-.agents/
-skills-lock.json
-
 # Prisma generated client
 **/prisma/generated/
