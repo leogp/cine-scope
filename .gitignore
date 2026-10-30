@@ -14,6 +14,7 @@ build/
 .env
 .env.*
 !.env.example
+.local/
 
 # Logs
 logs/
@@ -47,6 +48,7 @@ CLAUDE.md
 claude.json
 *.claude
 .agents/
-plan.md
+skills-lock.json
+
 # Prisma generated client
 **/prisma/generated/
