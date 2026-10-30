@@ -3,7 +3,7 @@
   "info": {
     "title": "cine-scope API (via gateway)",
     "version": "0.1.0",
-    "description": "Every endpoint reachable through `gateway-service` as of the `gateway/proxy`\nbranch. The gateway strips its mount prefix before forwarding, so\n`/catalog/movies` arrives at catalog-service as `/movies`.\n\nServices that are still scaffolding (recommendation, review, watchlist)\nexpose only `/health`.\n\nEvery service mounts its routes at its own root, so the public prefix is\nalways the gateway's. Paths here are verified against the running stack.\n"
+    "description": "Every endpoint reachable through `gateway-service`. The gateway strips its mount prefix before forwarding, so\n`/catalog/movies` arrives at catalog-service as `/movies`.\n\nThe gateway verifies the caller's access token and applies its access policy before forwarding: write operations\nrequire a bearer token carrying the corresponding permission, and services check it again on their own.\n\nServices that are still placeholders (recommendation, review, watchlist) expose only `/health`.\n\nEvery service mounts its routes at its own root, so the public prefix is always the gateway's. Paths here are\nverified against the running stack.\n"
   },
   "servers": [
     {
