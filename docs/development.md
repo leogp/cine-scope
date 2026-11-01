@@ -51,7 +51,7 @@ docker compose run --rm deps npm run build         # compile every service
 There are two kinds of suites:
 
 - **Unit and HTTP tests** (`*.test.ts`): Jest and Supertest over in-memory fakes, with no infrastructure required.
-- **Integration tests** (`*.int.test.ts`): Prisma repositories exercised against a real Postgres database (`auth_test_db`, `catalog_test_db`), created automatically the first time the `postgres` volume is initialised.
+- **Integration tests** (`*.int.test.ts`): code exercised against real infrastructure. Prisma repositories run against Postgres (`auth_test_db`, `catalog_test_db`, created automatically the first time the `postgres` volume is initialised); the gateway's rate limiter runs against Redis, in logical database 15.
 
 ```bash
 docker compose run --rm --no-deps deps npm test                    # every service
@@ -66,6 +66,17 @@ docker compose run --rm deps npm run test:int -w auth-service
 docker compose run --rm deps npm run test:int -w catalog-service
 ```
 
+### Gateway integration tests
+
+`gateway-service`'s `test:int` builds two gateway apps in one process, each with its own rate limiter, stores and Redis client, sharing one Redis: two replicas in miniature. It checks that the limit holds across them, and a contrast case shows that in-memory stores would let twice the limit through. The script targets `redis://redis:6379/15`, a logical database development never uses (the gateway itself uses 0). `tests/helpers/testRedis.ts` refuses to connect unless the URL names database 15, and asks the server which database the connection selected before every `FLUSHDB`.
+
+The `deps` service depends on Postgres only, so start Redis yourself and skip the other dependencies:
+
+```bash
+docker compose up -d redis
+docker compose run --rm --no-deps deps npm run test:int -w gateway-service
+```
+
 ## Continuous integration
 
 `.github/workflows/ci.yml` runs on every pull request to `main` and every push to `main`, as parallel jobs that report as separate checks:
@@ -76,18 +87,19 @@ docker compose run --rm deps npm run test:int -w catalog-service
 | Typecheck                       | `npm run typecheck`                                     |
 | Unit tests                      | `npm test`                                              |
 | Integration tests (per service) | `npm run test:int` against a Postgres service container |
+| Integration tests (gateway)     | `npm run test:int` against a Redis service container    |
 
-Each job first goes through `.github/actions/setup-workspace`: `npm ci`, a build of `@cinescope/shared`, then `npm run generate` for the Prisma clients with a placeholder `DATABASE_URL` (no database is contacted). The integration jobs add a `postgres:16` service container holding only that service's `*_test_db`, and alias the `postgres` hostname that `test:int` targets to it.
+Each job first goes through `.github/actions/setup-workspace`: `npm ci`, a build of `@cinescope/shared`, then `npm run generate` for the Prisma clients with a placeholder `DATABASE_URL` (no database is contacted). The Postgres integration jobs add a `postgres:16` service container holding only that service's `*_test_db`, and alias the `postgres` hostname that `test:int` targets to it. The gateway job does the same with a `redis:8.8-alpine` container and the `redis` hostname.
 
 ## `@cinescope/shared`
 
 Framework-level building blocks, published to the workspace as three subpath exports. Each subpath has a thin shim package at `packages/shared/<subpath>/package.json` pointing at the compiled `dist/` output.
 
-| Subpath                                 | Exports                                                                                                    |
-| --------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| `@cinescope/shared/domain`              | `Entity`, `AggregateRoot`, `ValueObject`, `DomainError`                                                    |
-| `@cinescope/shared/application`         | `UseCase`, `PaginationParams`, `PaginatedResult`, `normalizePagination`, `buildPaginatedResult`            |
-| `@cinescope/shared/infrastructure/http` | Express plumbing: validators, error and 404 handlers, health routes, authentication and permission guards  |
+| Subpath                                 | Exports                                                                                                   |
+| --------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| `@cinescope/shared/domain`              | `Entity`, `AggregateRoot`, `ValueObject`, `DomainError`                                                   |
+| `@cinescope/shared/application`         | `UseCase`, `PaginationParams`, `PaginatedResult`, `normalizePagination`, `buildPaginatedResult`           |
+| `@cinescope/shared/infrastructure/http` | Express plumbing: validators, error and 404 handlers, health routes, authentication and permission guards |
 
 The response envelopes are shared, while the error-to-status mapping stays in each service: every service passes its own `statusFor(err)` resolver to `buildErrorHandler`, because that mapping depends on its own error classes.
 
