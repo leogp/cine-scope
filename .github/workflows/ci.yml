@@ -44,7 +44,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - uses: ./.github/actions/setup-workspace
-      # Unit suites only: jest.config.js excludes *.int.test.ts, which need Postgres.
+      # Unit suites only: jest.config.js excludes *.int.test.ts, which need Postgres or Redis.
       - name: Jest
         run: npm test
 
@@ -87,3 +87,32 @@ jobs:
       # Applies the migrations to the test database, then runs *.int.test.ts serially.
       - name: Jest (integration)
         run: npm run test:int -w ${{ matrix.service }}
+
+  # Separate from the Postgres matrix above: a different service container,
+  # and that matrix stays unchanged.
+  integration-gateway:
+    name: Integration tests (gateway-service)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    services:
+      redis:
+        # Keep in sync with the redis image in docker-compose.yml.
+        image: redis:8.8-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ./.github/actions/setup-workspace
+      # test:int targets the compose hostname `redis` on purpose, so it can never
+      # reach a development Redis. Here the service container is published on
+      # the runner's localhost, so give it that name.
+      - name: Alias the redis hostname
+        run: echo '127.0.0.1 redis' | sudo tee -a /etc/hosts
+      # Runs *.int.test.ts serially against logical database 15.
+      - name: Jest (integration)
+        run: npm run test:int -w gateway-service
