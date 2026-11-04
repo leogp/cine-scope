@@ -8,7 +8,6 @@ flowchart LR
 
     gateway --> auth[Auth Service]
     gateway --> catalog[Catalog Service]
-    gateway --> redis[(Redis)]
     gateway -.-> engagement[Engagement Service]
     gateway -.-> recommendation[Recommendation Service]
 
@@ -29,13 +28,13 @@ Solid lines are implemented and dashed lines are planned. Every request enters t
 
 ## Services
 
-| Service        | Status                                                           | Responsibility                                                                            |
-| -------------- | ---------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
-| API Gateway    | In progress: proxy, authentication, authorization, rate limiting | Single entry point: routing, JWT verification, access policy, rate limiting               |
-| Auth           | Implemented                                                      | Signup, login, rotating refresh tokens, roles and permissions                             |
-| Catalog        | Implemented                                                      | Movies with full CRUD (series in progress); people, genres and companies with create/read |
-| Recommendation | Planned (Phase 3)                                                | Builds recommendations from the events Catalog publishes                                  |
-| Engagement     | Planned (Phase 4)                                                | Reviews and watchlists, with ownership-based authorization                                |
+| Service        | Status                                            | Responsibility                                                                            |
+| -------------- | ------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| API Gateway    | In progress: proxy, authentication, authorization | Single entry point: routing, JWT verification, access policy                              |
+| Auth           | Implemented                                       | Signup, login, rotating refresh tokens, roles and permissions                             |
+| Catalog        | Implemented                                       | Movies with full CRUD (series in progress); people, genres and companies with create/read | create/read |
+| Recommendation | Planned (Phase 3)                                 | Builds recommendations from the events Catalog publishes                                  |
+| Engagement     | Planned (Phase 4)                                 | Reviews and watchlists, with ownership-based authorization                                |
 
 Until `chore/engagement-merge` lands, Engagement still exists as the `review-service` and `watchlist-service` placeholders, which expose only `/health`.
 
@@ -45,15 +44,14 @@ Until `chore/engagement-merge` lands, Engagement still exists as the `review-ser
 
 - **Runtime:** Node.js 24, TypeScript, Express, Zod, http-proxy-middleware
 - **Data:** PostgreSQL 16 with Prisma
-- **Rate limiting:** Redis-backed at the gateway (express-rate-limit with rate-limit-redis), so limits hold across replicas
 - **Security:** HS256 JWT access tokens, rotating refresh tokens, permission-based RBAC enforced at the gateway and in each service
-- **Testing:** Jest and Supertest, plus integration suites against a real Postgres and Redis
+- **Testing:** Jest and Supertest, plus integration suites against a real Postgres
 - **Tooling:** npm workspaces, Docker, Docker Compose, ESLint, Prettier, GitHub Actions
 
 ### Planned
 
 - **Messaging:** RabbitMQ, with outbox, inbox, retries and dead-letter queues (Phase 3)
-- **Cache:** gateway response caching on the same Redis (`gateway/cache`)
+- **Cache:** Redis, already provisioned in Compose but not yet used by any service
 - **Deployment:** Kubernetes on minikube (Phase 5)
 - **Security:** RS256 with JWKS, then OAuth 2.0 Authorization Code and OpenID Connect (Phase 6)
 

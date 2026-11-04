@@ -15,7 +15,7 @@ const sign = (
   secret: string = SECRET
 ): string => jwt.sign(payload, secret, { issuer: ISSUER, expiresIn: '15m', ...options })
 
-// Rate limiting and authorization have their own suites; here both are no-ops.
+// Authorization has its own suite (authorization.test.ts); here it is a no-op.
 const passThrough: RequestHandler = (_req, _res, next) => next()
 
 const validClaims = {
@@ -55,7 +55,6 @@ describe('gateway authentication', () => {
       ],
       proxyTimeoutMs: 2_000,
       authenticate,
-      rateLimit: passThrough,
       authorize: passThrough,
     })
   })

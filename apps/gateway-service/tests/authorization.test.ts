@@ -1,5 +1,5 @@
 import { buildOptionalAuth } from '@cinescope/shared/infrastructure/http'
-import type { Application, RequestHandler } from 'express'
+import type { Application } from 'express'
 import jwt from 'jsonwebtoken'
 import request from 'supertest'
 
@@ -22,9 +22,6 @@ const bearer = (permissions: string[], roles: string[] = ['user']): string =>
 
 const READER = bearer(['catalog:read'])
 const EDITOR = bearer(['catalog:read', 'catalog:write'], ['editor'])
-
-// Rate limiting has its own suite; here it is a no-op.
-const passThrough: RequestHandler = (_req, _res, next) => next()
 
 describe('gateway authorization', () => {
   let auth: StubService
@@ -49,7 +46,6 @@ describe('gateway authorization', () => {
       routes,
       proxyTimeoutMs: 2_000,
       authenticate: buildOptionalAuth({ secret: SECRET, issuer: ISSUER }),
-      rateLimit: passThrough,
       authorize: buildAuthorization({ policy: ACCESS_POLICY, routes }),
     })
   })

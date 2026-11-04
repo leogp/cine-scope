@@ -11,8 +11,6 @@ module.exports = {
   testEnvironment: 'node',
   roots: ['<rootDir>/tests'],
   testMatch: ['**/*.test.ts'],
-  // *.int.test.ts need a running Redis; they run through `npm run test:int`.
-  testPathIgnorePatterns: ['\\.int\\.test\\.ts$'],
   clearMocks: true,
   collectCoverageFrom: ['src/**/*.ts', '!src/index.ts'],
 }
