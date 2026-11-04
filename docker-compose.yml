@@ -81,7 +81,7 @@ services:
       start_period: 10s
 
   redis:
-    image: redis:alpine
+    image: redis:8.8-alpine
     container_name: redis
     volumes:
       - redis_data:/data
@@ -245,9 +245,13 @@ services:
       RECOMMENDATION_SERVICE_URL: http://recommendation-service:4003
       REVIEW_SERVICE_URL: http://review-service:4004
       WATCHLIST_SERVICE_URL: http://watchlist-service:4005
+      REDIS_URL: redis://redis:6379
     depends_on:
       deps:
         condition: service_completed_successfully
+      # Ordering only: the gateway itself starts, and fails open, without Redis.
+      redis:
+        condition: service_healthy
       auth-service:
         condition: service_started
       catalog-service:
