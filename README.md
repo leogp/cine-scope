@@ -45,7 +45,7 @@ Until `chore/engagement-merge` lands, Engagement still exists as the `review-ser
 
 - **Runtime:** Node.js 24, TypeScript, Express, Zod, http-proxy-middleware
 - **Data:** PostgreSQL 16 with Prisma
-- **Rate limiting:** Redis-backed at the gateway (express-rate-limit with rate-limit-redis), so limits hold across replicas
+- **Redis:** backs the gateway's rate limiting (express-rate-limit with rate-limit-redis) and its response cache for public catalog reads, so limits and invalidations hold across replicas
 - **Security:** HS256 JWT access tokens, rotating refresh tokens, permission-based RBAC enforced at the gateway and in each service
 - **Testing:** Jest and Supertest, plus integration suites against a real Postgres and Redis
 - **Tooling:** npm workspaces, Docker, Docker Compose, ESLint, Prettier, GitHub Actions
@@ -53,7 +53,6 @@ Until `chore/engagement-merge` lands, Engagement still exists as the `review-ser
 ### Planned
 
 - **Messaging:** RabbitMQ, with outbox, inbox, retries and dead-letter queues (Phase 3)
-- **Cache:** gateway response caching on the same Redis (`gateway/cache`)
 - **Deployment:** Kubernetes on minikube (Phase 5)
 - **Security:** RS256 with JWKS, then OAuth 2.0 Authorization Code and OpenID Connect (Phase 6)
 

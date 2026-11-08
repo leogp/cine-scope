@@ -30,7 +30,7 @@ Scope is deliberately kept narrow: the goal is to exercise microservice patterns
 - [x] `fix/inactive-users` — reject login and token refresh for inactive users
 - [x] `gateway/authorization`
 - [x] `gateway/rate-limiting`
-- [ ] `gateway/cache`
+- [x] `gateway/cache`
 - [ ] `gateway/tests`
 
 ## Phase 3 — Event-driven integration
