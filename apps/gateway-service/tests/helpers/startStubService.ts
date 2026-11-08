@@ -1,4 +1,4 @@
-import express from 'express'
+import express, { type Response } from 'express'
 import type { Server } from 'http'
 import type { AddressInfo } from 'net'
 
@@ -8,6 +8,9 @@ export interface StubRequest {
   readonly headers: Record<string, string | string[] | undefined>
   readonly body: string
 }
+
+/** Writes the stub's answer; `request` is already in `received` when it runs. */
+export type StubResponder = (request: StubRequest, res: Response) => void
 
 export interface StubService {
   readonly url: string
@@ -21,8 +24,15 @@ export interface StubService {
  * It collects raw bytes instead of parsing: these tests exist to prove the
  * gateway forwards the body untouched, whatever its content-type, so parsing
  * here would hide the very thing under test.
+ *
+ * Answers 200 `{ service, url }` unless given a `respond`.
  */
-export async function startStubService(name = 'stub-service'): Promise<StubService> {
+export async function startStubService(
+  name = 'stub-service',
+  respond: StubResponder = (request, res) => {
+    res.status(200).json({ service: name, url: request.url })
+  }
+): Promise<StubService> {
   const received: StubRequest[] = []
   const app = express()
 
@@ -31,14 +41,14 @@ export async function startStubService(name = 'stub-service'): Promise<StubServi
 
     req.on('data', (chunk: Buffer) => chunks.push(chunk))
     req.on('end', () => {
-      received.push({
+      const request: StubRequest = {
         method: req.method,
         url: req.url,
         headers: req.headers,
         body: Buffer.concat(chunks).toString('utf8'),
-      })
-
-      res.status(200).json({ service: name, url: req.url })
+      }
+      received.push(request)
+      respond(request, res)
     })
   })
 
