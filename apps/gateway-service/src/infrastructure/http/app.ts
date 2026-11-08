@@ -27,6 +27,13 @@ export interface GatewayAppConfig {
    * stays out of the HTTP layer and the suites can inject a pass-through.
    */
   readonly authorize: RequestHandler
+  /**
+   * Answers public catalog reads from the shared response cache and invalidates
+   * it on writes. Built in the composition root, like `rateLimit`, so the Redis
+   * client never reaches the HTTP layer and the suites can inject an in-memory
+   * store or a pass-through.
+   */
+  readonly cache: RequestHandler
 }
 
 /**
@@ -36,7 +43,7 @@ export interface GatewayAppConfig {
  * the request stream, and the proxy would then forward a request whose body
  * never arrives — the upstream waits for bytes that were already read, and the
  * call hangs until the timeout. Gateway-only routes that need JSON get their own
- * parser (step 8).
+ * parser (step 9).
  */
 export const buildApp = ({
   routes,
@@ -44,6 +51,7 @@ export const buildApp = ({
   authenticate,
   rateLimit,
   authorize,
+  cache,
 }: GatewayAppConfig): Application => {
   const app = express()
 
@@ -88,20 +96,31 @@ export const buildApp = ({
   //    authenticated) and answers 401/403 before any service is called.
   app.use(authorize)
 
-  // 7. The proxies, reached only by requests steps 4–6 let through. Express
-  //    strips `route.prefix` from req.url before the handler runs, which is
-  //    what turns /catalog/movies into /movies.
+  // 7. Response cache, for the public catalog reads in cache/cacheableRoutes.ts.
+  //    After `authorize`, so a cached response can never reach a caller the
+  //    policy would refuse: every hit has passed the same check as a miss.
+  //    After the rate limiter, so a hit still counts against the caller's
+  //    quota; a cache ahead of it would make cached routes unlimited.
+  //    A hit is answered here and never reaches the proxy. A miss is marked,
+  //    proxied, and stored once sent; a 2xx write under a cached collection
+  //    bumps its generation, so every replica misses on its next read.
+  //    Fails open: a Redis outage makes every lookup a miss.
+  app.use(cache)
+
+  // 8. The proxies, reached only by requests steps 4–6 let through and step 7
+  //    did not answer. Express strips `route.prefix` from req.url before the
+  //    handler runs, which is what turns /catalog/movies into /movies.
   for (const route of routes) {
     app.use(route.prefix, createServiceProxy({ route, timeoutMs: proxyTimeoutMs }))
   }
 
-  // 8. Reserved: gateway-only routes (composition endpoints), each with a
+  // 9. Reserved: gateway-only routes (composition endpoints), each with a
   //    locally scoped parser, a prefix that overlaps no proxy prefix and its
   //    own access check, since `authorize` guards proxied prefixes only:
   //      app.use('/compose', express.json(), buildComposeRoutes(...))
 
-  // 9. Anything unmatched — `/`, `/engagement`, `/catalogue` — is a gateway 404;
-  //    authorization never touched it, but the rate limiter counted it.
+  // 10. Anything unmatched — `/`, `/engagement`, `/catalogue` — is a gateway 404;
+  //     authorization never touched it, but the rate limiter counted it.
   app.use(notFoundHandler)
   app.use(errorHandler)
 

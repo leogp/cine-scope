@@ -57,6 +57,7 @@ describe('gateway authentication', () => {
       authenticate,
       rateLimit: passThrough,
       authorize: passThrough,
+      cache: passThrough,
     })
   })
 

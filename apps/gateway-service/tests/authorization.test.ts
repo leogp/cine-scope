@@ -51,6 +51,7 @@ describe('gateway authorization', () => {
       authenticate: buildOptionalAuth({ secret: SECRET, issuer: ISSUER }),
       rateLimit: passThrough,
       authorize: buildAuthorization({ policy: ACCESS_POLICY, routes }),
+      cache: passThrough,
     })
   })
 

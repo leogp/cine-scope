@@ -4,11 +4,13 @@ import { env } from './config/env'
 import { buildApp } from './infrastructure/http/app'
 import { ACCESS_POLICY } from './infrastructure/http/authorization/accessPolicy'
 import { buildAuthorization } from './infrastructure/http/authorization/buildAuthorization'
+import { buildResponseCache } from './infrastructure/http/cache/buildResponseCache'
 import { buildRouteTable } from './infrastructure/http/proxy/routeTable'
 import { buildRateLimit } from './infrastructure/http/rateLimit/buildRateLimit'
 import { createRedisClient, waitUntilReady } from './infrastructure/redis/createRedisClient'
 import { RedisAvailability } from './infrastructure/redis/redisAvailability'
 import { redisStoreFactory } from './infrastructure/redis/redisRateLimitStore'
+import { redisResponseCacheStore } from './infrastructure/redis/redisResponseCacheStore'
 
 // Upper bound on waiting for Redis at startup. Compose starts the gateway only
 // once Redis reports healthy, so a normal boot is ready within milliseconds; the
@@ -18,7 +20,8 @@ const REDIS_READY_TIMEOUT_MS = 5_000
 async function main(): Promise<void> {
   const routes = buildRouteTable(env)
 
-  // One client for every Redis-backed feature; gateway/cache will share it.
+  // One client for every Redis-backed feature: the rate limiter and the
+  // response cache share it, and its availability tracker.
   const redisAvailability = new RedisAvailability()
   const redis = createRedisClient({
     url: env.REDIS_URL,
@@ -36,9 +39,10 @@ async function main(): Promise<void> {
   // The limiters are built after the wait, so their stores upload their Lua
   // scripts to a Redis that is ready.
   if (!(await ready)) {
-    // Fail-open mode: traffic passes unlimited until Redis answers. The stores
-    // then reload their scripts (rate-limit-redis >= 6.0.2) and limiting
-    // resumes without a restart. No-op if a connection error already warned.
+    // Fail-open mode: traffic passes unlimited and uncached until Redis
+    // answers. The stores then reload their scripts (rate-limit-redis >= 6.0.2)
+    // and limiting and caching resume without a restart. No-op if a connection
+    // error already warned.
     redisAvailability.markUnavailable(
       new Error(`not ready within ${REDIS_READY_TIMEOUT_MS} ms, starting without it`)
     )
@@ -66,6 +70,11 @@ async function main(): Promise<void> {
     }),
     // Throws at startup if the policy names a prefix the route table lacks.
     authorize: buildAuthorization({ policy: ACCESS_POLICY, routes }),
+    cache: buildResponseCache({
+      store: redisResponseCacheStore(redis, redisAvailability),
+      ttlMs: env.CACHE_TTL_MS,
+      maxEntryBytes: env.CACHE_MAX_ENTRY_BYTES,
+    }),
   })
 
   app.listen(env.PORT, () => console.log(`gateway-service running on port ${env.PORT}`))

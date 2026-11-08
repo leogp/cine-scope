@@ -18,7 +18,7 @@ const LIMIT = 3
 // through and fail the assertion for the wrong reason.
 const WINDOW_MS = 10 * 60_000
 
-// Authentication and authorization are not under test; every request is anonymous.
+// Authentication, authorization and caching are not under test; every request is anonymous.
 const passThrough: RequestHandler = (_req, _res, next) => next()
 
 describe('rate limiting across gateway replicas', () => {
@@ -38,6 +38,7 @@ describe('rate limiting across gateway replicas', () => {
         createStore,
       }),
       authorize: passThrough,
+      cache: passThrough,
     })
 
   /** A replica with its own client and tracker, sharing the one Redis and the same prefixes. */
