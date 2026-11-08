@@ -7,9 +7,10 @@ type State = 'unknown' | 'available' | 'unavailable'
  * when it starts failing, one line when it is available again.
  *
  * Fed by the client's connection events and by the outcome of every rate-limit
- * command, so a Redis that is connected but timing out counts as failing too.
- * Never per request and never per tier: during an outage every request fails
- * open in both tiers, and a line for each would bury everything else.
+ * and response-cache command, so a Redis that is connected but timing out
+ * counts as failing too. Never per request, per tier or per lookup: during an
+ * outage every request fails open in both tiers and misses the cache, and a
+ * line for each would bury everything else.
  */
 export class RedisAvailability {
   #state: State = 'unknown'
@@ -17,14 +18,14 @@ export class RedisAvailability {
   markAvailable(): void {
     if (this.#state === 'available') return
     this.#state = 'available'
-    console.info('[gateway] redis: available, rate limiting enforced')
+    console.info('[gateway] redis: available, rate limiting enforced and responses cached')
   }
 
   markUnavailable(reason: unknown): void {
     if (this.#state === 'unavailable') return
     this.#state = 'unavailable'
     console.warn(
-      `[gateway] redis: unavailable (${describe(reason)}), rate limiting fails open until it recovers`
+      `[gateway] redis: unavailable (${describe(reason)}), rate limiting and caching fail open until it recovers`
     )
   }
 
