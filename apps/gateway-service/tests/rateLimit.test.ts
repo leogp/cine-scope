@@ -1,5 +1,5 @@
 import { buildOptionalAuth, type AuthContext } from '@cinescope/shared/infrastructure/http'
-import type { Application, Request } from 'express'
+import type { Application, Request, RequestHandler } from 'express'
 import { MemoryStore, type ClientRateLimitInfo, type Store } from 'express-rate-limit'
 import jwt from 'jsonwebtoken'
 import request from 'supertest'
@@ -35,6 +35,9 @@ const BOB = tokenFor('bob')
 const READER = tokenFor('reader', ['catalog:read'])
 
 const memoryStores: StoreFactory = () => new MemoryStore()
+
+// Caching has its own suite (cache.test.ts, where a hit is shown to count).
+const passThrough: RequestHandler = (_req, _res, next) => next()
 
 /** A store whose Redis is gone: every increment rejects. */
 class UnavailableStore implements Store {
@@ -91,6 +94,7 @@ describe('gateway rate limiting', () => {
         createStore,
       }),
       authorize: buildAuthorization({ policy: ACCESS_POLICY, routes }),
+      cache: passThrough,
     })
 
   describe('the global tier', () => {

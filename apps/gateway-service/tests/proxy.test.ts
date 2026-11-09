@@ -4,7 +4,7 @@ import request from 'supertest'
 import { buildApp } from '@gateway/infrastructure/http/app'
 import { startStubService, type StubService } from './helpers/startStubService'
 
-// Authentication, rate limiting and authorization have their own suites; here all are no-ops.
+// Authentication, rate limiting, authorization and caching have their own suites; here all are no-ops.
 const passThrough: RequestHandler = (_req, _res, next) => next()
 
 describe('gateway proxy', () => {
@@ -19,6 +19,7 @@ describe('gateway proxy', () => {
       authenticate: passThrough,
       rateLimit: passThrough,
       authorize: passThrough,
+      cache: passThrough,
     })
   })
 

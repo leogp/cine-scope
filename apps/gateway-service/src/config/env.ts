@@ -21,15 +21,16 @@ const envSchema = z.object({
   // the connection and then never answers would pin the client socket open for
   // as long as the kernel allows.
   PROXY_TIMEOUT_MS: z.coerce.number().int().positive().default(30_000),
-  // Rate-limit counters live in Redis so that a limit holds across gateway
-  // replicas. Required: the gateway starts, and fails open, while Redis is
-  // unreachable, but it must know where Redis is.
+  // Rate-limit counters and cached responses live in Redis so that limits and
+  // cache invalidations hold across gateway replicas. Required: the gateway
+  // starts, and fails open, while Redis is unreachable, but it must know where
+  // Redis is.
   REDIS_URL: z.url({ protocol: /^rediss?$/ }),
 
-  // Upper bound on every Redis command. Each request waits on the limiter and
-  // the limiter fails open, so a slow Redis must fail fast rather than add its
-  // latency to every call; a healthy Redis on the same network answers in well
-  // under a millisecond.
+  // Upper bound on every Redis command. Each request waits on the limiter, and
+  // each cacheable read on two cache lookups; both fail open, so a slow Redis
+  // must fail fast rather than add its latency to every call. A healthy Redis
+  // on the same network answers in well under a millisecond.
   REDIS_COMMAND_TIMEOUT_MS: z.coerce.number().int().positive().default(200),
 
   // Global tier: every request past authentication, keyed by user when a valid
@@ -46,6 +47,21 @@ const envSchema = z.object({
   // credentialRoutes.ts.
   RATE_LIMIT_CREDENTIALS_WINDOW_MS: z.coerce.number().int().positive().default(900_000),
   RATE_LIMIT_CREDENTIALS_MAX: z.coerce.number().int().positive().default(10),
+
+  // Response cache for public catalog reads (infrastructure/http/cache). Writes
+  // through the gateway invalidate at once, so the TTL bounds staleness only
+  // where invalidation cannot reach: a failed INCR, the residual race after a
+  // write, a change made to catalog's database directly. 30 s keeps that bound
+  // short while a popular key still costs catalog about two calls a minute.
+  CACHE_TTL_MS: z.coerce.number().int().positive().default(30_000),
+
+  // Largest body stored, in bytes; a larger one is still served, only not
+  // stored. Every miss buffers up to this much while it is proxied, so it is a
+  // memory bound too. Estimated sizes: a movie list page is about 80–140 KiB at
+  // 100 items, since summaries omit relations and pageSize is capped at 100. A
+  // movie detail with 60 cast members and 4,000-character biographies is about
+  // 250 KiB. Only extreme casts exceed 512 KiB, and those are served uncached.
+  CACHE_MAX_ENTRY_BYTES: z.coerce.number().int().positive().default(524_288),
 })
 
 const parsed = envSchema.safeParse(process.env)
