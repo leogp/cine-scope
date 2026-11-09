@@ -31,6 +31,15 @@ export const DEFAULT_KEY_PREFIX = 'cache:'
 
 const X_CACHE = 'X-Cache'
 
+/**
+ * The methods that count as writes: the four catalog accepts writes on. Listed
+ * rather than "anything but GET and HEAD", so a method that changes nothing
+ * (OPTIONS, including CORS preflights once they reach this far, or TRACE)
+ * never invalidates; each spurious INCR empties a whole collection on every
+ * replica.
+ */
+const UNSAFE_METHODS: ReadonlySet<string> = new Set(['POST', 'PUT', 'PATCH', 'DELETE'])
+
 type Lookup =
   | { readonly outcome: 'hit'; readonly entry: CachedResponse }
   | { readonly outcome: 'miss'; readonly entryKey: string }
@@ -94,7 +103,16 @@ export function buildResponseCache(config: ResponseCacheConfig): RequestHandler 
 
   const cache = Router()
   cache.use(CACHE_PREFIX, catalog)
-  return cache
+
+  // Only GET (reads) and UNSAFE_METHODS (invalidation) enter the routers; any
+  // other method goes straight on to the proxy. That keeps out HEAD, which
+  // Express would run through the GET handlers, and OPTIONS, which a Router
+  // answers itself (200, Allow: GET,HEAD) when a route matches the path but
+  // none handles OPTIONS, so catalog would never see it.
+  return (req, res, next) => {
+    if (req.method === 'GET' || UNSAFE_METHODS.has(req.method)) return cache(req, res, next)
+    next()
+  }
 }
 
 function buildRead(
@@ -103,8 +121,6 @@ function buildRead(
   config: ResponseCacheConfig
 ): RequestHandler {
   return (req, res, next) => {
-    // Express runs GET handlers for HEAD too; HEAD is never cached and passes through.
-    if (req.method !== 'GET') return next('router')
     serveRead(route, keys, config, req, res, next).catch(next)
   }
 }
@@ -222,7 +238,7 @@ function contentLengthOf(res: Response): number | undefined {
 }
 
 /**
- * A write under the collection (any method but GET and HEAD) bumps its
+ * A write under the collection (a method in UNSAFE_METHODS) bumps its
  * generation once the service has answered 2xx: at writeHead, which runs when
  * the proxy relays the service's status line, so never before the service
  * has committed, and before the response is flushed. Not awaited, so it never
@@ -236,7 +252,7 @@ function buildInvalidation(
   const generationKey = keys.generation(collection)
 
   return (req, res, next) => {
-    if (req.method !== 'GET' && req.method !== 'HEAD') {
+    if (UNSAFE_METHODS.has(req.method)) {
       onResponseHead(res, () => {
         if (res.statusCode >= 200 && res.statusCode < 300) {
           store.incrementGeneration(generationKey).catch(ignore)

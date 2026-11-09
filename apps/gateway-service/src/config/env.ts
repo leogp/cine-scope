@@ -57,8 +57,10 @@ const envSchema = z.object({
 
   // Largest body stored, in bytes; a larger one is still served, only not
   // stored. Every miss buffers up to this much while it is proxied, so it is a
-  // memory bound too. 512 KiB holds a full page at MAX_PAGE_SIZE (100 movies
-  // with their genres, people and companies, about 3 KB each) with room to spare.
+  // memory bound too. Estimated sizes: a movie list page is about 80–140 KiB at
+  // 100 items, since summaries omit relations and pageSize is capped at 100. A
+  // movie detail with 60 cast members and 4,000-character biographies is about
+  // 250 KiB. Only extreme casts exceed 512 KiB, and those are served uncached.
   CACHE_MAX_ENTRY_BYTES: z.coerce.number().int().positive().default(524_288),
 })
 

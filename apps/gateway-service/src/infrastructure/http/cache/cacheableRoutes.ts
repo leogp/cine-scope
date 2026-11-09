@@ -43,14 +43,20 @@ const PAGINATION = { page: 'number', pageSize: 'number' } as const
  * /catalog/health is deliberately absent: a cached health check would report a
  * catalog that is down as up.
  *
- * Invalidation dependency rule. A 2xx write anywhere under `/<collection>`
- * bumps that collection's generation and no other. Collections are invalidated
- * independently because movie and series payloads embed genres, people and
- * companies, and those three have no update or delete today: they can only be
- * created, and a new one appears in no payload already cached. If any of them
- * gains an update or a delete, its writes must also invalidate every
- * collection that embeds it (movies and series), or those payloads keep the
- * old copy until their TTL.
+ * Writes that bypass the gateway (seeds, manual database changes) never
+ * invalidate anything: the entries they make stale stay visible until their
+ * TTL (CACHE_TTL_MS) expires. In development that includes reseeding, since
+ * the Redis volume persists across restarts and restarting the stack does not
+ * clear the cache.
+ *
+ * Invalidation dependency rule. A 2xx write (POST, PUT, PATCH or DELETE)
+ * anywhere under `/<collection>` bumps that collection's generation and no
+ * other. Collections are invalidated independently because movie and series
+ * payloads embed genres, people and companies, and those three have no update
+ * or delete today: they can only be created, and a new one appears in no
+ * payload already cached. If any of them gains an update or a delete, its
+ * writes must also invalidate every collection that embeds it (movies and
+ * series), or those payloads keep the old copy until their TTL.
  */
 export const CACHEABLE_ROUTES: readonly CacheableRoute[] = [
   { path: '/movies', collection: 'movies', query: PAGINATION },

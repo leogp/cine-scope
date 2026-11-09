@@ -51,7 +51,7 @@ docker compose run --rm deps npm run build         # compile every service
 There are two kinds of suites:
 
 - **Unit and HTTP tests** (`*.test.ts`): Jest and Supertest over in-memory fakes, with no infrastructure required.
-- **Integration tests** (`*.int.test.ts`): code exercised against real infrastructure. Prisma repositories run against Postgres (`auth_test_db`, `catalog_test_db`, created automatically the first time the `postgres` volume is initialised); the gateway's rate limiter runs against Redis, in logical database 15.
+- **Integration tests** (`*.int.test.ts`): code exercised against real infrastructure. Prisma repositories run against Postgres (`auth_test_db`, `catalog_test_db`, created automatically the first time the `postgres` volume is initialised); the gateway's rate limiter and response cache run against Redis, in logical database 15.
 
 ```bash
 docker compose run --rm --no-deps deps npm test                    # every service
@@ -68,7 +68,7 @@ docker compose run --rm deps npm run test:int -w catalog-service
 
 ### Gateway integration tests
 
-`gateway-service`'s `test:int` builds two gateway apps in one process, each with its own rate limiter, stores and Redis client, sharing one Redis: two replicas in miniature. It checks that the limit holds across them, and a contrast case shows that in-memory stores would let twice the limit through. The script targets `redis://redis:6379/15`, a logical database development never uses (the gateway itself uses 0). `tests/helpers/testRedis.ts` refuses to connect unless the URL names database 15, and asks the server which database the connection selected before every `FLUSHDB`.
+`gateway-service`'s `test:int` builds two gateway apps in one process, each with its own Redis client, sharing one Redis: two replicas in miniature. The rate-limit suite gives each replica its own limiter and stores, checks that the limit holds across them, and a contrast case shows that in-memory stores would let twice the limit through. The response-cache suite checks that a response one replica stores is served by the other, and that a 2xx write through one makes the other miss. The script targets `redis://redis:6379/15`, a logical database development never uses (the gateway itself uses 0). `tests/helpers/testRedis.ts` refuses to connect unless the URL names database 15, and asks the server which database the connection selected before every `FLUSHDB`.
 
 The `deps` service depends on Postgres only, so start Redis yourself and skip the other dependencies:
 
