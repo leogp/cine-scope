@@ -4,7 +4,8 @@
   "private": true,
   "workspaces": [
     "apps/*",
-    "packages/shared"
+    "packages/shared",
+    "e2e"
   ],
   "scripts": {
     "lint": "eslint .",

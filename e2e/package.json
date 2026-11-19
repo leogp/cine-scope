@@ -1,0 +1,11 @@
+{
+  "name": "e2e",
+  "version": "1.0.0",
+  "private": true,
+  "description": "End-to-end suite: enters only through the gateway, against the real services",
+  "scripts": {
+    "test:e2e": "jest --runInBand",
+    "lint": "eslint .",
+    "format": "prettier --write ."
+  }
+}

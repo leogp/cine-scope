@@ -21,6 +21,7 @@ COPY apps/recommendation-service/package.json ./apps/recommendation-service/
 COPY apps/review-service/package.json ./apps/review-service/
 COPY apps/watchlist-service/package.json ./apps/watchlist-service/
 COPY apps/gateway-service/package.json ./apps/gateway-service/
+COPY e2e/package.json ./e2e/
 RUN npm ci
 
 COPY tsconfig.base.json ./
@@ -49,6 +50,7 @@ COPY apps/recommendation-service/package.json ./apps/recommendation-service/
 COPY apps/review-service/package.json ./apps/review-service/
 COPY apps/watchlist-service/package.json ./apps/watchlist-service/
 COPY apps/gateway-service/package.json ./apps/gateway-service/
+COPY e2e/package.json ./e2e/
 RUN npm ci --omit=dev
 
 # ─── Stage 3: production — lean runtime image ────────────────────────────────
