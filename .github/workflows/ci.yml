@@ -116,3 +116,58 @@ jobs:
       # Runs *.int.test.ts serially against logical database 15.
       - name: Jest (integration)
         run: npm run test:int -w gateway-service
+
+  # The development stack itself, not service containers: the suite needs the
+  # real gateway, auth-service and catalog-service, migrated and seeded as
+  # `deps` leaves them. No setup-workspace: everything installs and runs inside
+  # the dev image, so native modules (bcrypt) are built for Alpine, not the runner.
+  e2e:
+    name: End-to-end tests
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v5
+
+      # The dev containers run as ${UID}:${GID} (default 1000:1000) and write
+      # node_modules, dist/ and the Prisma clients into this checkout, which
+      # belongs to the runner user, whose UID is not 1000. Compose reads the
+      # root .env; UID cannot be exported from bash, where it is readonly.
+      - name: Run the containers as the runner user
+        run: printf 'UID=%s\nGID=%s\n' "$(id -u)" "$(id -g)" > .env
+
+      # Each service reads its secrets from apps/<service>/.env (gitignored);
+      # Compose supplies the rest. One random access secret, shared by the
+      # signer (auth-service) and both verifiers (catalog-service, gateway).
+      - name: Write the service secrets
+        run: |
+          access_secret="$(openssl rand -hex 32)"
+          printf 'JWT_ACCESS_SECRET=%s\nJWT_REFRESH_SECRET=%s\n' "$access_secret" "$(openssl rand -hex 32)" > apps/auth-service/.env
+          printf 'JWT_ACCESS_SECRET=%s\n' "$access_secret" > apps/catalog-service/.env
+          printf 'JWT_ACCESS_SECRET=%s\n' "$access_secret" > apps/gateway-service/.env
+
+      # Returns once every container has started, which the services' dependency
+      # on `deps` completing holds back until the workspace is installed and
+      # auth-service is migrated and seeded. Fails here if `deps` fails.
+      - name: Start the stack
+        run: docker compose up -d
+
+      # On the Compose network, as in development. The suite's global setup
+      # waits for /health on the gateway and on every service through it.
+      - name: Run the end-to-end suite
+        run: >-
+          docker compose run --rm --no-deps
+          -e E2E_BASE_URL=http://gateway-service:4000
+          deps npm run test:e2e -w e2e
+
+      - name: Container logs
+        if: failure()
+        run: |
+          for service in $(docker compose config --services); do
+            echo "::group::$service"
+            docker compose logs --no-color --timestamps "$service"
+            echo "::endgroup::"
+          done
+
+      - name: Tear down the stack
+        if: always()
+        run: docker compose down --volumes --remove-orphans
