@@ -86,3 +86,10 @@ export function ensureStatus(response: ApiResponse, expected: number, action: st
     `Could not ${action}: expected HTTP ${expected}, got ${summarize(response)}${hint}`
   )
 }
+
+/** POSTs a catalog resource as `token` and returns the id catalog answers with (201 `{ id }`). */
+export async function createResource(path: string, token: string, body: unknown): Promise<string> {
+  const response = await api(path, { method: 'POST', token, body })
+  ensureStatus(response, 201, `create ${path}`)
+  return stringField(response.body, 'id')
+}

@@ -8,6 +8,22 @@ export interface Session {
   readonly refreshToken: string
 }
 
+/** The draft-8 rate-limit headers of one response, as received. */
+export interface RateLimitHeaders {
+  readonly rateLimit: string | null
+  readonly rateLimitPolicy: string | null
+}
+
+/** Created once per run, through the gateway, by the seeded user. */
+export interface CatalogFixtures {
+  readonly genreId: string
+  readonly personId: string
+  readonly companyId: string
+  readonly seriesId: string
+  /** Two, so a list page of two movies always exists. */
+  readonly movieIds: readonly [string, string]
+}
+
 export interface Fixtures {
   /** `e2e-<epoch ms>`: prefixes every value this run creates. */
   readonly runId: string
@@ -18,6 +34,12 @@ export interface Fixtures {
   readonly seeded: Session
   /** Signed up by this run, so it holds the default `user` role only: no `catalog:write`. */
   readonly signedUp: Session
+  /**
+   * Rate-limit headers of the setup's own credential calls, so the credentials
+   * tier is checked without spending more of it.
+   */
+  readonly credentialCalls: { readonly login: RateLimitHeaders; readonly signup: RateLimitHeaders }
+  readonly catalog: CatalogFixtures
 }
 
 export function readFixtures(): Fixtures {

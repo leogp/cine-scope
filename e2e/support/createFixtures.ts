@@ -1,6 +1,13 @@
+import { movieBody, seriesBody, type Relations } from './catalog'
 import { SEED_USER } from './env'
-import type { Fixtures, Session } from './fixtures'
-import { api, ensureStatus, stringField, type ApiResponse } from './http'
+import {
+  uniqueName,
+  type CatalogFixtures,
+  type Fixtures,
+  type RateLimitHeaders,
+  type Session,
+} from './fixtures'
+import { api, createResource, ensureStatus, stringField, type ApiResponse } from './http'
 
 /** Meets auth-service's Password rules: 8+ characters, upper, lower, digit, special. */
 const SIGNED_UP_PASSWORD = 'E2e-Passw0rd!'
@@ -32,7 +39,18 @@ export async function createFixtures(): Promise<Fixtures> {
 
   const signedUpLogin = await logIn(newUser, 'log in the signed-up user')
 
-  return { runId, seeded: sessionOf(seededLogin), signedUp: sessionOf(signedUpLogin) }
+  const seeded = sessionOf(seededLogin)
+
+  return {
+    runId,
+    seeded,
+    signedUp: sessionOf(signedUpLogin),
+    credentialCalls: {
+      login: rateLimitHeadersOf(seededLogin),
+      signup: rateLimitHeadersOf(signup),
+    },
+    catalog: await createCatalog(runId, seeded.accessToken),
+  }
 }
 
 async function logIn({ email, password }: Credentials, action: string): Promise<ApiResponse> {
@@ -46,4 +64,51 @@ function sessionOf(login: ApiResponse): Session {
     accessToken: stringField(login.body, 'accessToken'),
     refreshToken: stringField(login.body, 'refreshToken'),
   }
+}
+
+function rateLimitHeadersOf(response: ApiResponse): RateLimitHeaders {
+  return {
+    rateLimit: response.headers.get('ratelimit'),
+    rateLimitPolicy: response.headers.get('ratelimit-policy'),
+  }
+}
+
+/** One resource behind every cacheable catalog route, linked the way a real movie is. */
+async function createCatalog(runId: string, token: string): Promise<CatalogFixtures> {
+  const genreId = await createResource('/catalog/genres', token, {
+    name: uniqueName(runId, 'genre'),
+  })
+  const personId = await createResource('/catalog/people', token, {
+    name: uniqueName(runId, 'person'),
+  })
+  const companyId = await createResource('/catalog/companies', token, {
+    name: uniqueName(runId, 'company'),
+  })
+
+  const relations: Relations = {
+    genreIds: [genreId],
+    castIds: [personId],
+    directorIds: [personId],
+    companyIds: [companyId],
+  }
+
+  const seriesId = await createResource(
+    '/catalog/series',
+    token,
+    seriesBody(uniqueName(runId, 'series'), relations)
+  )
+  const movieIds = [
+    await createResource(
+      '/catalog/movies',
+      token,
+      movieBody(uniqueName(runId, 'movie'), relations)
+    ),
+    await createResource(
+      '/catalog/movies',
+      token,
+      movieBody(uniqueName(runId, 'movie'), relations)
+    ),
+  ] as const
+
+  return { genreId, personId, companyId, seriesId, movieIds }
 }
