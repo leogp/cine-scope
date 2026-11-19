@@ -5,6 +5,7 @@
   "description": "End-to-end suite: enters only through the gateway, against the real services",
   "scripts": {
     "test:e2e": "jest --runInBand",
+    "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "format": "prettier --write ."
   }
