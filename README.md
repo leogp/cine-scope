@@ -47,7 +47,7 @@ Until `chore/engagement-merge` lands, Engagement still exists as the `review-ser
 - **Data:** PostgreSQL 16 with Prisma
 - **Redis:** backs the gateway's rate limiting (express-rate-limit with rate-limit-redis) and its response cache for public catalog reads, so limits and invalidations hold across replicas
 - **Security:** HS256 JWT access tokens, rotating refresh tokens, permission-based RBAC enforced at the gateway and in each service
-- **Testing:** Jest and Supertest, plus integration suites against a real Postgres and Redis
+- **Testing:** Jest and Supertest, plus integration suites against a real Postgres and Redis, and an end-to-end suite that enters through the gateway against the real services
 - **Tooling:** npm workspaces, Docker, Docker Compose, ESLint, Prettier, GitHub Actions
 
 ### Planned
@@ -77,6 +77,7 @@ apps/        one folder per service
 packages/
   shared/    @cinescope/shared: domain, application and HTTP building blocks
 infra/       Postgres initialisation
+e2e/         end-to-end suite, run through the gateway against the running stack
 docs/        roadmap, ADRs, OpenAPI spec, development guide
 ```
 
