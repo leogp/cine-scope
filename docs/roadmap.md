@@ -31,7 +31,7 @@ Scope is deliberately kept narrow: the goal is to exercise microservice patterns
 - [x] `gateway/authorization`
 - [x] `gateway/rate-limiting`
 - [x] `gateway/cache`
-- [ ] `gateway/tests`
+- [x] `gateway/e2e` — end-to-end suite through the gateway against the real services, verifying the contracts the gateway copies from them: token claims, permission names, route prefixes and the cacheable routes table. CI runs it on a fresh stack; locally it runs against the development stack
 
 ## Phase 3 — Event-driven integration
 
@@ -50,6 +50,7 @@ Catalog publishes the lifecycle of its movies as domain events, and recommendati
 - [ ] `recommendation/retry`
 - [ ] `recommendation/dead-letter`
 - [ ] `recommendation/tests`
+- [ ] `chore/error-envelope` — one error shape across the gateway and every service: a stable machine-readable `error` code and a human-readable `message`, never an internal class name; the e2e error envelope test is tightened to match
 
 ## Phase 4 — Engagement service
 
@@ -57,7 +58,7 @@ Reviews and watchlists are two aggregates of the same bounded context — how a 
 
 Engagement is built on the messaging infrastructure from Phase 3. It keeps its own projection of catalog movies, validates movie references against it and removes orphaned reviews and watchlist entries when a movie is deleted.
 
-- [ ] `chore/engagement-merge` — consolidate the review and watchlist placeholders into `engagement-service`, with its own database, port and Compose entry
+- [ ] `chore/engagement-merge` — consolidate the review and watchlist placeholders into `engagement-service`, with its own database, port and Compose entry; the gateway's route table and the e2e suite's service list are updated together
 - [ ] `engagement/domain` — review and watchlist entry aggregates, targeting either a movie or a series
 - [ ] `engagement/application`
 - [ ] `engagement/infrastructure` — Prisma repositories and movie projection
@@ -70,6 +71,7 @@ Engagement is built on the messaging infrastructure from Phase 3. It keeps its o
 ## Phase 5 — Deployment
 
 - [ ] `infra/k8s`
+- [ ] `infra/load-tests` — k6 scenarios against minikube that verify design claims under load: cache effectiveness, rate limiting across replicas, gateway scaling and outbox relay lag
 
 ## Phase 6 — Token security and OAuth 2.0
 
