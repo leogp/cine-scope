@@ -46,6 +46,14 @@ docker compose run --rm deps npm run typecheck     # tsc --noEmit per service
 docker compose run --rm deps npm run build         # compile every service
 ```
 
+To check a single file, for example the one you just edited:
+
+```bash
+scripts/check-file apps/catalog-service/src/domain/entities/series.ts
+```
+
+It formats the file with Prettier (writing it in place), lints it with ESLint and typechecks the project that covers it: the service's tests project for test files, its source project otherwise. It runs inside a service container that is already up, or in a throwaway `deps` container if none is.
+
 ## Tests
 
 There are three kinds of suites:

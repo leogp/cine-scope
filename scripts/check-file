@@ -1,0 +1,77 @@
+#!/usr/bin/env bash
+# Formats, lints and typechecks a single file inside the development
+# containers. Usage, from the repository root:
+#
+#   scripts/check-file apps/catalog-service/src/domain/entities/series.ts
+#
+# Prettier writes the file in place; ESLint and tsc only report. tsc checks
+# the project that covers the file: the tests project for test files, the
+# workspace project otherwise. Files that none of the three tools handle are
+# skipped. Exits non-zero when a check fails.
+
+set -uo pipefail
+
+if [[ $# -ne 1 ]]; then
+  echo "usage: scripts/check-file <path relative to the repository root>" >&2
+  exit 64
+fi
+
+rel="${1#./}"
+
+case "$rel" in
+  node_modules/* | */node_modules/* | dist/* | */dist/* | */prisma/generated/*) exit 0 ;;
+esac
+
+lint=false
+case "$rel" in
+  *.ts) lint=true ;;
+  *.js | *.mjs | *.cjs | *.json | *.md | *.yml | *.yaml) ;;
+  *) exit 0 ;;
+esac
+
+root=$(cd "$(dirname "$0")/.." && pwd)
+cd "$root" || exit 1
+
+project=""
+if [[ "$rel" == *.ts ]]; then
+  case "$rel" in
+    apps/*/* | packages/*/*)
+      ws=$(cut -d/ -f1-2 <<<"$rel")
+      if [[ "$rel" == "$ws"/tests/* ]]; then
+        project="$ws/tests/tsconfig.json"
+      else
+        project="$ws/tsconfig.json"
+      fi
+      ;;
+    e2e/*) project="e2e/tsconfig.json" ;;
+  esac
+  [[ -n "$project" && ! -f "$project" ]] && project=""
+fi
+
+q() { printf '%q' "$1"; }
+
+script="npx prettier --write --ignore-unknown --log-level warn $(q "$rel")"
+if $lint; then
+  script+=" && npx eslint --no-warn-ignored $(q "$rel")"
+fi
+if [[ -n "$project" ]]; then
+  script+=" && npx tsc --noEmit -p $(q "$project")"
+fi
+
+# Every Node container mounts the whole repository at /workspace with the same
+# image, so any running one will do, and exec is much faster than starting a
+# new container. Without a running one, fall back to a throwaway deps container.
+running=$(docker compose ps --status running --services 2>/dev/null)
+container=""
+for svc in catalog-service auth-service gateway-service recommendation-service review-service watchlist-service; do
+  if grep -qx "$svc" <<<"$running"; then
+    container="$svc"
+    break
+  fi
+done
+
+if [[ -n "$container" ]]; then
+  exec docker compose exec -T -w /workspace "$container" sh -c "$script"
+else
+  exec docker compose run --rm --no-deps -T -w /workspace deps sh -c "$script"
+fi
