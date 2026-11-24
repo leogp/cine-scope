@@ -1,4 +1,4 @@
-import { movieBody } from '../support/catalog'
+import { movieBody, seriesBody } from '../support/catalog'
 import { eventually } from '../support/eventually'
 import { readFixtures, uniqueName } from '../support/fixtures'
 import { api, createResource, isRecord, type ApiResponse } from '../support/http'
@@ -32,6 +32,7 @@ const CACHEABLE_ROUTES = [
     path: `/catalog/movies/${catalog.movieIds[0]}`,
     expected: { id: catalog.movieIds[0] },
   },
+  { route: '/series', path: '/catalog/series', expected: { items: expect.any(Array) } },
   {
     route: '/series/:id',
     path: `/catalog/series/${catalog.seriesId}`,
@@ -55,35 +56,41 @@ const CACHEABLE_ROUTES = [
 ]
 
 describe('response cache', () => {
-  it('misses, hits, then misses with the new title after a PUT through the gateway', async () => {
-    // A movie of its own, never read before: the first GET misses whatever ran earlier.
-    const title = uniqueName(runId, 'cached')
-    const id = await createResource('/catalog/movies', seeded.accessToken, movieBody(title))
-    const path = `/catalog/movies/${id}`
+  it.each([
+    { collection: 'movies', body: movieBody },
+    { collection: 'series', body: seriesBody },
+  ])(
+    'misses, hits, then misses with the new title after a PUT to $collection',
+    async ({ collection, body }) => {
+      // A resource of its own, never read before: the first GET misses whatever ran earlier.
+      const title = uniqueName(runId, 'cached')
+      const id = await createResource(`/catalog/${collection}`, seeded.accessToken, body(title))
+      const path = `/catalog/${collection}/${id}`
 
-    const miss = await api(path)
-    expect(miss.status).toBe(200)
-    expect(xCache(miss)).toBe('MISS')
-    expect(miss.body).toMatchObject({ id, title })
+      const miss = await api(path)
+      expect(miss.status).toBe(200)
+      expect(xCache(miss)).toBe('MISS')
+      expect(miss.body).toMatchObject({ id, title })
 
-    const hit = await eventually(() => api(path), isHit, `GET ${path} to be served from cache`)
-    expect(hit.body).toEqual(miss.body)
+      const hit = await eventually(() => api(path), isHit, `GET ${path} to be served from cache`)
+      expect(hit.body).toEqual(miss.body)
 
-    const newTitle = uniqueName(runId, 'updated')
-    const put = await api(path, {
-      method: 'PUT',
-      token: seeded.accessToken,
-      body: movieBody(newTitle),
-    })
-    expect(put.status).toBe(200)
+      const newTitle = uniqueName(runId, 'updated')
+      const put = await api(path, {
+        method: 'PUT',
+        token: seeded.accessToken,
+        body: body(newTitle),
+      })
+      expect(put.status).toBe(200)
 
-    const fresh = await eventually(
-      () => api(path),
-      (response) => isRecord(response.body) && response.body.title === newTitle,
-      `GET ${path} to return the new title`
-    )
-    expect(xCache(fresh)).toBe('MISS')
-  })
+      const fresh = await eventually(
+        () => api(path),
+        (response) => isRecord(response.body) && response.body.title === newTitle,
+        `GET ${path} to return the new title`
+      )
+      expect(xCache(fresh)).toBe('MISS')
+    }
+  )
 
   // A pageSize the table no longer lists (renamed on either side) is dropped
   // from the key, so the second request would be answered from the first's entry.

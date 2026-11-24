@@ -7,7 +7,7 @@ import { CompanyName } from '@catalog/domain/value-objects/companyName'
 import { CountryCode } from '@catalog/domain/value-objects/countryCode'
 import { GenreName } from '@catalog/domain/value-objects/genreName'
 import { LanguageCode } from '@catalog/domain/value-objects/languageCode'
-import { MovieTitle } from '@catalog/domain/value-objects/movieTitle'
+import { Title } from '@catalog/domain/value-objects/title'
 import { PersonName } from '@catalog/domain/value-objects/personName'
 
 export const buildCompany = (overrides: Partial<CreateCompanyProps> = {}): Company =>
@@ -35,7 +35,7 @@ export const buildPerson = (overrides: Partial<CreatePersonProps> = {}): Person 
 
 export const buildMovie = (overrides: Partial<CreateMovieProps> = {}): Movie =>
   Movie.create({
-    title: new MovieTitle('Lady Bird'),
+    title: new Title('Lady Bird'),
     overview: null,
     releaseDate: null,
     duration: null,
@@ -51,7 +51,7 @@ export const buildMovie = (overrides: Partial<CreateMovieProps> = {}): Movie =>
 
 export const buildSeries = (overrides: Partial<CreateSeriesProps> = {}): Series =>
   Series.create({
-    title: new MovieTitle('Fleabag'),
+    title: new Title('Fleabag'),
     overview: null,
     firstAirDate: null,
     lastAirDate: null,

@@ -27,7 +27,10 @@ export function movieBody(
   }
 }
 
-/** A valid body for POST /catalog/series: catalog's createSeriesSchema. */
+/**
+ * A valid body for POST and PUT /catalog/series: catalog's createSeriesSchema,
+ * which PUT shares (full replace).
+ */
 export function seriesBody(
   title: string,
   relations: Relations = NO_RELATIONS

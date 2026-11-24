@@ -36,6 +36,12 @@ describe('cache keys', () => {
     expect(resourceOf(list, req)).toBe('GET:/catalog/movies?page=2&pageSize=10')
   })
 
+  it('keys the series list by the same pagination parameters', () => {
+    const req = requestWith({ query: { pageSize: '10', page: '2', sort: 'title' } })
+
+    expect(resourceOf(routeAt('/series'), req)).toBe('GET:/catalog/series?page=2&pageSize=10')
+  })
+
   it('drops parameters the route does not accept', () => {
     expect(resourceOf(list, requestWith({ query: { page: '2', sort: 'title' } }))).toBe(
       'GET:/catalog/movies?page=2'

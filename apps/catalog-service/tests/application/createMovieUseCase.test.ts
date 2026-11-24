@@ -5,7 +5,7 @@ import { GenreNotFoundError } from '@catalog/domain/errors/genreNotFoundError'
 import { PersonNotFoundError } from '@catalog/domain/errors/personNotFoundError'
 import { InvalidDurationError } from '@catalog/domain/errors/invalidDurationError'
 import { InvalidLanguageCodeError } from '@catalog/domain/errors/invalidLanguageCodeError'
-import { InvalidMovieTitleError } from '@catalog/domain/errors/invalidMovieTitleError'
+import { InvalidTitleError } from '@catalog/domain/errors/invalidTitleError'
 import { InMemoryCompanyRepository } from '../fakes/inMemoryCompanyRepository'
 import { InMemoryGenreRepository } from '../fakes/inMemoryGenreRepository'
 import { InMemoryMovieRepository } from '../fakes/inMemoryMovieRepository'
@@ -91,9 +91,7 @@ describe('CreateMovieUseCase', () => {
   it('rejects an invalid title and saves nothing', async () => {
     const { useCase, movieRepository } = makeSut()
 
-    await expect(useCase.execute(validRequest({ title: '' }))).rejects.toThrow(
-      InvalidMovieTitleError
-    )
+    await expect(useCase.execute(validRequest({ title: '' }))).rejects.toThrow(InvalidTitleError)
     expect(movieRepository.size).toBe(0)
   })
 

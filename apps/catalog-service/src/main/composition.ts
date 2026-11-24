@@ -31,7 +31,10 @@ import { UpdateMovieUseCase } from '../application/use-cases/movie/update/update
 import { CreatePersonUseCase } from '../application/use-cases/person/create/createPersonUseCase'
 import { GetPersonUseCase } from '../application/use-cases/person/get/getPersonUseCase'
 import { CreateSeriesUseCase } from '../application/use-cases/series/create/createSeriesUseCase'
+import { DeleteSeriesUseCase } from '../application/use-cases/series/delete/deleteSeriesUseCase'
 import { GetSeriesUseCase } from '../application/use-cases/series/get/getSeriesUseCase'
+import { ListSeriesUseCase } from '../application/use-cases/series/list/listSeriesUseCase'
+import { UpdateSeriesUseCase } from '../application/use-cases/series/update/updateSeriesUseCase'
 
 export function composeApp(): CatalogControllers {
   // Repositories
@@ -74,6 +77,14 @@ export function composeApp(): CatalogControllers {
     companyRepository
   )
   const getSeriesUseCase = new GetSeriesUseCase(seriesRepository)
+  const listSeriesUseCase = new ListSeriesUseCase(seriesRepository)
+  const updateSeriesUseCase = new UpdateSeriesUseCase(
+    seriesRepository,
+    genreRepository,
+    personRepository,
+    companyRepository
+  )
+  const deleteSeriesUseCase = new DeleteSeriesUseCase(seriesRepository)
 
   // Controllers
   return {
@@ -84,7 +95,13 @@ export function composeApp(): CatalogControllers {
       updateMovieUseCase,
       deleteMovieUseCase
     ),
-    series: new SeriesController(createSeriesUseCase, getSeriesUseCase),
+    series: new SeriesController(
+      createSeriesUseCase,
+      getSeriesUseCase,
+      listSeriesUseCase,
+      updateSeriesUseCase,
+      deleteSeriesUseCase
+    ),
     genre: new GenreController(createGenreUseCase, getGenreUseCase),
     company: new CompanyController(createCompanyUseCase, getCompanyUseCase),
     person: new PersonController(createPersonUseCase, getPersonUseCase),

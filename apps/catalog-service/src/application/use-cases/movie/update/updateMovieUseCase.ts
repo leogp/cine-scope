@@ -9,7 +9,7 @@ import { MovieRepository } from '@catalog/domain/repositories/movieRepository'
 import { PersonRepository } from '@catalog/domain/repositories/personRepository'
 import { Duration } from '@catalog/domain/value-objects/duration'
 import { LanguageCode } from '@catalog/domain/value-objects/languageCode'
-import { MovieTitle } from '@catalog/domain/value-objects/movieTitle'
+import { Title } from '@catalog/domain/value-objects/title'
 import { resolveByIds } from '@catalog/application/use-cases/shared/resolveByIds'
 import { UpdateMovieRequest } from './updateMovieRequest'
 import { UpdateMovieResponse } from './updateMovieResponse'
@@ -29,7 +29,7 @@ export class UpdateMovieUseCase implements UseCase<UpdateMovieRequest, UpdateMov
       throw new MovieNotFoundError()
     }
 
-    const title = new MovieTitle(request.title)
+    const title = new Title(request.title)
     const originalLanguage = new LanguageCode(request.originalLanguage)
     const duration = request.duration !== null ? Duration.create(request.duration) : null
 

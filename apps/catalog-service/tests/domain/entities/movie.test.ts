@@ -1,12 +1,12 @@
 import { Movie, MovieProps } from '@catalog/domain/entities/movie'
 import { Duration } from '@catalog/domain/value-objects/duration'
 import { LanguageCode } from '@catalog/domain/value-objects/languageCode'
-import { MovieTitle } from '@catalog/domain/value-objects/movieTitle'
+import { Title } from '@catalog/domain/value-objects/title'
 import { buildGenre, buildMovie, buildPerson, buildCompany } from '../../helpers/builders'
 
 const buildProps = (overrides: Partial<MovieProps> = {}): MovieProps => ({
   id: 'movie-1',
-  title: new MovieTitle('Lady Bird'),
+  title: new Title('Lady Bird'),
   overview: null,
   releaseDate: null,
   duration: null,
@@ -51,7 +51,7 @@ describe('Movie', () => {
     it('changeTitle replaces the title and touches updatedAt', () => {
       const movie = Movie.restore(buildProps())
 
-      movie.changeTitle(new MovieTitle('Little Women'))
+      movie.changeTitle(new Title('Little Women'))
 
       expect(movie.data.title.value).toBe('Little Women')
       expect(movie.data.updatedAt.getTime()).toBeGreaterThan(PAST)

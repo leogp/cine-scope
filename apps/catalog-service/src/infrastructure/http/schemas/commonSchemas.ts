@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-// HTTP-shape validation only — domain value objects (MovieTitle, Duration, ...)
+// HTTP-shape validation only — domain value objects (Title, Duration, ...)
 // remain the authority on business rules
 export const nonEmptyString = z.string().min(1)
 

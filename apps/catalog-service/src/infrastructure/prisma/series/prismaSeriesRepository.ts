@@ -27,6 +27,30 @@ export class PrismaSeriesRepository implements SeriesRepository {
   }
 
   /**
+   * Relations are deliberately not loaded: the list read model
+   * (toSeriesSummaryDTO) discards them, so including four joins per row would
+   * fan out hundreds of rows to build objects that are thrown away.
+   *
+   * The id tiebreaker matters — createdAt alone is not unique, and OFFSET
+   * pagination over a non-deterministic order repeats and skips rows.
+   */
+  async findAll(params: { limit: number; offset: number }): Promise<{
+    items: Series[]
+    total: number
+  }> {
+    const [rows, total] = await this.prisma.$transaction([
+      this.prisma.series.findMany({
+        orderBy: [{ createdAt: 'asc' }, { id: 'asc' }],
+        skip: params.offset,
+        take: params.limit,
+      }),
+      this.prisma.series.count(),
+    ])
+
+    return { items: rows.map((row) => PrismaSeriesMapper.toDomain(row)), total }
+  }
+
+  /**
    * Upsert rather than an exists()-then-branch: the port exposes no separate
    * `update`, so the repository cannot learn intent from the call site, and a
    * pre-check would cost a round trip while still racing on the primary key.

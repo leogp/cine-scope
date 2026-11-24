@@ -1,7 +1,7 @@
 import { Movie } from '@catalog/domain/entities/movie'
 import { Duration } from '@catalog/domain/value-objects/duration'
 import { LanguageCode } from '@catalog/domain/value-objects/languageCode'
-import { MovieTitle } from '@catalog/domain/value-objects/movieTitle'
+import { Title } from '@catalog/domain/value-objects/title'
 import { CompanyRow, PrismaCompanyMapper } from '../company/prismaCompanyMapper'
 import { GenreRow, PrismaGenreMapper } from '../genre/prismaGenreMapper'
 import { MovieModel } from '../generated/models'
@@ -54,7 +54,7 @@ export class PrismaMovieMapper {
   static toDomain(row: MovieRow): Movie {
     return Movie.restore({
       id: row.id,
-      title: new MovieTitle(row.title),
+      title: new Title(row.title),
       overview: row.overview,
       releaseDate: row.releaseDate,
       duration: row.duration !== null ? Duration.create(row.duration) : null,

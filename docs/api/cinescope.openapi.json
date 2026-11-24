@@ -302,7 +302,7 @@
                     "items": {
                       "type": "array",
                       "items": {
-                        "$ref": "#/components/schemas/Movie"
+                        "$ref": "#/components/schemas/MovieSummary"
                       }
                     },
                     "total": {
@@ -448,6 +448,68 @@
       }
     },
     "/catalog/series": {
+      "get": {
+        "tags": ["series"],
+        "summary": "List series",
+        "description": "Public. Pagination defaults and clamping live in normalizePagination.",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A page of series",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/SeriesSummary"
+                      }
+                    },
+                    "total": {
+                      "type": "integer"
+                    },
+                    "page": {
+                      "type": "integer"
+                    },
+                    "pageSize": {
+                      "type": "integer"
+                    },
+                    "totalPages": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationError"
+          }
+        }
+      },
       "post": {
         "tags": ["series"],
         "summary": "Create a series",
@@ -501,6 +563,66 @@
                 }
               }
             }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      },
+      "put": {
+        "tags": ["series"],
+        "summary": "Replace a series",
+        "description": "Full replace — the body is the same shape as create.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SeriesInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/CreatedId"
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationError"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      },
+      "delete": {
+        "tags": ["series"],
+        "summary": "Delete a series",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Deleted"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
           },
           "404": {
             "$ref": "#/components/responses/NotFound"
@@ -940,6 +1062,63 @@
           }
         ]
       },
+      "MovieSummary": {
+        "type": "object",
+        "required": [
+          "id",
+          "title",
+          "overview",
+          "releaseDate",
+          "duration",
+          "originalLanguage",
+          "posterPath",
+          "backdropPath",
+          "createdAt",
+          "updatedAt"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "overview": {
+            "type": "string",
+            "nullable": true
+          },
+          "releaseDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "duration": {
+            "type": "integer",
+            "description": "Minutes",
+            "nullable": true
+          },
+          "originalLanguage": {
+            "type": "string",
+            "description": "ISO 639-1"
+          },
+          "posterPath": {
+            "type": "string",
+            "nullable": true
+          },
+          "backdropPath": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
       "SeriesInput": {
         "type": "object",
         "required": [
@@ -1040,6 +1219,63 @@
             "$ref": "#/components/schemas/SeriesInput"
           }
         ]
+      },
+      "SeriesSummary": {
+        "type": "object",
+        "required": [
+          "id",
+          "title",
+          "overview",
+          "firstAirDate",
+          "lastAirDate",
+          "originalLanguage",
+          "posterPath",
+          "backdropPath",
+          "createdAt",
+          "updatedAt"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "overview": {
+            "type": "string",
+            "nullable": true
+          },
+          "firstAirDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "lastAirDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "originalLanguage": {
+            "type": "string",
+            "description": "ISO 639-1"
+          },
+          "posterPath": {
+            "type": "string",
+            "nullable": true
+          },
+          "backdropPath": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
       }
     },
     "responses": {

@@ -2,7 +2,7 @@ import { UseCase } from '@cinescope/shared/application'
 // entities & value objects
 import { Series } from '@catalog/domain/entities/series'
 import { LanguageCode } from '@catalog/domain/value-objects/languageCode'
-import { MovieTitle } from '@catalog/domain/value-objects/movieTitle'
+import { Title } from '@catalog/domain/value-objects/title'
 import { resolveByIds } from '@catalog/application/use-cases/shared/resolveByIds'
 // repositories
 import { CompanyRepository } from '@catalog/domain/repositories/companyRepository'
@@ -26,7 +26,7 @@ export class CreateSeriesUseCase implements UseCase<CreateSeriesRequest, CreateS
   ) {}
 
   async execute(request: CreateSeriesRequest): Promise<CreateSeriesResponse> {
-    const title = new MovieTitle(request.title)
+    const title = new Title(request.title)
     const originalLanguage = new LanguageCode(request.originalLanguage)
 
     const [genres, cast, directors, productionCompanies] = await Promise.all([
