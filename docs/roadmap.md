@@ -37,7 +37,7 @@ Scope is deliberately kept narrow: the goal is to exercise microservice patterns
 
 Catalog publishes the lifecycle of its movies as domain events, and recommendation-service builds its own projection of the catalog from them. Because that projection is fed by events alone, a lost event is a permanent divergence, so delivery is made reliable end to end: an outbox on the producer side, an inbox on the consumer side to absorb at-least-once redeliveries, retries for transient failures and a dead-letter queue for messages that keep failing.
 
-- [ ] `catalog/series-crud` — list, update and delete for series, renaming `MovieTitle` to `Title` now that both aggregates use it
+- [x] `catalog/series-crud` — list, update and delete for series, renaming `MovieTitle` to `Title` now that both aggregates use it
 - [ ] `catalog/domain-events` — record `MovieCreated` / `MovieUpdated` / `MovieDeleted` and `SeriesCreated` / `SeriesUpdated` / `SeriesDeleted`, with an event id on every domain event; deletion goes through the aggregate so that the deleted event can be recorded. The remaining aggregates publish no events until a consumer needs them
 - [ ] `packages/shared-messaging` — RabbitMQ connection, publisher with confirms and consumer building blocks
 - [ ] `catalog/outbox` — persist recorded events in an outbox table, in the same transaction as the aggregate

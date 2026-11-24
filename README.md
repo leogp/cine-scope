@@ -29,13 +29,13 @@ Solid lines are implemented and dashed lines are planned. Every request enters t
 
 ## Services
 
-| Service        | Status                                                           | Responsibility                                                                            |
-| -------------- | ---------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
-| API Gateway    | In progress: proxy, authentication, authorization, rate limiting | Single entry point: routing, JWT verification, access policy, rate limiting               |
-| Auth           | Implemented                                                      | Signup, login, rotating refresh tokens, roles and permissions                             |
-| Catalog        | Implemented                                                      | Movies with full CRUD (series in progress); people, genres and companies with create/read |
-| Recommendation | Planned (Phase 3)                                                | Builds recommendations from the events Catalog publishes                                  |
-| Engagement     | Planned (Phase 4)                                                | Reviews and watchlists, with ownership-based authorization                                |
+| Service        | Status                                                           | Responsibility                                                                  |
+| -------------- | ---------------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| API Gateway    | In progress: proxy, authentication, authorization, rate limiting | Single entry point: routing, JWT verification, access policy, rate limiting     |
+| Auth           | Implemented                                                      | Signup, login, rotating refresh tokens, roles and permissions                   |
+| Catalog        | Implemented                                                      | Movies and series with full CRUD; people, genres and companies with create/read |
+| Recommendation | Planned (Phase 3)                                                | Builds recommendations from the events Catalog publishes                        |
+| Engagement     | Planned (Phase 4)                                                | Reviews and watchlists, with ownership-based authorization                      |
 
 Until `chore/engagement-merge` lands, Engagement still exists as the `review-service` and `watchlist-service` placeholders, which expose only `/health`.
 
