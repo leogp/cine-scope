@@ -302,7 +302,7 @@
                     "items": {
                       "type": "array",
                       "items": {
-                        "$ref": "#/components/schemas/Movie"
+                        "$ref": "#/components/schemas/MovieSummary"
                       }
                     },
                     "total": {
@@ -939,6 +939,63 @@
             "$ref": "#/components/schemas/MovieInput"
           }
         ]
+      },
+      "MovieSummary": {
+        "type": "object",
+        "required": [
+          "id",
+          "title",
+          "overview",
+          "releaseDate",
+          "duration",
+          "originalLanguage",
+          "posterPath",
+          "backdropPath",
+          "createdAt",
+          "updatedAt"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "overview": {
+            "type": "string",
+            "nullable": true
+          },
+          "releaseDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "duration": {
+            "type": "integer",
+            "description": "Minutes",
+            "nullable": true
+          },
+          "originalLanguage": {
+            "type": "string",
+            "description": "ISO 639-1"
+          },
+          "posterPath": {
+            "type": "string",
+            "nullable": true
+          },
+          "backdropPath": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
       },
       "SeriesInput": {
         "type": "object",
