@@ -2,7 +2,7 @@ import { UpdateMovieUseCase } from '@catalog/application/use-cases/movie/update/
 import { UpdateMovieRequest } from '@catalog/application/use-cases/movie/update/updateMovieRequest'
 import { GenreNotFoundError } from '@catalog/domain/errors/genreNotFoundError'
 import { MovieNotFoundError } from '@catalog/domain/errors/movieNotFoundError'
-import { InvalidMovieTitleError } from '@catalog/domain/errors/invalidMovieTitleError'
+import { InvalidTitleError } from '@catalog/domain/errors/invalidTitleError'
 import { InMemoryCompanyRepository } from '../fakes/inMemoryCompanyRepository'
 import { InMemoryGenreRepository } from '../fakes/inMemoryGenreRepository'
 import { InMemoryMovieRepository } from '../fakes/inMemoryMovieRepository'
@@ -103,7 +103,7 @@ describe('UpdateMovieUseCase', () => {
     await movieRepository.save(existing)
 
     await expect(useCase.execute(updateRequest({ id: existing.id, title: '' }))).rejects.toThrow(
-      InvalidMovieTitleError
+      InvalidTitleError
     )
   })
 })

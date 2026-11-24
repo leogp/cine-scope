@@ -1,13 +1,13 @@
 import { AggregateRoot, EntityProps } from '@cinescope/shared/domain'
 import { LanguageCode } from '../value-objects/languageCode'
-import { MovieTitle } from '../value-objects/movieTitle'
+import { Title } from '../value-objects/title'
 import { Company } from './company'
 import { Genre } from './genre'
 import { Person } from './person'
 import { Duration } from '../value-objects/duration'
 
 export interface MovieProps extends EntityProps {
-  title: MovieTitle
+  title: Title
   overview: string | null
   releaseDate: Date | null
   duration: Duration | null
@@ -44,7 +44,7 @@ export class Movie extends AggregateRoot<MovieProps> {
     return new Movie(props)
   }
 
-  changeTitle(title: MovieTitle): void {
+  changeTitle(title: Title): void {
     this.props.title = title
     this.touch()
   }

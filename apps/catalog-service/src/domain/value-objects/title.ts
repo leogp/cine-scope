@@ -1,10 +1,10 @@
 import { ValueObject } from '@cinescope/shared/domain'
-import { InvalidMovieTitleError } from '../errors/invalidMovieTitleError'
+import { InvalidTitleError } from '../errors/invalidTitleError'
 
-export class MovieTitle extends ValueObject<string> {
+export class Title extends ValueObject<string> {
   constructor(value: string) {
     if (value.trim() === '' || value.length < 1 || value.length > 255) {
-      throw new InvalidMovieTitleError()
+      throw new InvalidTitleError()
     }
 
     super(value)

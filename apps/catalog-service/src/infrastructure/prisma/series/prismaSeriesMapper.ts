@@ -1,6 +1,6 @@
 import { Series } from '@catalog/domain/entities/series'
 import { LanguageCode } from '@catalog/domain/value-objects/languageCode'
-import { MovieTitle } from '@catalog/domain/value-objects/movieTitle'
+import { Title } from '@catalog/domain/value-objects/title'
 import { CompanyRow, PrismaCompanyMapper } from '../company/prismaCompanyMapper'
 import { GenreRow, PrismaGenreMapper } from '../genre/prismaGenreMapper'
 import { SeriesModel } from '../generated/models'
@@ -52,7 +52,7 @@ export class PrismaSeriesMapper {
   static toDomain(row: SeriesRow): Series {
     return Series.restore({
       id: row.id,
-      title: new MovieTitle(row.title),
+      title: new Title(row.title),
       overview: row.overview,
       firstAirDate: row.firstAirDate,
       lastAirDate: row.lastAirDate,

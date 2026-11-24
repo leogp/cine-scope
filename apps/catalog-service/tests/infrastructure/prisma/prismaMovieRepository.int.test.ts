@@ -4,7 +4,7 @@ import { Movie } from '@catalog/domain/entities/movie'
 import { Duration } from '@catalog/domain/value-objects/duration'
 import { GenreName } from '@catalog/domain/value-objects/genreName'
 import { LanguageCode } from '@catalog/domain/value-objects/languageCode'
-import { MovieTitle } from '@catalog/domain/value-objects/movieTitle'
+import { Title } from '@catalog/domain/value-objects/title'
 import { PrismaCompanyRepository } from '@catalog/infrastructure/prisma/company'
 import { PrismaGenreRepository } from '@catalog/infrastructure/prisma/genre'
 import { PrismaMovieRepository } from '@catalog/infrastructure/prisma/movie'
@@ -27,7 +27,7 @@ const companyRepository = new PrismaCompanyRepository(prisma)
 const restoreMovie = (title: string, createdAt: Date): Movie =>
   Movie.restore({
     id: randomUUID(),
-    title: new MovieTitle(title),
+    title: new Title(title),
     overview: null,
     releaseDate: null,
     duration: null,
@@ -156,7 +156,7 @@ describe('PrismaMovieRepository', () => {
     const movie = buildMovie()
     await movieRepository.save(movie)
 
-    movie.changeTitle(new MovieTitle('Little Women'))
+    movie.changeTitle(new Title('Little Women'))
     movie.changeDuration(Duration.create(135))
     await movieRepository.save(movie)
 

@@ -3,7 +3,7 @@ import { CreateSeriesUseCase } from '@catalog/application/use-cases/series/creat
 import { CompanyNotFoundError } from '@catalog/domain/errors/companyNotFoundError'
 import { GenreNotFoundError } from '@catalog/domain/errors/genreNotFoundError'
 import { InvalidLanguageCodeError } from '@catalog/domain/errors/invalidLanguageCodeError'
-import { InvalidMovieTitleError } from '@catalog/domain/errors/invalidMovieTitleError'
+import { InvalidTitleError } from '@catalog/domain/errors/invalidTitleError'
 import { PersonNotFoundError } from '@catalog/domain/errors/personNotFoundError'
 import { InMemoryCompanyRepository } from '../fakes/inMemoryCompanyRepository'
 import { InMemoryGenreRepository } from '../fakes/inMemoryGenreRepository'
@@ -107,9 +107,7 @@ describe('CreateSeriesUseCase', () => {
   it('rejects an invalid title and saves nothing', async () => {
     const { useCase, seriesRepository } = makeSut()
 
-    await expect(useCase.execute(validRequest({ title: '' }))).rejects.toThrow(
-      InvalidMovieTitleError
-    )
+    await expect(useCase.execute(validRequest({ title: '' }))).rejects.toThrow(InvalidTitleError)
     expect(seriesRepository.size).toBe(0)
   })
 

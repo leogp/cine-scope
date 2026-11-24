@@ -1,6 +1,6 @@
 import { Series } from '@catalog/domain/entities/series'
 import { GenreName } from '@catalog/domain/value-objects/genreName'
-import { MovieTitle } from '@catalog/domain/value-objects/movieTitle'
+import { Title } from '@catalog/domain/value-objects/title'
 import { PrismaCompanyRepository } from '@catalog/infrastructure/prisma/company'
 import { PrismaGenreRepository } from '@catalog/infrastructure/prisma/genre'
 import { PrismaPersonRepository } from '@catalog/infrastructure/prisma/person'
@@ -119,7 +119,7 @@ describe('PrismaSeriesRepository', () => {
     const series = buildSeries()
     await seriesRepository.save(series)
 
-    series.changeTitle(new MovieTitle('Killing Eve'))
+    series.changeTitle(new Title('Killing Eve'))
     await seriesRepository.save(series)
 
     const found = await seriesRepository.findById(series.id)

@@ -1,10 +1,10 @@
 import { Series, SeriesProps } from '@catalog/domain/entities/series'
 import { LanguageCode } from '@catalog/domain/value-objects/languageCode'
-import { MovieTitle } from '@catalog/domain/value-objects/movieTitle'
+import { Title } from '@catalog/domain/value-objects/title'
 
 const buildProps = (overrides: Partial<SeriesProps> = {}): SeriesProps => ({
   id: 'series-1',
-  title: new MovieTitle('Fleabag'),
+  title: new Title('Fleabag'),
   overview: null,
   firstAirDate: null,
   lastAirDate: null,
@@ -24,7 +24,7 @@ describe('Series', () => {
   describe('create', () => {
     it('generates an id and timestamps', () => {
       const series = Series.create({
-        title: new MovieTitle('The Bear'),
+        title: new Title('The Bear'),
         overview: null,
         firstAirDate: null,
         lastAirDate: null,
@@ -58,7 +58,7 @@ describe('Series', () => {
     it('replaces the title and refreshes updatedAt', () => {
       const series = Series.restore(buildProps())
 
-      series.changeTitle(new MovieTitle('Succession'))
+      series.changeTitle(new Title('Succession'))
 
       expect(series.data.title.value).toBe('Succession')
       expect(series.data.updatedAt.getTime()).toBeGreaterThan(
