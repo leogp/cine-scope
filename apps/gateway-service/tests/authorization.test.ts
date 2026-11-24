@@ -78,7 +78,7 @@ describe('gateway authorization', () => {
   })
 
   describe('/catalog reads', () => {
-    it.each(['/catalog/movies', '/catalog/movies/123'])(
+    it.each(['/catalog/movies', '/catalog/movies/123', '/catalog/series', '/catalog/series/123'])(
       'lets an anonymous GET %s through',
       async (path) => {
         await request(app).get(path).expect(200)
@@ -93,6 +93,9 @@ describe('gateway authorization', () => {
       ['post', '/catalog/movies'],
       ['put', '/catalog/movies/123'],
       ['delete', '/catalog/movies/123'],
+      ['post', '/catalog/series'],
+      ['put', '/catalog/series/123'],
+      ['delete', '/catalog/series/123'],
     ] as const
 
     it.each(writes)('answers an anonymous %s %s with 401', async (method, path) => {
