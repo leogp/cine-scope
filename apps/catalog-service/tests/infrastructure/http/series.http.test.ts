@@ -3,6 +3,8 @@ import request from 'supertest'
 import { authHeader } from '../../helpers/authToken'
 import { buildTestApp, validGenreBody, validSeriesBody } from '../../helpers/buildTestApp'
 
+const readOnly = () => authHeader({ roles: ['user'], permissions: ['catalog:read'] })
+
 describe('POST /series', () => {
   it('responds 201 with the new id and persists the series', async () => {
     const { app, seriesRepository } = buildTestApp()
@@ -147,5 +149,91 @@ describe('GET /series/:id', () => {
 
     expect(response.status).toBe(404)
     expect(response.body.error).toBe('SeriesNotFoundError')
+  })
+})
+
+describe('PUT /series/:id', () => {
+  it('responds 200 and replaces the series', async () => {
+    const { app } = buildTestApp()
+    const created = await request(app)
+      .post('/series')
+      .set('Authorization', authHeader())
+      .send(validSeriesBody)
+
+    const response = await request(app)
+      .put(`/series/${created.body.id}`)
+      .set('Authorization', authHeader())
+      .send({ ...validSeriesBody, title: 'Succession', firstAirDate: '2018-06-03' })
+
+    expect(response.status).toBe(200)
+    expect(response.body).toEqual({ id: created.body.id })
+
+    const updated = await request(app).get(`/series/${created.body.id}`)
+    expect(updated.body).toMatchObject({
+      title: 'Succession',
+      firstAirDate: '2018-06-03T00:00:00.000Z',
+    })
+  })
+
+  it('responds 404 for an unknown id', async () => {
+    const { app } = buildTestApp()
+
+    const response = await request(app)
+      .put('/series/does-not-exist')
+      .set('Authorization', authHeader())
+      .send(validSeriesBody)
+
+    expect(response.status).toBe(404)
+    expect(response.body.error).toBe('SeriesNotFoundError')
+  })
+
+  it('responds 400 for a body that misses the schema', async () => {
+    const { app } = buildTestApp()
+    const created = await request(app)
+      .post('/series')
+      .set('Authorization', authHeader())
+      .send(validSeriesBody)
+
+    const response = await request(app)
+      .put(`/series/${created.body.id}`)
+      .set('Authorization', authHeader())
+      .send({ title: 'Partial' })
+
+    expect(response.status).toBe(400)
+    expect(response.body.error).toBe('ValidationError')
+  })
+
+  // An empty body on purpose: the guards run before validation, so the caller
+  // learns nothing about the schema.
+  it('responds 401 without a token, before validating the body', async () => {
+    const { app } = buildTestApp()
+    const created = await request(app)
+      .post('/series')
+      .set('Authorization', authHeader())
+      .send(validSeriesBody)
+
+    const response = await request(app).put(`/series/${created.body.id}`).send({})
+
+    expect(response.status).toBe(401)
+    expect(response.body).toEqual({ error: 'Unauthorized' })
+  })
+
+  it('responds 403 without catalog:write and leaves the series unchanged', async () => {
+    const { app } = buildTestApp()
+    const created = await request(app)
+      .post('/series')
+      .set('Authorization', authHeader())
+      .send(validSeriesBody)
+
+    const response = await request(app)
+      .put(`/series/${created.body.id}`)
+      .set('Authorization', readOnly())
+      .send({ ...validSeriesBody, title: 'Succession' })
+
+    expect(response.status).toBe(403)
+    expect(response.body).toEqual({ error: 'Forbidden' })
+
+    const unchanged = await request(app).get(`/series/${created.body.id}`)
+    expect(unchanged.body.title).toBe('Fleabag')
   })
 })

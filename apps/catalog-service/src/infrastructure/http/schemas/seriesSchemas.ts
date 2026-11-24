@@ -15,3 +15,6 @@ export const createSeriesSchema = z.object({
   directorIds: z.array(nonEmptyString),
   companyIds: z.array(nonEmptyString),
 })
+
+// Full-replace (PUT) semantics: same body as create; the target id comes from the path
+export const updateSeriesSchema = createSeriesSchema

@@ -15,6 +15,7 @@ import { GetPersonUseCase } from '@catalog/application/use-cases/person/get/getP
 import { CreateSeriesUseCase } from '@catalog/application/use-cases/series/create/createSeriesUseCase'
 import { GetSeriesUseCase } from '@catalog/application/use-cases/series/get/getSeriesUseCase'
 import { ListSeriesUseCase } from '@catalog/application/use-cases/series/list/listSeriesUseCase'
+import { UpdateSeriesUseCase } from '@catalog/application/use-cases/series/update/updateSeriesUseCase'
 import { buildApp } from '@catalog/infrastructure/http/app'
 import { CompanyController } from '@catalog/infrastructure/http/controllers/companyController'
 import { GenreController } from '@catalog/infrastructure/http/controllers/genreController'
@@ -80,7 +81,13 @@ export const buildTestApp = (): TestApp => {
           companyRepository
         ),
         new GetSeriesUseCase(seriesRepository),
-        new ListSeriesUseCase(seriesRepository)
+        new ListSeriesUseCase(seriesRepository),
+        new UpdateSeriesUseCase(
+          seriesRepository,
+          genreRepository,
+          personRepository,
+          companyRepository
+        )
       ),
       genre: new GenreController(
         new CreateGenreUseCase(genreRepository),

@@ -118,9 +118,8 @@ describe('PrismaSeriesRepository', () => {
     expect(found!.data.productionCompanies.map((c) => c.id)).toEqual([company.id])
   })
 
-  // Series exposes no relation setters yet, so the aggregate is restored with
-  // a different genre set — the point under test is the repository's update
-  // branch (deleteMany + create), not the entity API.
+  // set* are full replacements, so the update path must clear the old join
+  // rows rather than accumulate them.
   it('replaces the join sets on a second save', async () => {
     // Distinct names: genres.name carries a unique index.
     const first = buildGenre({ name: new GenreName('Drama') })
@@ -131,7 +130,8 @@ describe('PrismaSeriesRepository', () => {
     const series = buildSeries({ genres: [first] })
     await seriesRepository.save(series)
 
-    await seriesRepository.save(Series.restore({ ...series.data, genres: [second] }))
+    series.setGenres([second])
+    await seriesRepository.save(series)
 
     const found = await seriesRepository.findById(series.id)
     expect(found!.data.genres.map((g) => g.id)).toEqual([second.id])
