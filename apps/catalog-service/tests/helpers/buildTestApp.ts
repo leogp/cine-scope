@@ -13,6 +13,7 @@ import { UpdateMovieUseCase } from '@catalog/application/use-cases/movie/update/
 import { CreatePersonUseCase } from '@catalog/application/use-cases/person/create/createPersonUseCase'
 import { GetPersonUseCase } from '@catalog/application/use-cases/person/get/getPersonUseCase'
 import { CreateSeriesUseCase } from '@catalog/application/use-cases/series/create/createSeriesUseCase'
+import { DeleteSeriesUseCase } from '@catalog/application/use-cases/series/delete/deleteSeriesUseCase'
 import { GetSeriesUseCase } from '@catalog/application/use-cases/series/get/getSeriesUseCase'
 import { ListSeriesUseCase } from '@catalog/application/use-cases/series/list/listSeriesUseCase'
 import { UpdateSeriesUseCase } from '@catalog/application/use-cases/series/update/updateSeriesUseCase'
@@ -87,7 +88,8 @@ export const buildTestApp = (): TestApp => {
           genreRepository,
           personRepository,
           companyRepository
-        )
+        ),
+        new DeleteSeriesUseCase(seriesRepository)
       ),
       genre: new GenreController(
         new CreateGenreUseCase(genreRepository),

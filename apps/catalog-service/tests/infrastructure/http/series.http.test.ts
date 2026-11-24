@@ -237,3 +237,62 @@ describe('PUT /series/:id', () => {
     expect(unchanged.body.title).toBe('Fleabag')
   })
 })
+
+describe('DELETE /series/:id', () => {
+  it('responds 204 with no body and removes the series', async () => {
+    const { app, seriesRepository } = buildTestApp()
+    const created = await request(app)
+      .post('/series')
+      .set('Authorization', authHeader())
+      .send(validSeriesBody)
+
+    const response = await request(app)
+      .delete(`/series/${created.body.id}`)
+      .set('Authorization', authHeader())
+
+    expect(response.status).toBe(204)
+    expect(response.body).toEqual({})
+    expect(seriesRepository.size).toBe(0)
+  })
+
+  it('responds 404 for an unknown id', async () => {
+    const { app } = buildTestApp()
+
+    const response = await request(app)
+      .delete('/series/does-not-exist')
+      .set('Authorization', authHeader())
+
+    expect(response.status).toBe(404)
+    expect(response.body.error).toBe('SeriesNotFoundError')
+  })
+
+  it('responds 401 without a token and keeps the series', async () => {
+    const { app, seriesRepository } = buildTestApp()
+    const created = await request(app)
+      .post('/series')
+      .set('Authorization', authHeader())
+      .send(validSeriesBody)
+
+    const response = await request(app).delete(`/series/${created.body.id}`)
+
+    expect(response.status).toBe(401)
+    expect(response.body).toEqual({ error: 'Unauthorized' })
+    expect(seriesRepository.size).toBe(1)
+  })
+
+  it('responds 403 for a token without catalog:write and keeps the series', async () => {
+    const { app, seriesRepository } = buildTestApp()
+    const created = await request(app)
+      .post('/series')
+      .set('Authorization', authHeader())
+      .send(validSeriesBody)
+
+    const response = await request(app)
+      .delete(`/series/${created.body.id}`)
+      .set('Authorization', readOnly())
+
+    expect(response.status).toBe(403)
+    expect(response.body).toEqual({ error: 'Forbidden' })
+    expect(seriesRepository.size).toBe(1)
+  })
+})

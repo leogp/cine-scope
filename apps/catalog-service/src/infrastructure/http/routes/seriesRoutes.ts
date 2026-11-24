@@ -36,6 +36,12 @@ export function buildSeriesRoutes(
     validateBody(updateSeriesSchema),
     asyncHandler(controller.update)
   )
+  router.delete(
+    '/:id',
+    ...writeGuards,
+    validateParams(idParamsSchema),
+    asyncHandler(controller.delete)
+  )
 
   return router
 }
