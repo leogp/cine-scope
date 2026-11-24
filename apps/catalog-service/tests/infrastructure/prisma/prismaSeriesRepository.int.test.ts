@@ -1,5 +1,8 @@
+import { randomUUID } from 'node:crypto'
+
 import { Series } from '@catalog/domain/entities/series'
 import { GenreName } from '@catalog/domain/value-objects/genreName'
+import { LanguageCode } from '@catalog/domain/value-objects/languageCode'
 import { Title } from '@catalog/domain/value-objects/title'
 import { PrismaCompanyRepository } from '@catalog/infrastructure/prisma/company'
 import { PrismaGenreRepository } from '@catalog/infrastructure/prisma/genre'
@@ -13,6 +16,36 @@ const seriesRepository = new PrismaSeriesRepository(prisma)
 const genreRepository = new PrismaGenreRepository(prisma)
 const personRepository = new PrismaPersonRepository(prisma)
 const companyRepository = new PrismaCompanyRepository(prisma)
+
+/**
+ * `Series.create` mints `createdAt` from the clock, so three series saved in a
+ * row can share a millisecond and leave findAll's `[createdAt, id]` sort to be
+ * decided by a random uuid. Restoring with explicit timestamps makes the
+ * pagination assertions deterministic.
+ */
+const restoreSeries = (title: string, createdAt: Date): Series =>
+  Series.restore({
+    id: randomUUID(),
+    title: new Title(title),
+    overview: null,
+    firstAirDate: null,
+    lastAirDate: null,
+    originalLanguage: new LanguageCode('en'),
+    posterPath: null,
+    backdropPath: null,
+    genres: [],
+    cast: [],
+    directors: [],
+    productionCompanies: [],
+    createdAt,
+    updatedAt: createdAt,
+  })
+
+const orderedSeries = (): Series[] => [
+  restoreSeries('First', new Date('2026-01-01T00:00:00.000Z')),
+  restoreSeries('Second', new Date('2026-01-02T00:00:00.000Z')),
+  restoreSeries('Third', new Date('2026-01-03T00:00:00.000Z')),
+]
 
 beforeEach(async () => {
   await truncateAll(prisma)
@@ -129,6 +162,51 @@ describe('PrismaSeriesRepository', () => {
 
   it('returns null for an unknown id', async () => {
     expect(await seriesRepository.findById('missing')).toBeNull()
+  })
+
+  describe('findAll', () => {
+    it('orders by createdAt and reports the unpaged total', async () => {
+      for (const series of orderedSeries()) {
+        await seriesRepository.save(series)
+      }
+
+      const page = await seriesRepository.findAll({ limit: 2, offset: 0 })
+
+      expect(page.total).toBe(3)
+      expect(page.items).toHaveLength(2)
+      expect(page.items.map((s) => s.data.title.value)).toEqual(['First', 'Second'])
+    })
+
+    it('honours the offset', async () => {
+      // Saved newest-first to prove the ordering comes from createdAt, not
+      // from insertion order.
+      for (const series of orderedSeries().reverse()) {
+        await seriesRepository.save(series)
+      }
+
+      const page = await seriesRepository.findAll({ limit: 2, offset: 2 })
+
+      expect(page.total).toBe(3)
+      expect(page.items.map((s) => s.data.title.value)).toEqual(['Third'])
+    })
+
+    it('returns an empty page and a zero total for an empty table', async () => {
+      expect(await seriesRepository.findAll({ limit: 10, offset: 0 })).toEqual({
+        items: [],
+        total: 0,
+      })
+    })
+
+    // findAll skips the joins; the mapper collapses "not loaded" to empty.
+    it('rehydrates list rows without their relations', async () => {
+      const genre = buildGenre()
+      await genreRepository.save(genre)
+      await seriesRepository.save(buildSeries({ genres: [genre] }))
+
+      const page = await seriesRepository.findAll({ limit: 10, offset: 0 })
+
+      expect(page.items[0].data.genres).toEqual([])
+    })
   })
 
   it('reports existence without rehydrating', async () => {

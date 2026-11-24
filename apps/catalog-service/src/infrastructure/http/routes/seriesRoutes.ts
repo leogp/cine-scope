@@ -1,8 +1,13 @@
-import { asyncHandler, validateBody, validateParams } from '@cinescope/shared/infrastructure/http'
+import {
+  asyncHandler,
+  validateBody,
+  validateParams,
+  validateQuery,
+} from '@cinescope/shared/infrastructure/http'
 import { RequestHandler, Router } from 'express'
 
 import { SeriesController } from '../controllers/seriesController'
-import { idParamsSchema } from '../schemas/commonSchemas'
+import { idParamsSchema, paginationQuerySchema } from '../schemas/commonSchemas'
 import { createSeriesSchema } from '../schemas/seriesSchemas'
 
 export function buildSeriesRoutes(
@@ -11,6 +16,10 @@ export function buildSeriesRoutes(
 ): Router {
   const router = Router()
 
+  // validateQuery is what makes the controller's `req.query as ListSeriesRequest`
+  // truthful — without the coercion, page/pageSize arrive as strings and
+  // normalizePagination silently falls back to its defaults.
+  router.get('/', validateQuery(paginationQuerySchema), asyncHandler(controller.list))
   router.post(
     '/',
     ...writeGuards,

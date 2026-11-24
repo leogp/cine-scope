@@ -7,19 +7,20 @@ import { SeriesModel } from '../generated/models'
 import { PersonRow, PrismaPersonMapper } from '../person/prismaPersonMapper'
 
 /**
- * Series scalars plus the four join tables with their related rows.
+ * Series scalars plus, when the repository chose to load them, the four join
+ * tables with their related rows.
  *
- * Unlike `MovieRow` the relation keys are required, not optional: `SeriesRepository`
- * exposes no list read (there is no ListSeries use case), so `findById` — which
- * always includes all four relations — is the only path into `toDomain`. Keeping
- * them required means a future relation-less read fails to compile instead of
- * silently rehydrating a Series with empty collections.
+ * The relation keys are optional, so a row without them collapses to empty
+ * arrays in `toDomain` — "not loaded" and "genuinely empty" are therefore
+ * indistinguishable. That is safe only because the single relation-less read
+ * path is `findAll`, whose results are rendered by `toSeriesSummaryDTO`, which
+ * discards all four collections.
  */
 export type SeriesRow = SeriesModel & {
-  genres: { genre: GenreRow }[]
-  cast: { person: PersonRow }[]
-  directors: { person: PersonRow }[]
-  productionCompanies: { company: CompanyRow }[]
+  genres?: { genre: GenreRow }[]
+  cast?: { person: PersonRow }[]
+  directors?: { person: PersonRow }[]
+  productionCompanies?: { company: CompanyRow }[]
 }
 
 export interface SeriesPersistence {
@@ -62,12 +63,11 @@ export class PrismaSeriesMapper {
       originalLanguage: new LanguageCode(row.originalLanguage),
       posterPath: row.posterPath,
       backdropPath: row.backdropPath,
-      genres: row.genres.map((join) => PrismaGenreMapper.toDomain(join.genre)),
-      cast: row.cast.map((join) => PrismaPersonMapper.toDomain(join.person)),
-      directors: row.directors.map((join) => PrismaPersonMapper.toDomain(join.person)),
-      productionCompanies: row.productionCompanies.map((join) =>
-        PrismaCompanyMapper.toDomain(join.company)
-      ),
+      genres: row.genres?.map((join) => PrismaGenreMapper.toDomain(join.genre)) ?? [],
+      cast: row.cast?.map((join) => PrismaPersonMapper.toDomain(join.person)) ?? [],
+      directors: row.directors?.map((join) => PrismaPersonMapper.toDomain(join.person)) ?? [],
+      productionCompanies:
+        row.productionCompanies?.map((join) => PrismaCompanyMapper.toDomain(join.company)) ?? [],
       createdAt: row.createdAt,
       updatedAt: row.updatedAt,
     })

@@ -74,6 +74,50 @@ describe('POST /series', () => {
   })
 })
 
+describe('GET /series', () => {
+  it('responds 200 with a paginated envelope, anonymously', async () => {
+    const { app } = buildTestApp()
+    await request(app).post('/series').set('Authorization', authHeader()).send(validSeriesBody)
+
+    const response = await request(app).get('/series')
+
+    expect(response.status).toBe(200)
+    expect(response.body).toMatchObject({
+      items: [expect.objectContaining({ title: 'Fleabag' })],
+      total: 1,
+      page: 1,
+    })
+    expect(response.body.items[0]).not.toHaveProperty('genres')
+  })
+
+  it('honours page and pageSize query params', async () => {
+    const { app } = buildTestApp()
+    await request(app)
+      .post('/series')
+      .set('Authorization', authHeader())
+      .send({ ...validSeriesBody, title: 'First' })
+    await request(app)
+      .post('/series')
+      .set('Authorization', authHeader())
+      .send({ ...validSeriesBody, title: 'Second' })
+
+    const response = await request(app).get('/series').query({ page: 2, pageSize: 1 })
+
+    expect(response.status).toBe(200)
+    expect(response.body.items).toHaveLength(1)
+    expect(response.body).toMatchObject({ total: 2, page: 2, pageSize: 1 })
+  })
+
+  it('responds 400 for a non-numeric page', async () => {
+    const { app } = buildTestApp()
+
+    const response = await request(app).get('/series').query({ page: 'abc' })
+
+    expect(response.status).toBe(400)
+    expect(response.body.error).toBe('ValidationError')
+  })
+})
+
 describe('GET /series/:id', () => {
   it('responds 200 with the full series read model', async () => {
     const { app } = buildTestApp()
