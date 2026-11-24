@@ -61,6 +61,7 @@ const PAGINATION = { page: 'number', pageSize: 'number' } as const
 export const CACHEABLE_ROUTES: readonly CacheableRoute[] = [
   { path: '/movies', collection: 'movies', query: PAGINATION },
   { path: '/movies/:id', collection: 'movies', query: {} },
+  { path: '/series', collection: 'series', query: PAGINATION },
   { path: '/series/:id', collection: 'series', query: {} },
   { path: '/genres/:id', collection: 'genres', query: {} },
   { path: '/companies/:id', collection: 'companies', query: {} },

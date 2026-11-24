@@ -32,6 +32,7 @@ const CACHEABLE_ROUTES = [
     path: `/catalog/movies/${catalog.movieIds[0]}`,
     expected: { id: catalog.movieIds[0] },
   },
+  { route: '/series', path: '/catalog/series', expected: { items: expect.any(Array) } },
   {
     route: '/series/:id',
     path: `/catalog/series/${catalog.seriesId}`,

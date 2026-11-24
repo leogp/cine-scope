@@ -275,21 +275,23 @@ describe('gateway response cache', () => {
   })
 
   describe('invalidation', () => {
-    it.each(['post', 'put', 'patch', 'delete'] as const)(
-      'makes every movies entry miss after a 2xx %s on movies',
-      async (method) => {
-        respond = getsOkWritesWith(201)
-        const app = buildGateway()
-        await request(app).get('/catalog/movies').expect('X-Cache', 'MISS')
-        await request(app).get('/catalog/movies/42').expect('X-Cache', 'MISS')
+    describe.each(['movies', 'series'] as const)('on %s', (collection) => {
+      it.each(['post', 'put', 'patch', 'delete'] as const)(
+        'makes the list and every item miss after a 2xx %s',
+        async (method) => {
+          respond = getsOkWritesWith(201)
+          const app = buildGateway()
+          await request(app).get(`/catalog/${collection}`).expect('X-Cache', 'MISS')
+          await request(app).get(`/catalog/${collection}/42`).expect('X-Cache', 'MISS')
 
-        await request(app)[method]('/catalog/movies/42').send({}).expect(201)
+          await request(app)[method](`/catalog/${collection}/42`).send({}).expect(201)
 
-        await request(app).get('/catalog/movies').expect('X-Cache', 'MISS')
-        await request(app).get('/catalog/movies/42').expect('X-Cache', 'MISS')
-        expect(catalog.received).toHaveLength(5)
-      }
-    )
+          await request(app).get(`/catalog/${collection}`).expect('X-Cache', 'MISS')
+          await request(app).get(`/catalog/${collection}/42`).expect('X-Cache', 'MISS')
+          expect(catalog.received).toHaveLength(5)
+        }
+      )
+    })
 
     it('invalidates nothing on a 2xx OPTIONS', async () => {
       respond = getsOkWritesWith(204)
